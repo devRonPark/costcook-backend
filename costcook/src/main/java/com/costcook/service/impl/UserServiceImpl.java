@@ -122,6 +122,7 @@ public class UserServiceImpl implements UserService {
 	 * @return 생성된 파라미터 맵
 	 */
 	private MultiValueMap<String, String> createTokenRequestParams(OAuth2Properties.Client client, String decodedCode) {
+		log.info("{}", client);
 	    MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 	    params.add("client_id", client.getClientId());
 	    params.add("client_secret", client.getClientSecret());
@@ -233,10 +234,10 @@ public class UserServiceImpl implements UserService {
 	 * @return OAuthUserInfo - Kakao 사용자 정보 객체
 	 */
 	private OAuthUserInfo extractKakaoUserInfo(JsonNode oAuthUserNode) {
-	    String key = oAuthUserNode.get("id").asText();
+	    String socialKey = oAuthUserNode.get("id").asText();
 	    String name = extractJsonNodeText(oAuthUserNode, "properties", "nickname");
-	    log.info("Kakao User Info - key: {}, name: {}", key, name);
-	    return new OAuthUserInfo(key, null, name, PlatformTypeEnum.KAKAO);
+	    log.info("Kakao User Info - socialKey: {}, name: {}", socialKey, name);
+	    return new OAuthUserInfo(socialKey, null, name, PlatformTypeEnum.KAKAO);
 	}
 
 	/**
@@ -245,11 +246,11 @@ public class UserServiceImpl implements UserService {
 	 * @return OAuthUserInfo - Google 사용자 정보 객체
 	 */
 	private OAuthUserInfo extractGoogleUserInfo(JsonNode oAuthUserNode) {
-	    String key = oAuthUserNode.get("sub").asText();
+	    String socialKey = oAuthUserNode.get("sub").asText();
 	    String email = oAuthUserNode.get("email").asText();
 	    String name = oAuthUserNode.get("name").asText();
-	    log.info("Google User Info - key: {}, email: {}, name: {}", key, email, name);
-	    return new OAuthUserInfo(key, email, name, PlatformTypeEnum.GOOGLE);
+	    log.info("Google User Info - socialKey: {}, email: {}, name: {}", socialKey, email, name);
+	    return new OAuthUserInfo(socialKey, email, name, PlatformTypeEnum.GOOGLE);
 	}
 
 	/**

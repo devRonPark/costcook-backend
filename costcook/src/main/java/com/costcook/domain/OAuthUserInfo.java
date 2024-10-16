@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OAuthUserInfo {
-	String key; 
+	String socialKey; 
 	String email;
 	String name;
 	PlatformTypeEnum provider;
 	
 	public boolean isAbleToLogin() {
-		if (this.getKey() != null && this.getEmail() != null && this.getName() != null && this.getProvider() != null) {
+		if (this.getSocialKey() != null && this.getEmail() != null && this.getName() != null && this.getProvider() != null) {
 			return true;
 	    }
 		return false;

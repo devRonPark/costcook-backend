@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -37,13 +38,13 @@ public class User {
     private String profileUrl;
 
     @Column(name = "service_agreement")
-    private Boolean serviceAgreement;
+    private Boolean serviceAgreement = false;
 
     @Column(name = "privacy_policy_agreement")
-    private Boolean privacyPolicyAgreement;
+    private Boolean privacyPolicyAgreement = false;
 
     @Column(name = "additional_info_agreement")
-    private Boolean additionalInfoAgreement;
+    private Boolean additionalInfoAgreement = false;
 
     @Column(nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -51,7 +52,7 @@ public class User {
 	private RoleEnum role = RoleEnum.ROLE_USER; // 권한 컬럼 추가 (기본값 ROLE_USER)
 
     @Column(name = "warning_count")
-    private Integer warningCount;
+    private Integer warningCount = 0;
 
     @Column(name = "refresh_token", length = 255)
     private String refreshToken; // 리프레시 토큰
@@ -81,6 +82,6 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }    
 
-    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    // private List<SocialAccount> socialAccounts; // 소셜 계정 리스트
+//     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//     private List<SocialAccount> socialAccounts; // 소셜 계정 리스트
 }
