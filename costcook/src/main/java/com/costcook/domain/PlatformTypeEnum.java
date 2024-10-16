@@ -20,6 +20,6 @@ public enum PlatformTypeEnum {
                 return authEnum;
             }
         }
-        throw new IllegalArgumentException("유효하지 않은 값입니다: " + value);
+        throw new IllegalArgumentException("적절하지 않은 소셜 로그인 제공자입니다.");
     }
 }

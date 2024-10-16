@@ -3,6 +3,7 @@ package com.costcook.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,11 +29,10 @@ public class OAuthController {
 	}
 
 	@GetMapping("/{provider}")
-	public ResponseEntity<?> getProviderInfo(@RequestParam("code") final String code, @PathVariable("provider") final String provider, HttpServletResponse res) {
+	public ResponseEntity<OAuthUserInfo> getProviderInfo(@RequestParam("code") final String code, @PathVariable("provider") final String provider, HttpServletResponse res) {
 		log.info("들어온 코드 값 > {}, {}", code, provider);
 		PlatformTypeEnum platformType = PlatformTypeEnum.fromString(provider);
 		OAuthUserInfo oAuthUserInfo = userService.getOAuthUserInfo(code, platformType);
 		return ResponseEntity.ok(oAuthUserInfo);
-		
 	}
 }
