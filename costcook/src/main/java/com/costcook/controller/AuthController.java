@@ -1,5 +1,6 @@
 package com.costcook.controller;
 
+import java.util.Map;
 import java.util.Random;
 
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.costcook.domain.request.EmailRequest;
+import com.costcook.domain.request.VerificationRequest;
 import com.costcook.service.EmailService;
 import com.costcook.util.EmailUtil;
 
@@ -42,6 +44,31 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .body("이메일 전송에 실패했습니다. 다시 시도해주세요.");
+        }
+    }
+    
+    @PostMapping("/verify-code")
+    public ResponseEntity<?> verifyCode(@RequestBody VerificationRequest request) {
+        try {
+            boolean isVerified = emailService.verifyCode(request.getEmail(), request.getVerificationCode());
+
+            if (isVerified) {
+                return ResponseEntity.ok().body(Map.of(
+                        "isVerified", true,
+                        "message", "인증번호가 일치합니다."
+                ));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "isVerified", false,
+                        "message", "인증번호가 일치하지 않습니다."
+                ));
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "인증 코드가 만료되었습니다. 다시 인증해주세요."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 에러가 발생했습니다.");
         }
     }
 }
