@@ -25,50 +25,36 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/auth")
 public class AuthController {
 	private final EmailService emailService;
-    
-    @PostMapping("/send-verification-code")
-    public ResponseEntity<?> sendVerificationCode(@RequestBody EmailRequest emailRequest) {
-    	String email = emailRequest.getEmail();
-    	
-    	// 이메일 유효성 검증
-        if (!EmailUtil.isValidEmail(email)) {
-            return ResponseEntity.badRequest().body("유효하지 않은 이메일입니다.");
-        }
 
-        // 인증 코드 생성
-        String verificationCode = EmailUtil.generateVerificationCode();
+	@PostMapping("/send-verification-code")
+	public ResponseEntity<?> sendVerificationCode(@RequestBody EmailRequest emailRequest) {
+		String email = emailRequest.getEmail();
 
-        try {
-            emailService.sendVerificationCode(email, verificationCode);
-            return ResponseEntity.ok().body("인증번호가 이메일로 전송되었습니다.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body("이메일 전송에 실패했습니다. 다시 시도해주세요.");
-        }
-    }
-    
-    @PostMapping("/verify-code")
-    public ResponseEntity<?> verifyCode(@RequestBody VerificationRequest request) {
-        try {
-            boolean isVerified = emailService.verifyCode(request.getEmail(), request.getVerificationCode());
+		// 이메일 유효성 검증
+		if (!EmailUtil.isValidEmail(email)) {
+			throw new IllegalArgumentException("유효하지 않은 이메일입니다.");
+		}
 
-            if (isVerified) {
-                return ResponseEntity.ok().body(Map.of(
-                        "isVerified", true,
-                        "message", "인증번호가 일치합니다."
-                ));
-            } else {
-                return ResponseEntity.badRequest().body(Map.of(
-                        "isVerified", false,
-                        "message", "인증번호가 일치하지 않습니다."
-                ));
-            }
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", "인증 코드가 만료되었습니다. 다시 인증해주세요."));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 에러가 발생했습니다.");
-        }
-    }
+		// 인증 코드 생성
+		String verificationCode = EmailUtil.generateVerificationCode();
+
+		try {
+			emailService.sendVerificationCode(email, verificationCode);
+			return ResponseEntity.ok().body("인증번호가 이메일로 전송되었습니다.");
+		} catch (Exception e) {
+			throw new RuntimeException("이메일 전송에 실패했습니다. 다시 시도해주세요.");
+		}
+	}
+
+	@PostMapping("/verify-code")
+	public ResponseEntity<?> verifyCode(@RequestBody VerificationRequest request) {
+		boolean isVerified = emailService.verifyCode(request.getEmail(), request.getVerificationCode());
+
+		if (isVerified) {
+			return ResponseEntity.ok().body(Map.of("isVerified", true, "message", "인증번호가 일치합니다."));
+		} else {
+			throw new IllegalArgumentException("인증번호가 일치하지 않습니다.");
+		}
+
+	}
 }
