@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.costcook.domain.request.EmailRequest;
 import com.costcook.domain.request.VerificationRequest;
+import com.costcook.domain.response.VerifyCodeResponse;
 import com.costcook.service.EmailService;
 import com.costcook.util.EmailUtil;
 
@@ -51,9 +52,9 @@ public class AuthController {
 		boolean isVerified = emailService.verifyCode(request.getEmail(), request.getVerificationCode());
 
 		if (isVerified) {
-			return ResponseEntity.ok().body(Map.of("isVerified", true, "message", "인증번호가 일치합니다."));
+			 return ResponseEntity.ok(new VerifyCodeResponse(true, "인증번호가 일치합니다."));
 		} else {
-			throw new IllegalArgumentException("인증번호가 일치하지 않습니다.");
+			 return ResponseEntity.ok(new VerifyCodeResponse(false, "인증번호가 일치하지 않습니다."));
 		}
 
 	}
