@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.costcook.domain.request.EmailRequest;
 import com.costcook.service.EmailService;
+import com.costcook.util.EmailUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +29,12 @@ public class AuthController {
     	String email = emailRequest.getEmail();
     	
     	// 이메일 유효성 검증
-        if (!isValidEmail(email)) {
+        if (!EmailUtil.isValidEmail(email)) {
             return ResponseEntity.badRequest().body("유효하지 않은 이메일입니다.");
         }
 
         // 인증 코드 생성
-        String verificationCode = generateVerificationCode();
+        String verificationCode = EmailUtil.generateVerificationCode();
 
         try {
             emailService.sendVerificationCode(email, verificationCode);
@@ -42,15 +43,5 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .body("이메일 전송에 실패했습니다. 다시 시도해주세요.");
         }
-    }
-    
-    private boolean isValidEmail(String email) {
-        return StringUtils.hasText(email) && email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
-    }
-
-    private String generateVerificationCode() {
-        Random random = new Random();
-        int code = 100000 + random.nextInt(900000); // 6자리 랜덤 숫자 생성
-        return String.valueOf(code);
     }
 }
