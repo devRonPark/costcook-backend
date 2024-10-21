@@ -11,12 +11,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.costcook.service.AuthService;
 import com.costcook.domain.request.EmailRequest;
+import com.costcook.domain.request.SignUpOrLoginRequest;
 import com.costcook.domain.request.VerificationRequest;
+import com.costcook.domain.response.SignUpOrLoginResponse;
 import com.costcook.domain.response.VerifyCodeResponse;
 import com.costcook.service.EmailService;
 import com.costcook.util.EmailUtil;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +30,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
-	private final EmailService emailService;
+	private final AuthService authService;
+    private final EmailService emailService;
+	
+	@PostMapping("/signup-or-login")
+    public ResponseEntity<?> signUpOrLogin(@RequestBody SignUpOrLoginRequest signUpOrLoginRequest, HttpServletResponse response) {
+		SignUpOrLoginResponse signUpOrLoginResponse = authService.signUpOrLogin(signUpOrLoginRequest, response);
+    	return ResponseEntity.ok(signUpOrLoginResponse);
+    }
 
 	@PostMapping("/send-verification-code")
 	public ResponseEntity<?> sendVerificationCode(@RequestBody EmailRequest emailRequest) {
