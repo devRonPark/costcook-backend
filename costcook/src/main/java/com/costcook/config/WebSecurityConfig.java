@@ -10,10 +10,15 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+
+import com.costcook.security.JwtProperties;
+import com.costcook.security.JwtProvider;
+import com.costcook.util.TokenUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +26,18 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
+	private final JwtProperties	jwtProperties;
+	private final UserDetailsService userDetailsService;
+	
+	// JWT PROVIDER 생성자 호출
+	private JwtProvider jwtProvider() {
+		return new JwtProvider(userDetailsService, jwtProperties);
+	}
+	// TokenUtils 생성자 호출
+	private TokenUtils tokenUtils() {
+		return new TokenUtils(jwtProvider());
+	}
+	
 	// HTTP 요청에 따른 보안 구성
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
