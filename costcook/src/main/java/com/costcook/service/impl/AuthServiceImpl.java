@@ -29,6 +29,30 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final SocialAccountRepository socialAccountRepository;
     private final TokenUtils tokenUtils;
+    
+    /**
+     * 주어진 소셜 키와 공급자를 사용하여 해당 사용자의 이메일을 조회합니다.
+     *
+     * 1. 소셜 계정(social_accounts) 테이블에서 소셜 키와 공급자를 기준으로 사용자 정보를 검색합니다.
+     * 2. 사용자가 존재할 경우, 해당 사용자의 이메일을 리턴합니다.
+     *
+     * @param socialKey - 소셜 계정의 고유 키
+     * @param provider - 소셜 공급자 유형 (Kakao, Google 등)
+     * @return Optional<String> - 사용자의 이메일이 존재할 경우 해당 이메일, 그렇지 않으면 Optional.empty() 반환
+     */
+    @Override
+    public Optional<String> getEmailFromSocialAccount(String socialKey, PlatformTypeEnum provider) {
+        // social_accounts 테이블에서 socialKey와 provider를 기준으로 사용자 조회
+        Optional<SocialAccount> socialAccountOpt = socialAccountRepository.findBySocialKeyAndProvider(socialKey, provider);
+        
+        if (socialAccountOpt.isPresent()) {
+            // 사용자 ID를 가져옴
+            User user = socialAccountOpt.get().getUser();
+            return Optional.of(user.getEmail());
+        }
+        
+        return Optional.empty(); // 사용자를 찾지 못한 경우
+    }
 
     @Override
     public SignUpOrLoginResponse signUpOrLogin(SignUpOrLoginRequest request, HttpServletResponse response) {
