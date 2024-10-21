@@ -17,8 +17,8 @@ import com.costcook.domain.PlatformTypeEnum;
 @Table(name = "social_accounts")
 @EntityListeners(AuditingEntityListener.class) // 생성, 수정 날짜 추적 -> Application.java (@EnableJpaAuditing)
 @Data
-@Builder
 @AllArgsConstructor
+@Builder
 public class SocialAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
