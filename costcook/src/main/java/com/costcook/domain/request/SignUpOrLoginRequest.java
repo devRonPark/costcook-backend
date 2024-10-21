@@ -1,10 +1,21 @@
 package com.costcook.domain.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class SignUpOrLoginRequest {
-    private String socialKey;        // provider_user_id
-    private String email;      // 사용자 이메일
-    private String provider;   // 소셜 로그인 제공자 (kakao, google)
+
+    // 소셜 로그인 키 (Google, Kakao 등의 고유 식별자)
+    private String socialKey;
+
+    // 이메일 주소
+    private String email;
+
+    // 제공자 (소셜 로그인 제공자, 예: 'KAKAO', 'GOOGLE')
+    private String provider;
 }
+
