@@ -35,7 +35,7 @@ public class AuthController {
 	
 	@PostMapping("/signup-or-login")
     public ResponseEntity<?> signUpOrLogin(@RequestBody SignUpOrLoginRequest signUpOrLoginRequest, HttpServletResponse response) {
-		SignUpOrLoginResponse signUpOrLoginResponse = authService.signUpOrLogin(signUpOrLoginRequest);
+		SignUpOrLoginResponse signUpOrLoginResponse = authService.signUpOrLogin(signUpOrLoginRequest, response);
     	return ResponseEntity.ok(signUpOrLoginResponse);
     }
 
