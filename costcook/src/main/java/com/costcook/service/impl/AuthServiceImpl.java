@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.costcook.domain.PlatformTypeEnum;
 import com.costcook.domain.request.SignUpOrLoginRequest;
-import com.costcook.domain.request.SignUpOrLoginResponse;
+import com.costcook.domain.response.SignUpOrLoginResponse;
 import com.costcook.entity.SocialAccount;
 import com.costcook.entity.User;
 import com.costcook.exceptions.InvalidProviderException;
