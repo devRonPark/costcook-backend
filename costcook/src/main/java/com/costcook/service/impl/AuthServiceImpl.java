@@ -1,5 +1,8 @@
 package com.costcook.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
 import com.costcook.domain.PlatformTypeEnum;
@@ -12,8 +15,9 @@ import com.costcook.exceptions.MissingFieldException;
 import com.costcook.repository.SocialAccountRepository;
 import com.costcook.repository.UserRepository;
 import com.costcook.service.AuthService;
-import com.costcook.util.OAuth2Properties;
+import com.costcook.util.TokenUtils;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,9 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthServiceImpl implements AuthService {
 	private final UserRepository userRepository;
 	private final SocialAccountRepository socialAccountRepository;
+	private final TokenUtils tokenUtils;
 	
 	@Override
-	public SignUpOrLoginResponse signUpOrLogin(SignUpOrLoginRequest request) {
+	public SignUpOrLoginResponse signUpOrLogin(SignUpOrLoginRequest request, HttpServletResponse response) {
 		// 1. Request DTO 유효성 검증
 		validateSignUpOrLoginRequest(request);
 
@@ -37,10 +42,33 @@ public class AuthServiceImpl implements AuthService {
 
 		log.info("새로 가입한 회원 정보: {}", user);
 		// 3. 액세스 토큰, 리프레시 토큰 발급
-		return null;
+		Map<String, String> tokenMap = tokenUtils.generateToken(user);
+		String accessToken = tokenMap.get("accessToken");
+		String refreshToken = tokenMap.get("refreshToken");
+		log.info("새로 발급된 액세스 토큰: {}", accessToken);
+		log.info("새로 발급된 리프레시 토큰: {}", refreshToken);
+		
+		// 4. 발급된 리프레시 토큰 사용자 테이블에 저장.
+		user.setRefreshToken(refreshToken);
+		userRepository.save(user);
+		
+		// 5. 응답
+		// 생성된 리프레시 토큰을 cookie에 담아 응답
+		tokenUtils.setRefreshTokenCookie(response, refreshToken);
+		tokenUtils.setAccessTokenCookie(response, accessToken);
+		
+		// SignUpOrLoginResponse 객체 생성
+	    boolean isNewUser = user.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1)); // 1분 이내에 생성된 경우 신규 사용자로 간주
+	    SignUpOrLoginResponse signUpOrLoginResponse = SignUpOrLoginResponse.builder()
+	    		.message(isNewUser ? "회원가입 후 로그인이 완료되었습니다." : "로그인에 성공했습니다.")
+	            .accessToken(accessToken)
+	            .isNewUser(isNewUser)
+	            .build();
+		return signUpOrLoginResponse;
 	}
 
 	private void validateSignUpOrLoginRequest(SignUpOrLoginRequest request) {
+		log.info(request.toString());
 		if (request.getSocialKey() == null || request.getEmail() == null || request.getProvider() == null) {
 			throw new MissingFieldException();
 		}
