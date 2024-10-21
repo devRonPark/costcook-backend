@@ -1,37 +1,42 @@
 package com.costcook.controller;
 
+import java.util.Map;
+import java.util.Random;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.costcook.domain.request.SignUpOrLoginRequest;
 import com.costcook.service.AuthService;
 import com.costcook.domain.request.EmailRequest;
+import com.costcook.domain.request.SignUpOrLoginRequest;
 import com.costcook.domain.request.VerificationRequest;
+import com.costcook.domain.response.SignUpOrLoginResponse;
 import com.costcook.domain.response.VerifyCodeResponse;
 import com.costcook.service.EmailService;
 import com.costcook.util.EmailUtil;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@RequestMapping("/api/auth")
 public class AuthController {
 	private final AuthService authService;
     private final EmailService emailService;
 	
 	@PostMapping("/signup-or-login")
-    public ResponseEntity<?> signUpOrLogin(@RequestBody SignUpOrLoginRequest signUpOrLoginRequest) {
-		// 1. authRequest 필드 유효성 검증
-		authService.signUpOrLogin(signUpOrLoginRequest);
-		
-		
-    	return ResponseEntity.ok("signup or login");
+    public ResponseEntity<?> signUpOrLogin(@RequestBody SignUpOrLoginRequest signUpOrLoginRequest, HttpServletResponse response) {
+		SignUpOrLoginResponse signUpOrLoginResponse = authService.signUpOrLogin(signUpOrLoginRequest);
+    	return ResponseEntity.ok(signUpOrLoginResponse);
     }
 
 	@PostMapping("/send-verification-code")

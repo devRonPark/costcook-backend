@@ -1,4 +1,4 @@
-package com.costcook.domain.request;
+package com.costcook.domain.response;
 
 import lombok.Data;
 
