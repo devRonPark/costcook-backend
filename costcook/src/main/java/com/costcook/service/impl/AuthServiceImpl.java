@@ -2,6 +2,7 @@ package com.costcook.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,17 @@ public class AuthServiceImpl implements AuthService {
                 .orElseGet(() -> registerNewUser(request));
 
         log.info("새로 가입한 회원 정보: {}", user);
+
+        // 2-2. email 을 기준으로 이미 회원가입한 회원이지만, social_accounts 테이블 조회(provider, socialKey) 없는 경우 registerNewUser(request) 호출 필요.
+        log.info("findBySocialKeyAndProvider 호출");        
+        Optional<SocialAccount> socialAccount = socialAccountRepository.findBySocialKeyAndProvider(request.getSocialKey(), PlatformTypeEnum.fromString(request.getProvider()));
+        log.info("{}", socialAccount.toString());        
+        if (!socialAccount.isPresent() && request.getProvider() != null && request.getSocialKey() != null) {
+            // 소셜 계정 정보가 없다면 카카오 계정 정보를 등록
+            registerSocialAccount(user, request.getProvider(), request.getSocialKey());
+            log.info("소셜 계정 정보가 등록되었습니다: {} - {}", request.getProvider(), request.getSocialKey());
+        }
+
 
         // 3. 액세스 토큰, 리프레시 토큰 발급
         Map<String, String> tokenMap = tokenUtils.generateToken(user);
@@ -102,5 +114,18 @@ public class AuthServiceImpl implements AuthService {
         socialAccountRepository.save(socialAccount);
 
         return savedUser;
+    }
+
+    // 소셜 계정 등록 메소드
+    private void registerSocialAccount(User user, String provider, String socialKey) {
+    	log.info("{}", PlatformTypeEnum.fromString(provider));
+    	log.info("--------");
+        SocialAccount newSocialAccount = SocialAccount
+                    .builder()
+                    .provider(PlatformTypeEnum.fromString(provider))
+                    .socialKey(socialKey)
+                    .user(user)
+                    .build();
+        socialAccountRepository.save(newSocialAccount);
     }
 }

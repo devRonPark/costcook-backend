@@ -234,6 +234,7 @@ public class UserServiceImpl implements UserService {
 	 * @return OAuthUserInfo - Kakao 사용자 정보 객체
 	 */
 	private OAuthUserInfo extractKakaoUserInfo(JsonNode oAuthUserNode) {
+		log.info("Kakao User Info: {}", oAuthUserNode);
 	    String socialKey = oAuthUserNode.get("id").asText();
 	    String name = extractJsonNodeText(oAuthUserNode, "properties", "nickname");
 	    log.info("Kakao User Info - socialKey: {}, name: {}", socialKey, name);
