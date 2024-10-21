@@ -17,8 +17,9 @@ import com.costcook.domain.PlatformTypeEnum;
 @Table(name = "social_accounts")
 @EntityListeners(AuditingEntityListener.class) // 생성, 수정 날짜 추적 -> Application.java (@EnableJpaAuditing)
 @Data
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class SocialAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +32,7 @@ public class SocialAccount {
     @Enumerated(EnumType.STRING)
     @Column(name = "provider")
     @Builder.Default
-    private PlatformTypeEnum provider; // 플랫폼 타입 (KAKAO, GOOGLE)
+    private PlatformTypeEnum provider = PlatformTypeEnum.GOOGLE; // 플랫폼 타입 (KAKAO, GOOGLE)
 
     @Column(name = "social_key", length = 255, nullable = true)
     private String socialKey; // 소셜 키
