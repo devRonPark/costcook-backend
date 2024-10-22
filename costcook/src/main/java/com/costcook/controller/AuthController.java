@@ -3,9 +3,11 @@ package com.costcook.controller;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +19,7 @@ import com.costcook.domain.request.SignUpOrLoginRequest;
 import com.costcook.domain.request.VerificationRequest;
 import com.costcook.domain.response.SignUpOrLoginResponse;
 import com.costcook.domain.response.VerifyCodeResponse;
+import com.costcook.exceptions.MissingFieldException;
 import com.costcook.service.EmailService;
 import com.costcook.util.EmailUtil;
 
@@ -34,7 +37,7 @@ public class AuthController {
     private final EmailService emailService;
 	
 	@PostMapping("/signup-or-login")
-    public ResponseEntity<?> signUpOrLogin(@RequestBody SignUpOrLoginRequest signUpOrLoginRequest, HttpServletResponse response) {
+    public ResponseEntity<SignUpOrLoginResponse> signUpOrLogin(@RequestBody SignUpOrLoginRequest signUpOrLoginRequest, HttpServletResponse response) {
 		SignUpOrLoginResponse signUpOrLoginResponse = authService.signUpOrLogin(signUpOrLoginRequest, response);
     	return ResponseEntity.ok(signUpOrLoginResponse);
     }
@@ -68,6 +71,21 @@ public class AuthController {
 		} else {
 			 return ResponseEntity.ok(new VerifyCodeResponse(false, "인증번호가 일치하지 않습니다."));
 		}
-
 	}
+
+	@PostMapping("/token/refresh")
+	public ResponseEntity<?> refreshAccessToken(
+        @CookieValue(value = "refreshToken", required = true) String refreshToken,
+        HttpServletResponse response
+	) {
+		// 1. 리프레시 토큰이 쿠키에 없거나 유효하지 않은 경우 처리 > 401 에러 응답
+
+		// 2. 리프레시 토큰에서 사용자 정보 추출
+
+		// 3. 새로운 액세스 토큰 생성
+
+		// 4. 액세스 토큰을 Set-Cookie 헤더에 실어서 응답
+		return ResponseEntity.ok().body(refreshToken);
+	}
+	
 }
