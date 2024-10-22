@@ -49,7 +49,7 @@ public class TokenUtils {
     // 쿠키 설정을 위한 기본 메소드
     public void setCookie(HttpServletResponse response, String name, String value, int maxAge) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(name.equals("refreshToken") ? true : false);
         cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(maxAge);
