@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import com.costcook.domain.PlatformTypeEnum;
@@ -15,6 +16,7 @@ import com.costcook.exceptions.InvalidProviderException;
 import com.costcook.exceptions.MissingFieldException;
 import com.costcook.repository.SocialAccountRepository;
 import com.costcook.repository.UserRepository;
+import com.costcook.security.JwtProvider;
 import com.costcook.service.AuthService;
 import com.costcook.util.TokenUtils;
 
@@ -26,9 +28,11 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+    private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
     private final SocialAccountRepository socialAccountRepository;
     private final TokenUtils tokenUtils;
+    private final JwtProvider jwtProvider;
     
     /**
      * 주어진 소셜 키와 공급자를 사용하여 해당 사용자의 이메일을 조회합니다.
@@ -151,5 +155,28 @@ public class AuthServiceImpl implements AuthService {
                     .user(user)
                     .build();
         socialAccountRepository.save(newSocialAccount);
+    }
+
+    // 리프레시 토큰을 검증하고 새로운 액세스 토큰을 발급하는 메서드
+    @Override
+    public String refreshAccessToken(String refreshToken) {
+        // 1. 리프레시 토큰 유효성 검증
+        if (refreshToken == null || !jwtProvider.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다.");
+        }
+
+        // 2. 리프레시 토큰에서 사용자 정보 추출
+        String userEmail = jwtProvider.getUserEmailByToken(refreshToken);
+        User user = (User) userDetailsService.loadUserByUsername(userEmail);
+        log.info("{}", user.toString());
+        if (user == null) {
+            throw new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다.");
+        }
+
+        // 3. 새로운 액세스 토큰 생성
+        String newAccessToken = jwtProvider.generateAccessToken(user);
+
+        // 4. 새로운 액세스 토큰 반환
+        return newAccessToken;
     }
 }
