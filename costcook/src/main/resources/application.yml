@@ -1,47 +1,33 @@
 spring:
-    application:
-        name: costcook
-    datasource:
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3306/costcook_db
-        username: root
-        password: 1234
-    jpa:
-        generate-ddl: true
-        show-sql: true
-        open-in-view: false
-    sql:
-        init:
-            mode: never
-    upload:
-        location: C:\\Users\\WD\\Desktop\\costcook-image
-    mail:
-        host: smtp.gmail.com  # Google SMTP 서버 주소
-        port: 587  # SMTP 포트
-        username: pbc9236@gmail.com  # 발송자 이메일
-        password: scjtbmripfszsirb  # 발송자 이메일 비밀번호
-        properties:
-            mail:
-                smtp:
-                    auth: true
-                    starttls:
-                    enable: true
+  application:
+    name: costcook
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/costcook_db
+    username: root
+    password: 1234
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    open-in-view: false
+  sql:
+    init:
+      mode: never
+  upload:
+    location: C:\\Users\\WD\\Desktop\\costcook-image
+  mail:
+    host: smtp.gmail.com # Google SMTP 서버 주소
+    port: 587 # SMTP 포트
+    username: pbc9236@gmail.com # 발송자 이메일
+    password: scjtbmripfszsirb # 발송자 이메일 비밀번호
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+          enable: true
 jwt:
-    issuer: costcook
-    secret_key: mysecretmysecretmysecretmysecret
-    access_duration: 5000 # 1800000  # 30분 (30 * 60 * 1000)
-    refresh_duration: 86400000 # 86400000 # 24시간 (24 * 60 * 60 * 1000)
-oauth2:
-    clients:
-        google:
-            client-id: 
-            client-secret: 
-            redirect-uri: http:// {아이피 주소} /oauth/google
-            token-uri: https://oauth2.googleapis.com/token
-            user-info-request-uri: https://www.googleapis.com/oauth2/v3/userinfo
-        kakao:
-            client-id: 
-            client-secret: 
-            redirect-uri: http:// {아이피 주소} /oauth/kakao
-            token-uri: https://kauth.kakao.com/oauth/token
-            user-info-request-uri: https://kapi.kakao.com/v2/user/me
+  issuer: costcook
+  secret_key: mysecretmysecretmysecretmysecret
+  access_duration: 1800000 # 30분을 ms로 변환
+  refresh_duration: 604800000 # 1주을 ms로 변환
