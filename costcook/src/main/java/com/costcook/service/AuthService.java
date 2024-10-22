@@ -11,4 +11,5 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface AuthService {
 	public Optional<String> getEmailFromSocialAccount(String socialKey, PlatformTypeEnum provider);
 	public SignUpOrLoginResponse signUpOrLogin(SignUpOrLoginRequest request, HttpServletResponse response);
+	public String refreshAccessToken(String refreshToken);
 }
