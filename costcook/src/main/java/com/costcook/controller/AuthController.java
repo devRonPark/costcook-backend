@@ -19,11 +19,12 @@ import com.costcook.domain.request.SignUpOrLoginRequest;
 import com.costcook.domain.request.VerificationRequest;
 import com.costcook.domain.response.SignUpOrLoginResponse;
 import com.costcook.domain.response.VerifyCodeResponse;
-import com.costcook.exceptions.MissingFieldException;
+import com.costcook.exceptions.ErrorResponse;
+import com.costcook.security.JwtProperties;
 import com.costcook.service.EmailService;
 import com.costcook.util.EmailUtil;
+import com.costcook.util.TokenUtils;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
 	private final AuthService authService;
     private final EmailService emailService;
+	private final TokenUtils tokenUtils;
 	
 	@PostMapping("/signup-or-login")
     public ResponseEntity<SignUpOrLoginResponse> signUpOrLogin(@RequestBody SignUpOrLoginRequest signUpOrLoginRequest, HttpServletResponse response) {
@@ -75,17 +77,30 @@ public class AuthController {
 
 	@PostMapping("/token/refresh")
 	public ResponseEntity<?> refreshAccessToken(
-        @CookieValue(value = "refreshToken", required = true) String refreshToken,
+        @CookieValue(value = "refreshToken", required = false) String refreshToken,
         HttpServletResponse response
 	) {
-		// 1. 리프레시 토큰이 쿠키에 없거나 유효하지 않은 경우 처리 > 401 에러 응답
+		log.info("액세스 토큰 재발급 API 호출");
 
-		// 2. 리프레시 토큰에서 사용자 정보 추출
+		// 리프레시 토큰이 없을 경우 400 Bad Request 응답
+		if (refreshToken == null) {
+			return ResponseEntity.badRequest()
+					.body(new ErrorResponse("리프레시 토큰이 필요합니다."));
+		}
 
-		// 3. 새로운 액세스 토큰 생성
+		log.info("리프레시 토큰 값: {}", refreshToken);
+	    try {
+			// authService를 사용하여 새로운 액세스 토큰 발급
+			String newAccessToken = authService.refreshAccessToken(refreshToken);
 
-		// 4. 액세스 토큰을 Set-Cookie 헤더에 실어서 응답
-		return ResponseEntity.ok().body(refreshToken);
-	}
-	
+			// 새로운 액세스 토큰을 Set-Cookie 헤더에 추가
+			tokenUtils.setAccessTokenCookie(response, newAccessToken);
+        
+        	return ResponseEntity.ok().build();
+		} catch (IllegalArgumentException e) {
+			// 리프레시 토큰이 유효하지 않을 때
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(new ErrorResponse(e.getMessage()));
+		}
+	}	
 }
