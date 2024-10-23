@@ -18,6 +18,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.costcook.domain.OAuthUserInfo;
 import com.costcook.domain.PlatformTypeEnum;
+import com.costcook.domain.request.UserUpdateRequest;
+import com.costcook.entity.User;
+import com.costcook.repository.UserRepository;
+import com.costcook.service.FileUploadService;
 import com.costcook.service.UserService;
 import com.costcook.util.OAuth2Properties;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,6 +34,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 	private final OAuth2Properties oAuth2Properties;
+	private final FileUploadService fileUploadService;
+	private final UserRepository userRepository;
+
+	private final String USER_PROFILE_ACCESS_PATH = "/img/user/";
 
 	/**
 	 * OAuth provider에서 code를 통해 access token을 가져오고, 그 access token으로 사용자 정보를 추출한 후 OAuthUserInfo 객체로 반환한다.
@@ -270,4 +278,43 @@ public class UserServiceImpl implements UserService {
 	    }
 	    return currentNode.asText();
 	}
+
+	    public void updateUserInfo(Long userId, UserUpdateRequest requestDTO) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+
+        // 1. 프로필 이미지 처리
+        if (requestDTO.getProfileImage() != null) {
+            // 파일 업로드 서비스 사용
+            String savedFileName = fileUploadService.uploadUserFile(requestDTO.getProfileImage());
+            String profileImageUrl = USER_PROFILE_ACCESS_PATH + savedFileName;
+            user.setProfileUrl(profileImageUrl);
+        }
+
+        // 2. 닉네임 검증 및 업데이트
+        if (requestDTO.getNickname() != null && !requestDTO.getNickname().isEmpty()) {
+            validateNickname(requestDTO.getNickname()); // 닉네임 검증
+            user.setNickname(requestDTO.getNickname());
+        }
+
+        // 3. 개인정보 동의 여부 검증 및 업데이트
+        if (requestDTO.getPersonalInfoAgreement() != null) {
+            user.setPersonalInfoAgreement(requestDTO.getPersonalInfoAgreement());
+        } else {
+            throw new IllegalArgumentException("개인정보 동의 여부는 필수입니다.");
+        }
+
+        // 4. 사용자 정보 저장
+        userRepository.save(user);
+    }
+
+    // 닉네임 검증 로직 (예: 최소 2자 이상, 금지된 특수문자 포함 여부 등)
+    private void validateNickname(String nickname) {
+        if (nickname.length() < 2) {
+            throw new IllegalArgumentException("닉네임은 최소 2자 이상이어야 합니다.");
+        }
+        if (!nickname.matches("^[a-zA-Z가-힣0-9_]+$")) {
+            throw new IllegalArgumentException("닉네임은 알파벳, 숫자, 한글, 밑줄(_)만 사용할 수 있습니다.");
+        }
+    }
 }

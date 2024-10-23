@@ -16,5 +16,5 @@ public class UserUpdateRequest {
 
     private List<Integer> dislikedIngredients; // 필수
 
-    private boolean personalInfoAgreement; // 필수
+    private Boolean personalInfoAgreement; // 필수
 }
