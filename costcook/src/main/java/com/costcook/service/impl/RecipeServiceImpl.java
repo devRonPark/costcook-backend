@@ -1,19 +1,16 @@
 package com.costcook.service.impl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.costcook.domain.response.RecipeResponse;
 import com.costcook.entity.RecipeItem;
 import com.costcook.repository.RecipeRepository;
 import com.costcook.service.RecipeService;
-import com.costcook.util.FileUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 public class RecipeServiceImpl implements RecipeService {
 	
 	private final RecipeRepository recipeRepository;
-	private final FileUtils fileUtils;
 
 	
 	// 레시피 목록 조회
