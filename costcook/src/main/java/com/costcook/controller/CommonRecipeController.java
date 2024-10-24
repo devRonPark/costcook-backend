@@ -3,7 +3,6 @@ package com.costcook.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,8 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.costcook.domain.response.RecipeIngredientResponse;
 import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
+import com.costcook.entity.RecipeIngredient;
+import com.costcook.repository.RecipeIngredientRepository;
+import com.costcook.service.RecipeIngredientService;
 import com.costcook.service.RecipeService;
 
 import lombok.RequiredArgsConstructor;
@@ -27,11 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 public class CommonRecipeController {
 	
 	private final RecipeService recipeService;
-	// application.yml의 location 정보 가져오기
-	@Value("${spring.upload.location}")
-	private String uploadPath;
-	
-	
+	private final RecipeIngredientService recipeIngredientService;
+	private final RecipeIngredientRepository recipeIngredientRepository;
+
 	// 레시피 전체 목록 조회 
 	@GetMapping(value = {"", "/"})
 	public ResponseEntity<RecipeListResponse> getAllRecipe(
@@ -68,6 +69,24 @@ public class CommonRecipeController {
 		return ResponseEntity.ok(recipeResponse);
 	}
 	
+	
+
+	// 레시피별 재료 조회
+	@GetMapping("/{recipeId}/ingredients")
+	public ResponseEntity<List<RecipeIngredientResponse>> getIngredientsByRecipeId(@PathVariable("recipeId") Long id) {
+		List<RecipeIngredientResponse> ingredients = recipeIngredientService.getRecipeIngredients(id);
+		return ResponseEntity.ok(ingredients);
+	}
+
+	
+	// 이미 프론트에 적용 되어있다고 함..
+	// 레시피 재료 가격 합산 = price
+	@GetMapping("/{recipeId}/total-price")
+	public ResponseEntity<Integer> getTotalPriceByRecipeId(@PathVariable("recipeId") Long id) {
+	    List<RecipeIngredient> ingredients = recipeIngredientRepository.findByRecipeId(id);
+	    int totalPrice = ingredients.stream().mapToInt(RecipeIngredient::getPrice).sum();
+	    return ResponseEntity.ok(totalPrice);
+	}
 	
 	
 }

@@ -8,23 +8,17 @@ import com.costcook.domain.response.RecipeResponse;
 
 public interface RecipeService {
 
+	// 레시피 목록 가져오기
 	List<RecipeResponse> getRecipes(int page, int size, String sort, String order);
 	
+	// 레시피 총 개수
 	long getTotalRecipes();
 	
-//	RecipeResponse insertRecipe(RecipeRequest recipeRequest, MultipartFile file);
-	
+	// 레시피 ID 가져오기
 	RecipeResponse getRecipeById(Long id);
-
-
-//	RecipeResponse updateRecipe(RecipeRequest recipeRequest, Long id, MultipartFile file);
-
-//	List<RecipeResponse> getAdminRecipes(int page, int limit);
-
 
 	// DB에 직접 데이터를 넣는 메소드
 	void insertRecipes();
-
 
 
 }

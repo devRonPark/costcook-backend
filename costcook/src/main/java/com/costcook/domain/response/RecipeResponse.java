@@ -15,10 +15,10 @@ public class RecipeResponse {
 	private Long id;
 	private int rcpSno;
 	private String title, description, thumbnailUrl, createdAt, updatedAt;
-	private int servings, price, viewCount, bookmarkCount, commentCount;
+	private int servings, price, viewCount, favoriteCount, commentCount;
 	private double avgRatings;
 	private Category category;
-	
+
 	// Recipe -> response 변환
 	public static RecipeResponse toDTO(RecipeItem recipe) {
 		return RecipeResponse.builder()
@@ -28,11 +28,11 @@ public class RecipeResponse {
 				.title(recipe.getTitle())
 				.description(recipe.getDescription())
 				.createdAt(recipe.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
-				.createdAt(recipe.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
+				.updatedAt(recipe.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
 				.servings(recipe.getServings())
 				.price(recipe.getPrice())
 				.viewCount(recipe.getViewCount())
-				.bookmarkCount(recipe.getBookmarkCount())
+				.favoriteCount(recipe.getFavoriteCount())
 				.commentCount(recipe.getCommentCount())
 				.avgRatings(recipe.getAvgRatings())
 				.thumbnailUrl(recipe.getThumbnailUrl())

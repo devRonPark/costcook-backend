@@ -1,8 +1,8 @@
 package com.costcook.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -85,7 +86,7 @@ public class RecipeItem {
 	// 즐겨찾기 수 (디폴트 0)
 	@Column(nullable = false)
 	@Builder.Default()
-	private int bookmarkCount = 0;
+	private int favoriteCount = 0;
 	
 	// 댓글 수 (디폴트 0)
 	@Column(nullable = false)
@@ -96,6 +97,17 @@ public class RecipeItem {
 	@Column(nullable = false)
 	@Builder.Default()
 	private double avgRatings = 0.0;
+	
+	
+	// 가상 컬럼 (DB에 저장되지 않음)
+	// 레시피 총 가격 계산
+	@Transient
+	public int getTotalPrice(List<RecipeIngredient> recipeIngredients) {
+		return recipeIngredients.stream()
+				.filter(recipeIngredient -> recipeIngredient.getRecipe() != null && recipeIngredient.getRecipe().getId().equals(this.id)) // 레시피 ID로 필터링
+				.mapToInt(RecipeIngredient::getPrice)
+				.sum();
+	}
 	
 	
 

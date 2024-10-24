@@ -1,7 +1,11 @@
 package com.costcook.service.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
+import com.costcook.domain.response.RecipeIngredientResponse;
 import com.costcook.entity.Ingredient;
 import com.costcook.entity.RecipeIngredient;
 import com.costcook.entity.RecipeItem;
@@ -27,7 +31,15 @@ public class RecipeIngredientServiceImpl implements RecipeIngredientService {
 	public Ingredient findIngredientById(Long id) {
 		return ingredientReposity.findById(id).orElse(null);
 	}
-
+	
+	// 재료 정보 가져오기
+	@Override
+	public List<RecipeIngredientResponse> getRecipeIngredients(Long id) {
+		List<RecipeIngredient> ingredients = recipeIngredientRepository.findByRecipeId(id);
+		return ingredients.stream().map(RecipeIngredientResponse::toDTO).collect(Collectors.toList());
+	}
+	
+	
 	@Override
 	public void insertRecipeIngredients() {
 		RecipeIngredient[] recipeIngredients = {
@@ -1246,5 +1258,6 @@ public class RecipeIngredientServiceImpl implements RecipeIngredientService {
 		}
 		
 	}
+
 
 }

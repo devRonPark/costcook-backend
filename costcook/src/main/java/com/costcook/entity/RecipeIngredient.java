@@ -46,4 +46,16 @@ public class RecipeIngredient {
 	@Builder.Default()
 	private int price = 0;
 	
+	
+//	// -> response 이동
+//	// 레시피 가격 계산 로직
+//	public void calculatePrice() {
+//		if (recipe != null) {
+//			this.price = (int) (recipe.getPrice() * this.quantity);
+//		}
+//	}
+	
+	
+	
+	
 }

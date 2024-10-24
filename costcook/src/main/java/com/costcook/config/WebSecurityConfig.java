@@ -68,14 +68,12 @@ public class WebSecurityConfig {
 		http.authorizeHttpRequests(auth ->
 			// 특정 URL 경로에 대해서는 인증 없이 접근 가능
 			auth.requestMatchers(
+				new AntPathRequestMatcher("/img/**"), // 이미지
 				new AntPathRequestMatcher("/api/oauth/**"),
 				new AntPathRequestMatcher("/api/auth/**"),
 				new AntPathRequestMatcher("/api/auth/token/refresh"),
-				new AntPathRequestMatcher("/api/recipes/**"),// 사용자 레시피 조회
+				new AntPathRequestMatcher("/api/recipes/**")// 사용자 레시피 조회
 				
-				new AntPathRequestMatcher("/**") // 임시
-
-
 			).permitAll()
 			.requestMatchers("/api/users/me").authenticated() // 이 API는 인증이 필요함
 			// 그 밖의 다른 요청들은 인증을 통과한(로그인한) 사용자라면 모두 접근할 수 있도록 한다.

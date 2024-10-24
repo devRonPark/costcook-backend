@@ -18,10 +18,25 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.costcook.domain.OAuthUserInfo;
 import com.costcook.domain.PlatformTypeEnum;
+import com.costcook.domain.request.UserUpdateRequest;
+import com.costcook.entity.Category;
+import com.costcook.entity.DislikedIngredient;
+import com.costcook.entity.DislikedIngredientId;
+import com.costcook.entity.PreferredIngredient;
+import com.costcook.entity.PreferredIngredientId;
+import com.costcook.entity.User;
+import com.costcook.repository.CategoryRepository;
+import com.costcook.repository.DislikedIngredientRepository;
+import com.costcook.repository.PreferredIngredientRepository;
+import com.costcook.repository.UserRepository;
+import com.costcook.service.FileUploadService;
 import com.costcook.service.UserService;
 import com.costcook.util.OAuth2Properties;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,6 +45,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 	private final OAuth2Properties oAuth2Properties;
+	private final FileUploadService fileUploadService;
+	private final UserRepository userRepository;
+	private final CategoryRepository categoryRepository;
+	private final PreferredIngredientRepository preferredIngredientRepository;
+	private final DislikedIngredientRepository dislikedIngredientRepository;
+
+	private final String USER_PROFILE_ACCESS_PATH = "/img/user/";
 
 	/**
 	 * OAuth provider에서 code를 통해 access token을 가져오고, 그 access token으로 사용자 정보를 추출한 후 OAuthUserInfo 객체로 반환한다.
@@ -269,5 +291,114 @@ public class UserServiceImpl implements UserService {
 	        currentNode = currentNode.get(nodeName);
 	    }
 	    return currentNode.asText();
+	}
+
+	@Transactional
+	@Override
+	public void updateUserInfo(User user, UserUpdateRequest requestDTO) {
+		try {
+			log.info("내 정보 업데이트 메소드 호출");
+			log.info("내 정보: {}", user.toString());
+			log.info("요청 본문 정보: {}", requestDTO.toString());
+		
+			// 1. 프로필 이미지 처리
+			if (requestDTO.getProfileImage() != null) {
+				// 파일 업로드 서비스 사용
+				String savedFileName = fileUploadService.uploadUserFile(requestDTO.getProfileImage());
+				String profileImageUrl = USER_PROFILE_ACCESS_PATH + savedFileName;
+				user.setProfileUrl(profileImageUrl);
+			}
+		
+			// 2. 닉네임 검증 및 업데이트
+			if (requestDTO.getNickname() != null && !requestDTO.getNickname().isEmpty()) {
+				validateNickname(requestDTO.getNickname()); // 닉네임 검증
+				user.setNickname(requestDTO.getNickname());
+			}
+		
+			// 3. 개인정보 동의 여부 검증 및 업데이트
+			if (requestDTO.getPersonalInfoAgreement() != null) {
+				user.setPersonalInfoAgreement(requestDTO.getPersonalInfoAgreement());
+			} else {
+				throw new IllegalArgumentException("개인정보 동의 여부는 필수입니다.");
+			}
+		
+			// 4. 선호 재료 및 기피 재료 업데이트
+			updateUserTaste(user, requestDTO);
+		
+			// 5. 사용자 정보 저장
+			userRepository.save(user);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("{}", e.getMessage());
+			throw e;
+		}
+	}
+
+	@Transactional
+@Override
+public void updateUserTaste(User user, UserUpdateRequest requestDTO) {
+    log.info("updateUserTaste 메소드 호출");
+    log.info("preference 정보: {}", requestDTO.getPreferences());
+    log.info("dislikedIngredients 정보: {}", requestDTO.getDislikedIngredients());
+
+    // 선호 재료 처리
+    List<PreferredIngredient> preferredIngredients = createPreferredIngredients(user, requestDTO.getPreferences());
+    preferredIngredients.forEach(preferredIngredient -> {
+        if (!preferredIngredientRepository.existsByUserIdAndCategoryId(user.getId(), preferredIngredient.getCategory().getId())) {
+            preferredIngredientRepository.save(preferredIngredient);
+        }
+    });
+
+    // 기피 재료 처리
+    List<DislikedIngredient> dislikedIngredients = createDislikedIngredients(user, requestDTO.getDislikedIngredients());
+    dislikedIngredients.forEach(dislikedIngredient -> {
+        if (!dislikedIngredientRepository.existsByUserIdAndCategoryId(user.getId(), dislikedIngredient.getCategory().getId())) {
+            dislikedIngredientRepository.save(dislikedIngredient);
+        }
+    });
+
+    log.info("선호 및 기피 재료 저장 완료");
+}
+
+    // 닉네임 검증 로직 (예: 최소 2자 이상, 금지된 특수문자 포함 여부 등)
+    private void validateNickname(String nickname) {
+        if (nickname.length() < 2) {
+            throw new IllegalArgumentException("닉네임은 최소 2자 이상이어야 합니다.");
+        }
+        if (!nickname.matches("^[a-zA-Z가-힣0-9_]+$")) {
+            throw new IllegalArgumentException("닉네임은 알파벳, 숫자, 한글, 밑줄(_)만 사용할 수 있습니다.");
+        }
+    }
+
+	// 주어진 카테고리 ID 리스트로 선호 재료 객체 리스트 생성
+	private List<PreferredIngredient> createPreferredIngredients(User user, List<Long> categoryIds) {
+		return categoryIds.stream()
+				.map(categoryId -> {
+					Category category = categoryRepository.findById(categoryId)
+						.orElseThrow(() -> new IllegalArgumentException("Invalid category ID: " + categoryId));
+					
+					return PreferredIngredient.builder()
+							.id(new PreferredIngredientId(user.getId(), categoryId))
+							.user(user)
+							.category(category)
+							.build();
+				})
+				.collect(Collectors.toList());
+	}
+	
+	// 주어진 카테고리 ID 리스트로 기피 재료 객체 리스트 생성
+	private List<DislikedIngredient> createDislikedIngredients(User user, List<Long> categoryIds) {
+		return categoryIds.stream()
+				.map(categoryId -> {
+					Category category = categoryRepository.findById(categoryId)
+						.orElseThrow(() -> new IllegalArgumentException("Invalid category ID: " + categoryId));
+					
+					return DislikedIngredient.builder()
+							.id(new DislikedIngredientId(user.getId(), categoryId))
+							.user(user)
+							.category(category)
+							.build();
+				})
+				.collect(Collectors.toList());
 	}
 }
