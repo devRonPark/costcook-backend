@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "units")
 public class Unit {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(updatable = false)
@@ -29,4 +30,5 @@ public class Unit {
 
   @Column(nullable = false, length = 10)
   private String name;
+  
 }

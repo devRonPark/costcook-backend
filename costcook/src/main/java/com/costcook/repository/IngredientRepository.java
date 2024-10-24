@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
 
-  // 재료 이름을 기준으로 검색
   List<Ingredient> findByNameContaining(String keyword);
+
 }

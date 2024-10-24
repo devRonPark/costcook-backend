@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "ingredients")
 public class Ingredient {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(updatable = false)
@@ -47,4 +48,5 @@ public class Ingredient {
   @Column(nullable = false)
   @Builder.Default()
   private int price = 0;
+  
 }
