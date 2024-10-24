@@ -50,6 +50,9 @@ public class User implements UserDetails {
     @Column(name = "additional_info_agreement")
     private Boolean additionalInfoAgreement = false;
 
+    @Column(name = "personal_info_agreement")
+    private Boolean personalInfoAgreement = false;
+
     @Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	@Builder.Default

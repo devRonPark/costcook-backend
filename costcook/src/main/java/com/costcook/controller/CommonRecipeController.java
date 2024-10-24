@@ -3,7 +3,6 @@ package com.costcook.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,10 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 public class CommonRecipeController {
 	
 	private final RecipeService recipeService;
-	// application.yml의 location 정보 가져오기
-	@Value("${spring.upload.location}")
-	private String uploadPath;
-	
 	
 	// 레시피 전체 목록 조회 
 	@GetMapping(value = {"", "/"})
