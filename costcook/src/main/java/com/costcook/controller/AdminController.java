@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.costcook.domain.response.IngredientSearchResponse;
 import com.costcook.service.AdminService;
-import com.costcook.service.RecipeService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

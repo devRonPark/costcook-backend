@@ -15,7 +15,7 @@ public class IngredientSearchResponse {
   private String unitName;
   private Double pricePerUnit;
 
-    // Entity -> DTO 변환하는 빌더 메서드
+  // Entity -> DTO 변환하는 빌더 메서드
   public static IngredientSearchResponse toDTO(Ingredient ingredient) {
     return IngredientSearchResponse.builder()
             .id(ingredient.getId())
