@@ -48,14 +48,20 @@ public class UserController {
         @AuthenticationPrincipal User userDetails, // 사용자 정보 가져오기,
         @ModelAttribute UserUpdateRequest requestDTO
     ) {
-        log.info("내 정보 업데이트 API 호출");
-        log.info("내 정보: {}", userDetails.toString());
-        log.info("요청 본문 정보: {}", requestDTO.toString());
-
-        // 사용자 정보 업데이트 로직 서비스에 위임
-        userService.updateUserInfo(userDetails, requestDTO);
-
-        // 성공 응답 반환
-        return ResponseEntity.ok("내 정보가 성공적으로 업데이트되었습니다.");
+        try {
+            log.info("내 정보 업데이트 API 호출");
+            log.info("내 정보: {}", userDetails.toString());
+            log.info("요청 본문 정보: {}", requestDTO.toString());
+    
+            // 사용자 정보 업데이트 로직 서비스에 위임
+            userService.updateUserInfo(userDetails, requestDTO);
+    
+            // 성공 응답 반환
+            return ResponseEntity.ok("내 정보가 성공적으로 업데이트되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("{}", e.getMessage());
+            throw e;
+        }
     }
 }
