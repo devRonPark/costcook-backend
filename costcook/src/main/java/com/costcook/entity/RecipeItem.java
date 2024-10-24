@@ -36,8 +36,9 @@ public class RecipeItem {
 	private Long id;
 	
 	// 카테고리 식별자 (디폴트 null, 외래키(카테고리 테이블))
-	@Column(nullable = true)
-	private Long categoryId;
+	@ManyToOne
+	@JoinColumn(name = "category_id", nullable = true)
+	private Category category;
 	
 	// 만개 레시피 제공 데이터 고유번호
 	@Column(nullable = false)

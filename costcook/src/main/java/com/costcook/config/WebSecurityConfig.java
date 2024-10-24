@@ -71,7 +71,10 @@ public class WebSecurityConfig {
 				new AntPathRequestMatcher("/api/oauth/**"),
 				new AntPathRequestMatcher("/api/auth/**"),
 				new AntPathRequestMatcher("/api/auth/token/refresh"),
-				new AntPathRequestMatcher("/api/recipes/**")// 사용자 레시피 조회
+				new AntPathRequestMatcher("/api/recipes/**"),// 사용자 레시피 조회
+				
+				new AntPathRequestMatcher("/**") // 임시
+
 
 			).permitAll()
 			.requestMatchers("/api/users/me").authenticated() // 이 API는 인증이 필요함

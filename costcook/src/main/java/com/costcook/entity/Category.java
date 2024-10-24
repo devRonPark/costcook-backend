@@ -1,10 +1,8 @@
 package com.costcook.entity;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,7 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Data
 @Builder
 @AllArgsConstructor
@@ -32,6 +29,6 @@ public class Category {
 
   @Column(nullable = false, name = "parent_id")
   @Builder.Default()
-  private Long parentId = 0;
+  private Long parentId = 0L;
   
 }

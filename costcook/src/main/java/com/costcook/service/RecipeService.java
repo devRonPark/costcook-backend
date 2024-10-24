@@ -16,12 +16,14 @@ public interface RecipeService {
 	
 	RecipeResponse getRecipeById(Long id);
 
+
 //	RecipeResponse updateRecipe(RecipeRequest recipeRequest, Long id, MultipartFile file);
 
 //	List<RecipeResponse> getAdminRecipes(int page, int limit);
 
-	// 레시피 삭제 미구현
 
+	// DB에 직접 데이터를 넣는 메소드
+	void insertRecipes();
 
 
 
