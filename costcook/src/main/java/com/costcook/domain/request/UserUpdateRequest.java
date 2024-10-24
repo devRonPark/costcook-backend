@@ -12,9 +12,9 @@ public class UserUpdateRequest {
 
     private MultipartFile profileImage; // 선택
 
-    private List<Integer> preferences; // 필수
+    private List<Long> preferences; // 필수
 
-    private List<Integer> dislikedIngredients; // 필수
+    private List<Long> dislikedIngredients; // 필수
 
     private Boolean personalInfoAgreement; // 필수
 }
