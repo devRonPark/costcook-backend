@@ -11,6 +11,7 @@ public class SignUpOrLoginResponse {
     private String message;
     private String accessToken;
     private boolean isNewUser;
+    private boolean isUserProfileUpdated;
 
     public SignUpOrLoginResponse(String message) {
         this.message = message;
