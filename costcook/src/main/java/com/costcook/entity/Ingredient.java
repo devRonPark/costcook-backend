@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -35,12 +36,12 @@ public class Ingredient {
   private String name;
 
   // 카테고리
-  @OneToOne
+  @ManyToOne
   @JoinColumn(name = "category_id", nullable = true)
   private Category category;
 
   // 단위
-  @OneToOne
+  @ManyToOne
   @JoinColumn(name = "unit_id", nullable = false)
   private Unit unit;
 
