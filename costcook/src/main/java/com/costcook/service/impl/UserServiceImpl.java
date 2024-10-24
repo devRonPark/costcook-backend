@@ -4,7 +4,6 @@ import java.util.Map;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,7 +16,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.costcook.domain.BaseTaste;
 import com.costcook.domain.OAuthUserInfo;
 import com.costcook.domain.PlatformTypeEnum;
 import com.costcook.domain.request.UserUpdateRequest;
@@ -298,36 +296,42 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	@Override
 	public void updateUserInfo(User user, UserUpdateRequest requestDTO) {
-		log.info("내 정보 업데이트 메소드 호출");
-		log.info("내 정보: {}", user.toString());
-		log.info("요청 본문 정보: {}", requestDTO.toString());
-	
-		// 1. 프로필 이미지 처리
-		if (requestDTO.getProfileImage() != null) {
-			// 파일 업로드 서비스 사용
-			String savedFileName = fileUploadService.uploadUserFile(requestDTO.getProfileImage());
-			String profileImageUrl = USER_PROFILE_ACCESS_PATH + savedFileName;
-			user.setProfileUrl(profileImageUrl);
+		try {
+			log.info("내 정보 업데이트 메소드 호출");
+			log.info("내 정보: {}", user.toString());
+			log.info("요청 본문 정보: {}", requestDTO.toString());
+		
+			// 1. 프로필 이미지 처리
+			if (requestDTO.getProfileImage() != null) {
+				// 파일 업로드 서비스 사용
+				String savedFileName = fileUploadService.uploadUserFile(requestDTO.getProfileImage());
+				String profileImageUrl = USER_PROFILE_ACCESS_PATH + savedFileName;
+				user.setProfileUrl(profileImageUrl);
+			}
+		
+			// 2. 닉네임 검증 및 업데이트
+			if (requestDTO.getNickname() != null && !requestDTO.getNickname().isEmpty()) {
+				validateNickname(requestDTO.getNickname()); // 닉네임 검증
+				user.setNickname(requestDTO.getNickname());
+			}
+		
+			// 3. 개인정보 동의 여부 검증 및 업데이트
+			if (requestDTO.getPersonalInfoAgreement() != null) {
+				user.setPersonalInfoAgreement(requestDTO.getPersonalInfoAgreement());
+			} else {
+				throw new IllegalArgumentException("개인정보 동의 여부는 필수입니다.");
+			}
+		
+			// 4. 선호 재료 및 기피 재료 업데이트
+			updateUserTaste(user, requestDTO);
+		
+			// 5. 사용자 정보 저장
+			userRepository.save(user);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("{}", e.getMessage());
+			throw e;
 		}
-	
-		// 2. 닉네임 검증 및 업데이트
-		if (requestDTO.getNickname() != null && !requestDTO.getNickname().isEmpty()) {
-			validateNickname(requestDTO.getNickname()); // 닉네임 검증
-			user.setNickname(requestDTO.getNickname());
-		}
-	
-		// 3. 개인정보 동의 여부 검증 및 업데이트
-		if (requestDTO.getPersonalInfoAgreement() != null) {
-			user.setPersonalInfoAgreement(requestDTO.getPersonalInfoAgreement());
-		} else {
-			throw new IllegalArgumentException("개인정보 동의 여부는 필수입니다.");
-		}
-	
-		// 4. 선호 재료 및 기피 재료 업데이트
-		updateUserTaste(user, requestDTO);
-	
-		// 5. 사용자 정보 저장
-		userRepository.save(user);
 	}
 
 	@Transactional
