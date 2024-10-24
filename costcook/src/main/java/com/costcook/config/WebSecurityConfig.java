@@ -68,6 +68,7 @@ public class WebSecurityConfig {
 		http.authorizeHttpRequests(auth ->
 			// 특정 URL 경로에 대해서는 인증 없이 접근 가능
 			auth.requestMatchers(
+				new AntPathRequestMatcher("/img/**"), // 이미지
 				new AntPathRequestMatcher("/api/oauth/**"),
 				new AntPathRequestMatcher("/api/auth/**"),
 				new AntPathRequestMatcher("/api/auth/token/refresh"),
