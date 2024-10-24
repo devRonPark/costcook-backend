@@ -8,8 +8,6 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-import com.costcook.domain.BaseTaste;
-
 @Entity
 @Table(name = "preferred_ingredients")
 @Data
