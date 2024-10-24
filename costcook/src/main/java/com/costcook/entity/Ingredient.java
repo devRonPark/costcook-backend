@@ -25,9 +25,9 @@ import lombok.NoArgsConstructor;
 @Table(name = "ingredients")
 public class Ingredient {
   @Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(updatable = false)
-	private Long id;
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(updatable = false)
+  private Long id;
 
   // 이름
   @Column(nullable = false, length = 255)
@@ -36,15 +36,15 @@ public class Ingredient {
   // 카테고리
   @OneToOne
   @JoinColumn(name = "category_id", nullable = true)
-	private Category category;
+  private Category category;
 
   // 단위
   @OneToOne
   @JoinColumn(name = "unit_id", nullable = false)
-	private Unit unit;
+  private Unit unit;
 
   // 단위당 가격
-	@Column(nullable = false)
-	@Builder.Default()
-	private int price = 0;
+  @Column(nullable = false)
+  @Builder.Default()
+  private int price = 0;
 }

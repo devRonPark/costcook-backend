@@ -9,7 +9,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.costcook.domain.response.IngredientSearchResponse;
 import com.costcook.domain.response.RecipeResponse;
+import com.costcook.entity.Ingredient;
 import com.costcook.entity.RecipeItem;
 import com.costcook.repository.RecipeRepository;
 import com.costcook.service.RecipeService;

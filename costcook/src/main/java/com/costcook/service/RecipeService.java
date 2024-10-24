@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.costcook.domain.response.IngredientSearchResponse;
 import com.costcook.domain.response.RecipeResponse;
 
 public interface RecipeService {
@@ -21,7 +22,6 @@ public interface RecipeService {
 //	List<RecipeResponse> getAdminRecipes(int page, int limit);
 
 	// 레시피 삭제 미구현
-
 
 
 
