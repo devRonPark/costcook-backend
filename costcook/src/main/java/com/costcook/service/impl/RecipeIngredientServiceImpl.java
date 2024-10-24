@@ -24,6 +24,7 @@ public class RecipeIngredientServiceImpl implements RecipeIngredientService {
 	private final RecipeRepository recipeRepository;
 	private final IngredientRepository ingredientReposity;
 	
+	
 	// 레시피, 재료
 	public RecipeItem findRecipeById(Long id) {
 		return recipeRepository.findById(id).orElse(null);
@@ -39,7 +40,11 @@ public class RecipeIngredientServiceImpl implements RecipeIngredientService {
 		return ingredients.stream().map(RecipeIngredientResponse::toDTO).collect(Collectors.toList());
 	}
 	
-	
+
+
+
+
+
 	@Override
 	public void insertRecipeIngredients() {
 		RecipeIngredient[] recipeIngredients = {

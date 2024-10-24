@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.costcook.domain.response.RecipeResponse;
 import com.costcook.entity.Category;
-import com.costcook.entity.RecipeIngredient;
 import com.costcook.entity.RecipeItem;
 import com.costcook.repository.CategoryRepository;
 import com.costcook.repository.RecipeIngredientRepository;
@@ -32,6 +31,7 @@ public class RecipeServiceImpl implements RecipeService {
 	// 레시피 목록 조회
 	@Override
 	public List<RecipeResponse> getRecipes(int page, int size, String sort, String order) {
+		
 		Pageable pageable = PageRequest.of(page, size);
 		Page<RecipeItem> recipePage;
 		
