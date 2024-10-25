@@ -6,6 +6,7 @@ import java.util.Random;
 import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,10 +18,11 @@ import com.costcook.service.AuthService;
 import com.costcook.domain.request.EmailRequest;
 import com.costcook.domain.request.SignUpOrLoginRequest;
 import com.costcook.domain.request.VerificationRequest;
+import com.costcook.domain.response.DefaultSuccessResponse;
 import com.costcook.domain.response.SignUpOrLoginResponse;
 import com.costcook.domain.response.VerifyCodeResponse;
+import com.costcook.entity.User;
 import com.costcook.exceptions.ErrorResponse;
-import com.costcook.security.JwtProperties;
 import com.costcook.service.EmailService;
 import com.costcook.util.EmailUtil;
 import com.costcook.util.TokenUtils;
@@ -103,4 +105,21 @@ public class AuthController {
 					.body(new ErrorResponse(e.getMessage()));
 		}
 	}	
+
+	@PostMapping("/logout")
+	public ResponseEntity<?> logout(
+		@AuthenticationPrincipal User currentUser, // 현재 로그인한 사용자 정보 가져오기,
+		@CookieValue(value = "refreshToken", required = false) String refreshToken,
+		HttpServletResponse response
+	) {
+		log.info("로그아웃 API 호출");
+
+		try {
+			// user 조회해서 refreshToken 컬럼 null 처리.
+            String message = authService.logout(currentUser, refreshToken, response);
+            return ResponseEntity.ok().body(new DefaultSuccessResponse(message));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(e.getMessage()));
+        }
+	}
 }
