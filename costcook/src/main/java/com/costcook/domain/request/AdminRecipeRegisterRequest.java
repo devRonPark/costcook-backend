@@ -27,7 +27,7 @@ public class AdminRecipeRegisterRequest {
   private String thumbnailUrl;
 
   // 총 가격
-  private double price;
+  private Integer price;
 
   @Getter
   @Setter

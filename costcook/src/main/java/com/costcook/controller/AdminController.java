@@ -49,8 +49,17 @@ public class AdminController {
         log.info("파일 이름: " + thumbnailFile.getOriginalFilename());
       }
 
+      boolean result = adminService.saveRecipe(recipe, thumbnailFile);
+      
+      if(result == false) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 등록에 실패했습니다.");
+      }
+
+      log.info("레시피 등록 완료 : " + recipe.getTitle());
       return ResponseEntity.ok("레시피가 성공적으로 등록되었습니다.");
+
     } catch (Exception e) {
+      log.error("레시피 생성 중 오류 발생: " + e.getMessage(), e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 등록에 실패했습니다.");
     }
   }
