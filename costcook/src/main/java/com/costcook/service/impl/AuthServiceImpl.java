@@ -199,4 +199,18 @@ public class AuthServiceImpl implements AuthService {
         // 4. 새로운 액세스 토큰 반환
         return newAccessToken;
     }
+
+    @Override
+    public String logout(User user, String refreshToken, HttpServletResponse response) {
+        if (refreshToken != null) {
+            // 리프레시 토큰을 null로 설정
+            user.setRefreshToken(null);
+            userRepository.save(user); // 사용자 정보를 업데이트하여 DB에 저장
+        }
+
+        // 리프레시 토큰 쿠키 제거
+        tokenUtils.removeRefreshTokenCookie(response);
+
+        return "로그아웃이 성공적으로 처리되었습니다.";
+    }
 }
