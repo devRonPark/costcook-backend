@@ -1,10 +1,8 @@
 package com.costcook.domain.response;
 
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 import com.costcook.entity.Category;
-import com.costcook.entity.Ingredient;
 import com.costcook.entity.Recipe;
 
 import lombok.Builder;

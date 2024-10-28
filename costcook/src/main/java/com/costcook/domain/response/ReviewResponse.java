@@ -1,9 +1,8 @@
 package com.costcook.domain.response;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import com.costcook.entity.RecipeItem;
+import com.costcook.entity.Recipe;
 import com.costcook.entity.Review;
 
 import lombok.AllArgsConstructor;
@@ -21,7 +20,7 @@ public class ReviewResponse {
 	private boolean status;
 	private String createdAt;
 	private User user;
-	private RecipeItem recipeItem;
+	private Recipe recipe;
 	
 	@Data
 	@Builder
@@ -38,7 +37,7 @@ public class ReviewResponse {
 	@Builder
     @AllArgsConstructor
     @NoArgsConstructor
-	public static class recipeItem{
+	public static class recipe{
 		private Long id;
 		private String thumbnailUrl;
 	}
@@ -58,9 +57,9 @@ public class ReviewResponse {
                           .nickname(review.getUser().getNickname())
                           .profileUrl(review.getUser().getProfileUrl())
                           .build())
-                 .recipeItem(RecipeItem.builder()
-                         .id(review.getRecipeItem().getId())
-                         .thumbnailUrl(review.getRecipeItem().getThumbnailUrl())
+                 .recipe(Recipe.builder()
+                         .id(review.getRecipe().getId())
+                         .thumbnailUrl(review.getRecipe().getThumbnailUrl())
                          .build())
                  .build();						
 	}
