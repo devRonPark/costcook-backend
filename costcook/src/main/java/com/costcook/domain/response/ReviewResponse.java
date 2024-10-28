@@ -1,6 +1,7 @@
 package com.costcook.domain.response;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import com.costcook.entity.RecipeItem;
 import com.costcook.entity.Review;
@@ -15,12 +16,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReviewResponse {
+	
+	
+	
 
 		
 	private int score;
 	private String comment;
 	private boolean status;
-	private LocalDateTime createdAt;
+	private String createdAt;
 	private User user;
 	private RecipeItem recipeItem;
 	
@@ -49,12 +53,13 @@ public class ReviewResponse {
 
 	// Review -> response 변환
 	public static ReviewResponse toDTO(Review review) {
-		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	    String formattedDate = review.getCreatedAt() != null ? review.getCreatedAt().format(formatter) : null;
 		return ReviewResponse.builder()
 				 .score(review.getScore())
                  .comment(review.getComment())
                  .status(review.isStatus())
-                 .createdAt(review.getCreatedAt())
+                 .createdAt(formattedDate)
                  .user(User.builder()
                 		  .id(review.getUser().getId())
                           .nickname(review.getUser().getNickname())
