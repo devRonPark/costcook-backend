@@ -2,34 +2,69 @@ package com.costcook.domain.response;
 
 import java.time.LocalDateTime;
 
+import com.costcook.entity.RecipeItem;
 import com.costcook.entity.Review;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class ReviewResponse {
 
-	private String nickname, profileUrl;
+		
 	private int score;
 	private String comment;
 	private boolean status;
 	private LocalDateTime createdAt;
+	private User user;
+	private RecipeItem recipeItem;
+	
 
-	// Recipe -> response 변환
+	@Data
+	@Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+	public static class User{
+		
+		private Long id;
+		private String nickname;
+		private String profileUrl;
+		
+		
+	}
+	@Data
+	@Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+	public static class recipeItem{
+		private Long id;
+		private String thumbnailUrl;
+	}
+	
+
+	// Review -> response 변환
 	public static ReviewResponse toDTO(Review review) {
-		System.out.println(review);
+		
 		return ReviewResponse.builder()
-				.nickname(review.getUser().getNickname())
-				.profileUrl(review.getUser().getProfileUrl())
-				.score(review.getScore())
-				.comment(review.getComment())
-				.status(review.isStatus())
-				.createdAt(null)
-				.build();
+				 .score(review.getScore())
+                 .comment(review.getComment())
+                 .status(review.isStatus())
+                 .createdAt(review.getCreatedAt())
+                 .user(User.builder()
+                		  .id(review.getUser().getId())
+                          .nickname(review.getUser().getNickname())
+                          .profileUrl(review.getUser().getProfileUrl())
+                          .build())
+                 .recipeItem(RecipeItem.builder()
+                         .id(review.getRecipeItem().getId())
+                         .thumbnailUrl(review.getRecipeItem().getThumbnailUrl())
+                         .build())
+                 .build();						
 	}
 	
 }
