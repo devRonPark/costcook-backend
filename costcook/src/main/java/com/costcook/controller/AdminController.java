@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.costcook.domain.request.AdminRecipeRegisterRequest;
 import com.costcook.domain.response.IngredientSearchResponse;
+import com.costcook.domain.response.RecipeIngredientResponse;
 import com.costcook.service.AdminService;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,17 @@ public class AdminController {
     return ResponseEntity.ok(responseList);
   }
 
+  @GetMapping("/recipes/{id}/ingredients")
+  public ResponseEntity<List<RecipeIngredientResponse>> getRecipeIngredients(@PathVariable Long id) {
+    try {
+      // 서비스에서 이미 변환된 DTO 리스트를 받아옵니다.
+      List<RecipeIngredientResponse> ingredientResponses = adminService.findIngredientsByRecipeId(id);
+      return ResponseEntity.ok(ingredientResponses);
+    } catch (Exception e) {
+      log.error("레시피 재료 조회 중 오류 발생: " + e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
+  }
 
   @PostMapping("/recipes")
   public ResponseEntity<String> createRecipe(

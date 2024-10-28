@@ -15,7 +15,7 @@ public class RecipeResponse {
 	private Long id;
 	private int rcpSno;
 	private String title, description, createdAt, updatedAt;
-	private int servings, price, viewCount, bookmarkCount, commentCount;
+	private int servings, price, viewCount, favoriteCount, commentCount;
 	private double avgRatings;
   private Category category;
 
@@ -32,7 +32,7 @@ public class RecipeResponse {
 				.servings(recipe.getServings())
 				.price(recipe.getPrice())
 				.viewCount(recipe.getViewCount())
-				.bookmarkCount(recipe.getBookmarkCount())
+				.favoriteCount(recipe.getFavoriteCount())
 				.commentCount(recipe.getCommentCount())
 				.avgRatings(recipe.getAvgRatings())
 				.build();

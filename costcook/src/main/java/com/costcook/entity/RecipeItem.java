@@ -41,7 +41,7 @@ public class RecipeItem {
 	private Category category;
 	
 	// 만개 레시피 제공 데이터 고유번호
-	@Column(nullable = false)
+	@Column(name="rcp_sno", nullable = false)
 	@Builder.Default()
 	private int rcpSno = 0;
 	
@@ -83,17 +83,17 @@ public class RecipeItem {
 	private int viewCount = 0;
 	
 	// 즐겨찾기 수 (디폴트 0)
-	@Column(nullable = false)
-	@Builder.Default()
-	private int bookmarkCount = 0;
+  @Column(nullable = false, name = "favorite_count")
+  @Builder.Default()
+  private int favoriteCount = 0;
 	
 	// 댓글 수 (디폴트 0)
-	@Column(nullable = false)
+	@Column(nullable = false, name = "comment_count")
 	@Builder.Default()
 	private int commentCount = 0;
 	
 	// 평점 (디폴트 0.0)
-	@Column(nullable = false)
+	@Column(nullable = false, name = "avg_ratings")
 	@Builder.Default()
 	private double avgRatings = 0.0;
 	

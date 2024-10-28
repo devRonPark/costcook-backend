@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.costcook.domain.request.AdminRecipeRegisterRequest;
 import com.costcook.domain.request.AdminRecipeRegisterRequest.IngredientDTO;
 import com.costcook.domain.response.IngredientSearchResponse;
+import com.costcook.domain.response.RecipeIngredientResponse;
 import com.costcook.entity.Category;
 import com.costcook.entity.Ingredient;
 import com.costcook.entity.RecipeIngredient;
@@ -136,6 +137,19 @@ public class AdminServiceImpl implements AdminService {
       log.error("레시피 및 재료 저장 중 오류 발생: " + e.getMessage(), e);
       return false;
     }
+  }
+
+  @Override
+  public List<RecipeIngredientResponse> findIngredientsByRecipeId(Long id) {
+      // 먼저 레시피가 존재하는지 확인
+      RecipeItem recipe = recipeRepository.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("해당 레시피가 존재하지 않습니다: " + id));
+
+      // 레시피가 존재할 때 재료들을 조회하고 DTO로 변환하여 반환
+      List<RecipeIngredient> recipeIngredients = recipeIngredientRepository.findByRecipeId(id);
+      return recipeIngredients.stream()
+              .map(RecipeIngredientResponse::toDTO)
+              .collect(Collectors.toList());
   }
   
 }
