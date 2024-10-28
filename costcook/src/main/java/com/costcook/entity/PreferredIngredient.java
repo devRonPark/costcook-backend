@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PreferredIngredient {
-
     @EmbeddedId
     private PreferredIngredientId id; // 복합키
 
