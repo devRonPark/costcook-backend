@@ -34,6 +34,7 @@ import com.costcook.service.UserService;
 import com.costcook.util.OAuth2Properties;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import jakarta.transaction.Transactional;
@@ -318,12 +319,15 @@ public class UserServiceImpl implements UserService {
 			// 3. 개인정보 동의 여부 검증 및 업데이트
 			if (requestDTO.getPersonalInfoAgreement() != null) {
 				user.setPersonalInfoAgreement(requestDTO.getPersonalInfoAgreement());
-			} else {
-				throw new IllegalArgumentException("개인정보 동의 여부는 필수입니다.");
 			}
 		
 			// 4. 선호 재료 및 기피 재료 업데이트
-			updateUserTaste(user, requestDTO);
+			// requestDTO.getPreferredIngredients(): List<Long>, requestDTO.getDislikedIngredients(): List<Long>
+			// requestDTO.getPreferredIngredients() 나 requestDTO.getDislikedIngredients() 가 null 인 경우 동작하지 않도록.
+			if ((requestDTO.getPreferredIngredients() != null && !requestDTO.getPreferredIngredients().isEmpty()) ||
+				(requestDTO.getDislikedIngredients() != null && !requestDTO.getDislikedIngredients().isEmpty())) {
+				updateUserTaste(user, requestDTO);
+			}
 		
 			// 5. 사용자 정보 저장
 			userRepository.save(user);
@@ -400,5 +404,17 @@ public class UserServiceImpl implements UserService {
 						.build();
 			})
 			.collect(Collectors.toList());
+	}
+
+	@Override
+	public Map<String, List<Long>> getPreferredAndDislikedCategoryIds(User user) {
+		List<Long> preferredIngredients = preferredIngredientRepository.findCategoryIdsByUserId(user.getId());
+        List<Long> dislikedIngredients = dislikedIngredientRepository.findCategoryIdsByUserId(user.getId());
+
+		Map<String, List<Long>> userTaste = new HashMap<>();
+        userTaste.put("preferredIngredients", preferredIngredients);
+        userTaste.put("dislikedIngredients", dislikedIngredients);
+
+        return userTaste;
 	}
 }
