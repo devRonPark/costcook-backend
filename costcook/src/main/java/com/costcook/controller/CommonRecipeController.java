@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
+import com.costcook.domain.response.ReviewResponse;
 import com.costcook.service.RecipeService;
+import com.costcook.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CommonRecipeController {
 	
 	private final RecipeService recipeService;
+	private final ReviewService reviewService;
 	
 	// 레시피 전체 목록 조회 
 	@GetMapping(value = {"", "/"})
@@ -63,6 +66,19 @@ public class CommonRecipeController {
 		return ResponseEntity.ok(recipeResponse);
 	}
 	
+	
+	// 레시피 리뷰 전체보기
+	@GetMapping("/{recipeId}/reviews")
+	public ResponseEntity<List<ReviewResponse>> getRecipeReviews(@PathVariable("recipeId") Long id){
+		 List<ReviewResponse> reviewList = reviewService.getReviewList(id);
+		 
+		 if(reviewList.isEmpty()) {
+			 return ResponseEntity.noContent().build();
+		 }
+		 return ResponseEntity.ok(reviewList);
+		
+	
+	}
 	
 	
 }
