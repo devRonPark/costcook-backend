@@ -335,30 +335,30 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Transactional
-@Override
-public void updateUserTaste(User user, UserUpdateRequest requestDTO) {
-    log.info("updateUserTaste 메소드 호출");
-    log.info("preference 정보: {}", requestDTO.getPreferences());
-    log.info("dislikedIngredients 정보: {}", requestDTO.getDislikedIngredients());
+    @Override
+    public void updateUserTaste(User user, UserUpdateRequest requestDTO) {
+		log.info("updateUserTaste 메소드 호출");
+		log.info("preference 정보: {}", requestDTO.getPreferredIngredients());
+		log.info("dislikedIngredients 정보: {}", requestDTO.getDislikedIngredients());
 
-    // 선호 재료 처리
-    List<PreferredIngredient> preferredIngredients = createPreferredIngredients(user, requestDTO.getPreferences());
-    preferredIngredients.forEach(preferredIngredient -> {
-        if (!preferredIngredientRepository.existsByUserIdAndCategoryId(user.getId(), preferredIngredient.getCategory().getId())) {
-            preferredIngredientRepository.save(preferredIngredient);
-        }
-    });
+		// 선호 재료 처리
+		List<PreferredIngredient> preferredIngredients = createPreferredIngredients(user, requestDTO.getPreferredIngredients());
+		preferredIngredients.forEach(preferredIngredient -> {
+			if (!preferredIngredientRepository.existsByUserIdAndCategoryId(user.getId(), preferredIngredient.getCategory().getId())) {
+				preferredIngredientRepository.save(preferredIngredient);
+			}
+		});
 
-    // 기피 재료 처리
-    List<DislikedIngredient> dislikedIngredients = createDislikedIngredients(user, requestDTO.getDislikedIngredients());
-    dislikedIngredients.forEach(dislikedIngredient -> {
-        if (!dislikedIngredientRepository.existsByUserIdAndCategoryId(user.getId(), dislikedIngredient.getCategory().getId())) {
-            dislikedIngredientRepository.save(dislikedIngredient);
-        }
-    });
+		// 기피 재료 처리
+		List<DislikedIngredient> dislikedIngredients = createDislikedIngredients(user, requestDTO.getDislikedIngredients());
+		dislikedIngredients.forEach(dislikedIngredient -> {
+			if (!dislikedIngredientRepository.existsByUserIdAndCategoryId(user.getId(), dislikedIngredient.getCategory().getId())) {
+				dislikedIngredientRepository.save(dislikedIngredient);
+			}
+		});
 
-    log.info("선호 및 기피 재료 저장 완료");
-}
+		log.info("선호 및 기피 재료 저장 완료");
+	}
 
     // 닉네임 검증 로직 (예: 최소 2자 이상, 금지된 특수문자 포함 여부 등)
     private void validateNickname(String nickname) {
@@ -373,32 +373,32 @@ public void updateUserTaste(User user, UserUpdateRequest requestDTO) {
 	// 주어진 카테고리 ID 리스트로 선호 재료 객체 리스트 생성
 	private List<PreferredIngredient> createPreferredIngredients(User user, List<Long> categoryIds) {
 		return categoryIds.stream()
-				.map(categoryId -> {
-					Category category = categoryRepository.findById(categoryId)
-						.orElseThrow(() -> new IllegalArgumentException("Invalid category ID: " + categoryId));
-					
-					return PreferredIngredient.builder()
-							.id(new PreferredIngredientId(user.getId(), categoryId))
-							.user(user)
-							.category(category)
-							.build();
-				})
-				.collect(Collectors.toList());
+			.map(categoryId -> {
+				Category category = categoryRepository.findById(categoryId)
+					.orElseThrow(() -> new IllegalArgumentException("Invalid category ID: " + categoryId));
+				
+				return PreferredIngredient.builder()
+						.id(new PreferredIngredientId(user.getId(), categoryId))
+						.user(user)
+						.category(category)
+						.build();
+			})
+			.collect(Collectors.toList());
 	}
 	
 	// 주어진 카테고리 ID 리스트로 기피 재료 객체 리스트 생성
 	private List<DislikedIngredient> createDislikedIngredients(User user, List<Long> categoryIds) {
 		return categoryIds.stream()
-				.map(categoryId -> {
-					Category category = categoryRepository.findById(categoryId)
-						.orElseThrow(() -> new IllegalArgumentException("Invalid category ID: " + categoryId));
-					
-					return DislikedIngredient.builder()
-							.id(new DislikedIngredientId(user.getId(), categoryId))
-							.user(user)
-							.category(category)
-							.build();
-				})
-				.collect(Collectors.toList());
+			.map(categoryId -> {
+				Category category = categoryRepository.findById(categoryId)
+					.orElseThrow(() -> new IllegalArgumentException("Invalid category ID: " + categoryId));
+				
+				return DislikedIngredient.builder()
+						.id(new DislikedIngredientId(user.getId(), categoryId))
+						.user(user)
+						.category(category)
+						.build();
+			})
+			.collect(Collectors.toList());
 	}
 }
