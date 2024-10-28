@@ -53,13 +53,8 @@ public class ReviewResponse {
 
 	// Review -> response 변환
 	public static ReviewResponse toDTO(Review review) {
-		
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	    String formattedDate = review.getCreatedAt() != null ? review.getCreatedAt().format(formatter) : null;
-	    
-	    
-	    
-		
 		return ReviewResponse.builder()
 				 .score(review.getScore())
                  .comment(review.getComment())
