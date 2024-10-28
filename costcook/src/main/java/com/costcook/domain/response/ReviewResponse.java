@@ -2,7 +2,6 @@ package com.costcook.domain.response;
 
 import java.time.format.DateTimeFormatter;
 
-import com.costcook.entity.Recipe;
 import com.costcook.entity.Review;
 
 import lombok.AllArgsConstructor;
@@ -37,7 +36,7 @@ public class ReviewResponse {
 	@Builder
     @AllArgsConstructor
     @NoArgsConstructor
-	public static class recipe{
+	public static class Recipe{
 		private Long id;
 		private String thumbnailUrl;
 	}
