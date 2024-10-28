@@ -17,6 +17,9 @@ import com.costcook.service.FileUploadService;
 import com.costcook.service.UserService;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,16 +34,35 @@ public class UserController {
     public ResponseEntity<?> getMyInfo(
         @AuthenticationPrincipal User userDetails // 사용자 정보 가져오기
     ) {
-        log.info("내 정보 조회 API 호출");
-        log.info("내 정보: {}", userDetails.toString());
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("액세스 토큰이 만료되었습니다.?"));
-        }
+        try {
 
-        // UserDetailsImpl에서 사용자 정보를 추출
-        UserResponse userResponse = UserResponse.from(userDetails);
-        return ResponseEntity.ok(userResponse);
+            log.info("내 정보 조회 API 호출");
+            log.info("내 정보: {}", userDetails.toString());
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ErrorResponse("액세스 토큰이 만료되었습니다.?"));
+            }
+    
+            // UserServiceImpl 에서 userDetails.getId() 를 이용해서 각각 선호 재료 목록(preferredIngredients), 기피 재료 목록(dislikedIngredients) 조회
+            // 파라미터 값: User user
+            // 리턴 값: { preferredIngredients: [ ], dislikedIngredients: [ ] }
+            Map<String, List<Long>> userTaste = userService.getPreferredAndDislikedCategoryIds(userDetails);
+            log.info("{}", userTaste);
+    
+            // [] 혹은
+            // [{"userId": 1, "categoryId": 2}, {"userId": 1, "categoryId": 3}, {"userId": 1, "categoryId": 4}, ...]
+            // > [2, 3, 4] // categoryId 만 담긴 배열로 전환 필요.
+            userTaste.get("preferredIngredient");
+            userTaste.get("dislikedIngredient");
+    
+            // UserDetailsImpl에서 사용자 정보를 추출
+            UserResponse userResponse = UserResponse.from(userDetails, userTaste);
+            return ResponseEntity.ok(userResponse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("{}", e.getMessage());
+            throw e;
+        }
     }
 
     @PatchMapping("/me")

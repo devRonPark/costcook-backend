@@ -1,5 +1,8 @@
 package com.costcook.service;
 
+import java.util.List;
+import java.util.Map;
+
 import com.costcook.domain.OAuthUserInfo;
 import com.costcook.domain.PlatformTypeEnum;
 import com.costcook.domain.request.UserUpdateRequest;
@@ -12,4 +15,6 @@ public interface UserService {
 	public void updateUserInfo(User user, UserUpdateRequest requestDTO);
 	// 사용자 선호 재료 및 기피 재료 업데이트
 	public void updateUserTaste(User user, UserUpdateRequest requestDTO);
+	// 사용자 선호 재료 및 기피 재료 목록 조회
+	public Map<String, List<Long>> getPreferredAndDislikedCategoryIds(User user);
 }
