@@ -37,8 +37,7 @@ public class ReviewServiceImpl implements ReviewService {
 				.user(user)
 				.recipeItem(optRecipe.get())
 				.score(reviewRequest.getScore())
-				.comment(reviewRequest.getComment())
-				.status(reviewRequest.isStatus()).build();
+				.comment(reviewRequest.getComment()).build();
 		
 		Review result = reviewRepository.save(review);
 		return CreateReviewResponse.toDTO(result);
