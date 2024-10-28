@@ -9,11 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException.NotFound;
 
 import com.costcook.domain.request.CreateReviewRequest;
+import com.costcook.domain.request.UpdateReviewRequest;
 import com.costcook.domain.response.CreateReviewResponse;
 import com.costcook.domain.response.ReviewResponse;
+import com.costcook.domain.response.UpdateReviewResponse;
 import com.costcook.entity.Recipe;
 import com.costcook.entity.Review;
 import com.costcook.entity.User;
+import com.costcook.exceptions.ErrorResponse;
+import com.costcook.exceptions.MessageExcepiton;
 import com.costcook.exceptions.NotFoundException;
 import com.costcook.repository.RecipeRepository;
 import com.costcook.repository.ReviewRepository;
@@ -61,7 +65,7 @@ public class ReviewServiceImpl implements ReviewService {
 		}
 		
 		// 유저 아이디와 리뷰 아이디의 값이 같은지 비교를 한다 .
-		if( !optReview.get().getUser().getId().equals(reviewId)) {
+		if( !optReview.get().getUser().getId().equals(user.getId())) {
 			
 			// 리뷰를 삭제할 권한이 없습니다 403 Forbidden
 			return false;
@@ -73,6 +77,38 @@ public class ReviewServiceImpl implements ReviewService {
 		return true;
 		// 반환 204 No Content
 
+	}
+
+	@Override
+	public ReviewResponse modifyReview(UpdateReviewRequest updateReviewRequest, User user, Long reviewId) {
+		
+		Optional<Review> optReview = reviewRepository.findById(reviewId);
+		if (optReview.isEmpty()) {
+			// 해당 리뷰를 찾을 수 없습니다 404 Not Found
+			throw new NotFoundException("해당 리뷰를 찾을 수 없습니다.");
+		}
+		
+		// 유저 아이디와 리뷰 아이디의 값이 같은지 비교를 한다 .
+		if( !optReview.get().getUser().getId().equals(user.getId())) {
+			
+			throw new IllegalArgumentException("리뷰를 수정할 권한이 없습니다.");
+		}
+		
+		
+		  // 요청 데이터 유효성 검사
+		if ( updateReviewRequest.getScore() < 1 || updateReviewRequest.getScore() > 5  || updateReviewRequest.getComment().trim().isEmpty()) {
+			
+			
+			throw new IllegalArgumentException("요청 데이터가 유효하지 않습니다. 평점은 1에서 5 사이여야 하며, 댓글은 비워둘 수 없습니다.");
+			
+		}
+		Review reviewToUpdate  = optReview.get();
+		reviewToUpdate .setScore(updateReviewRequest.getScore());
+		reviewToUpdate .setComment(updateReviewRequest.getComment());
+		
+		Review updatedReview = reviewRepository.save(reviewToUpdate);
+		
+		return ReviewResponse.toDTO(updatedReview);
 	}
 	
 	
