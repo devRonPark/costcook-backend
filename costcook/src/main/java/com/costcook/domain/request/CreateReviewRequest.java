@@ -11,5 +11,4 @@ public class CreateReviewRequest {
 	private Long recipeId;
 	private int score;
 	private String comment;
-	private boolean status;
 }
