@@ -41,7 +41,7 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "recipe_id", updatable = false) // category_id는 변경 불가
-    private RecipeItem recipeItem;
+    private Recipe recipe;
 	
 	// 평점
 	@Column(nullable = false)

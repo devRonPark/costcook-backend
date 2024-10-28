@@ -11,7 +11,7 @@ import org.springframework.web.client.HttpClientErrorException.NotFound;
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.response.CreateReviewResponse;
 import com.costcook.domain.response.ReviewResponse;
-import com.costcook.entity.RecipeItem;
+import com.costcook.entity.Recipe;
 import com.costcook.entity.Review;
 import com.costcook.entity.User;
 import com.costcook.exceptions.NotFoundException;
@@ -29,13 +29,13 @@ public class ReviewServiceImpl implements ReviewService {
 
 	@Override
 	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
-		Optional<RecipeItem> optRecipe = recipeRepository.findById(reviewRequest.getRecipeId());
+		Optional<Recipe> optRecipe = recipeRepository.findById(reviewRequest.getRecipeId());
 		if (optRecipe.isEmpty()) {
 			return CreateReviewResponse.builder().message("해당 레시피를 찾을 수 없습니다.").build();
 		}
 		Review review = Review.builder()
 				.user(user)
-				.recipeItem(optRecipe.get())
+				.recipe(optRecipe.get())
 				.score(reviewRequest.getScore())
 				.comment(reviewRequest.getComment()).build();
 		
@@ -45,7 +45,7 @@ public class ReviewServiceImpl implements ReviewService {
 
 	@Override
 	public List<ReviewResponse> getReviewList(Long id) {
-		List<Review> reviewList = reviewRepository.findAllByRecipeItemId(id);
+		List<Review> reviewList = reviewRepository.findAllByRecipeId(id);
 		return reviewList.stream().map(review -> ReviewResponse.toDTO(review)).toList();
 	}
 

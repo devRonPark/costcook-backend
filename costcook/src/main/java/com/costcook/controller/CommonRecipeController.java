@@ -15,6 +15,10 @@ import com.costcook.domain.response.RecipeResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.service.RecipeService;
 import com.costcook.service.ReviewService;
+import com.costcook.domain.response.IngredientResponse;
+import com.costcook.domain.response.RecipeDetailResponse;
+import com.costcook.repository.RecipeIngredientRepository;
+import com.costcook.service.RecipeIngredientService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +34,9 @@ public class CommonRecipeController {
 	private final RecipeService recipeService;
 	private final ReviewService reviewService;
 	
+	private final RecipeIngredientService recipeIngredientService;
+	private final RecipeIngredientRepository recipeIngredientRepository;
+
 	// 레시피 전체 목록 조회 
 	@GetMapping(value = {"", "/"})
 	public ResponseEntity<RecipeListResponse> getAllRecipe(
@@ -58,15 +65,6 @@ public class CommonRecipeController {
 		return ResponseEntity.ok(response);
 	}
 	
-	
-	// 레시피 상세보기
-	@GetMapping("/{recipeId}")
-	public ResponseEntity<RecipeResponse> getRecipe(@PathVariable("recipeId") Long id) {
-		RecipeResponse recipeResponse = recipeService.getRecipeById(id);
-		return ResponseEntity.ok(recipeResponse);
-	}
-	
-	
 	// 레시피 리뷰 전체보기
 	@GetMapping("/{recipeId}/reviews")
 	public ResponseEntity<List<ReviewResponse>> getRecipeReviews(@PathVariable("recipeId") Long id){
@@ -79,6 +77,18 @@ public class CommonRecipeController {
 		
 	
 	}
+	// 레시피별 상세보기
+	@GetMapping("/{recipeId}")
+	public ResponseEntity<RecipeDetailResponse> getIngredientsByRecipeId(@PathVariable("recipeId") Long id) {
+		// 아이디를 통한 레시피 조회 (레시피 아이디, 제목, 조회수, 설명, 평점, 리뷰개수, 북마크개수, 총 가격, 인분, 카테고리, 재료목록(재료아이디, 재료명, 가격, 단위, 수량, 재료카테고리))
+		RecipeResponse recipeResponse = recipeService.getRecipeById(id);
+		List<IngredientResponse> ingredients = recipeIngredientService.getRecipeIngredients(id);
+		RecipeDetailResponse result = RecipeDetailResponse.toDTO(recipeResponse, ingredients);
+		return ResponseEntity.ok(result);
+	}
+
+
+
 	
 	
 }

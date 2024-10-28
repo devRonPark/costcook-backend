@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.costcook.service.AuthService;
 import com.costcook.domain.request.EmailRequest;
 import com.costcook.domain.request.SignUpOrLoginRequest;
 import com.costcook.domain.request.VerificationRequest;
@@ -23,6 +22,7 @@ import com.costcook.domain.response.SignUpOrLoginResponse;
 import com.costcook.domain.response.VerifyCodeResponse;
 import com.costcook.entity.User;
 import com.costcook.exceptions.ErrorResponse;
+import com.costcook.service.AuthService;
 import com.costcook.service.EmailService;
 import com.costcook.util.EmailUtil;
 import com.costcook.util.TokenUtils;

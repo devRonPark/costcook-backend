@@ -15,12 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReviewResponse {
-	
-	
-	
-
-		
+public class ReviewResponse {		
 	private int score;
 	private String comment;
 	private boolean status;
@@ -28,13 +23,11 @@ public class ReviewResponse {
 	private User user;
 	private RecipeItem recipeItem;
 	
-
 	@Data
 	@Builder
     @AllArgsConstructor
     @NoArgsConstructor
 	public static class User{
-		
 		private Long id;
 		private String nickname;
 		private String profileUrl;

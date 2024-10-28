@@ -8,6 +8,6 @@ import com.costcook.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long>{
 
-	List<Review> findAllByRecipeItemId(Long id);
+	List<Review> findAllByRecipeId(Long id);
 
 }
