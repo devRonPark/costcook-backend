@@ -2,15 +2,9 @@ package com.costcook.service;
 
 import java.util.List;
 
-import com.costcook.domain.response.RecipeIngredientResponse;
-import com.costcook.entity.RecipeIngredient;
+import com.costcook.domain.response.IngredientResponse;
 
 public interface RecipeIngredientService {
-
-	// DB에 직접 삽입
-	void insertRecipeIngredients();
-
-	// 재료 정보 조회 메소드
-	List<RecipeIngredientResponse> getRecipeIngredients(Long id);
-
+	// 레시피 아이디에 따른 재료 목록 조회
+	List<IngredientResponse> getRecipeIngredients(Long id);
 }

@@ -29,7 +29,7 @@ public class RecipeIngredient {
 	// 레시피의 ID
 	@ManyToOne
 	@JoinColumn(name = "recipe_id", nullable = true)
-	private RecipeItem recipe;
+	private Recipe recipe;
 	
 	// 재료의 ID
 	@ManyToOne
@@ -41,10 +41,10 @@ public class RecipeIngredient {
 	@Builder.Default()
 	private double quantity = 0.0;
 	
-	// 포함된 재료의 가격
-	@Column(nullable = false)
-	@Builder.Default()
-	private int price = 0;
+//	// 포함된 재료의 가격
+//	@Column(nullable = false)
+//	@Builder.Default()
+//	private int price = 0;
 	
 	
 //	// -> response 이동

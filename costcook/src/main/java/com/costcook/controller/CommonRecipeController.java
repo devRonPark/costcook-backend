@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.costcook.domain.response.RecipeIngredientResponse;
+import com.costcook.domain.response.IngredientResponse;
+import com.costcook.domain.response.RecipeDetailResponse;
 import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
-import com.costcook.entity.RecipeIngredient;
 import com.costcook.repository.RecipeIngredientRepository;
 import com.costcook.service.RecipeIngredientService;
 import com.costcook.service.RecipeService;
@@ -44,7 +44,6 @@ public class CommonRecipeController {
 		
 		// 레시피 목록 가져오기
 		List<RecipeResponse> recipes = recipeService.getRecipes(page, size, sort, order);
-		
 		// 총 레시피 개수 : 불러올 데이터가 없는 데 스크롤이 가능하면 계속해서 데이터를 불러옴 => 마지막 페이지를 설정해서 무한 로딩 방지
 		long totalRecipes = recipeService.getTotalRecipes();
 		// 총 페이지 수
@@ -61,32 +60,18 @@ public class CommonRecipeController {
 		return ResponseEntity.ok(response);
 	}
 	
-	
-	// 레시피 상세보기
+	// 레시피별 상세보기
 	@GetMapping("/{recipeId}")
-	public ResponseEntity<RecipeResponse> getRecipe(@PathVariable("recipeId") Long id) {
+	public ResponseEntity<RecipeDetailResponse> getIngredientsByRecipeId(@PathVariable("recipeId") Long id) {
+		// 아이디를 통한 레시피 조회 (레시피 아이디, 제목, 조회수, 설명, 평점, 리뷰개수, 북마크개수, 총 가격, 인분, 카테고리, 재료목록(재료아이디, 재료명, 가격, 단위, 수량, 재료카테고리))
 		RecipeResponse recipeResponse = recipeService.getRecipeById(id);
-		return ResponseEntity.ok(recipeResponse);
-	}
-	
-	
-
-	// 레시피별 재료 조회
-	@GetMapping("/{recipeId}/ingredients")
-	public ResponseEntity<List<RecipeIngredientResponse>> getIngredientsByRecipeId(@PathVariable("recipeId") Long id) {
-		List<RecipeIngredientResponse> ingredients = recipeIngredientService.getRecipeIngredients(id);
-		return ResponseEntity.ok(ingredients);
+		List<IngredientResponse> ingredients = recipeIngredientService.getRecipeIngredients(id);
+		RecipeDetailResponse result = RecipeDetailResponse.toDTO(recipeResponse, ingredients);
+		return ResponseEntity.ok(result);
 	}
 
-	
-	// 이미 프론트에 적용 되어있다고 함..
-	// 레시피 재료 가격 합산 = price
-	@GetMapping("/{recipeId}/total-price")
-	public ResponseEntity<Integer> getTotalPriceByRecipeId(@PathVariable("recipeId") Long id) {
-	    List<RecipeIngredient> ingredients = recipeIngredientRepository.findByRecipeId(id);
-	    int totalPrice = ingredients.stream().mapToInt(RecipeIngredient::getPrice).sum();
-	    return ResponseEntity.ok(totalPrice);
-	}
+
+
 	
 	
 }

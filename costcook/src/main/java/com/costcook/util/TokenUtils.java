@@ -65,4 +65,9 @@ public class TokenUtils {
     public void setAccessTokenCookie(HttpServletResponse response, String accessToken) {
         setCookie(response, "accessToken", accessToken, 30 * 60); // 30분 유효기간
     }
+
+    // 리프레시 토큰을 쿠키에서 제거하는 메소드
+    public void removeRefreshTokenCookie(HttpServletResponse response) {
+        setCookie(response, "refreshToken", "", 0); // 유효기간을 0으로 설정하여 쿠키 제거
+    }
 }

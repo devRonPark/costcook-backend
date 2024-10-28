@@ -1,20 +1,16 @@
 package com.costcook.domain.request;
 
-import lombok.Data;
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import lombok.Data;
 
 @Data
 public class UserUpdateRequest {
-
-    private String nickname; // 필수
-
+    private String nickname; // 선택
     private MultipartFile profileImage; // 선택
-
-    private List<Long> preferences; // 필수
-
-    private List<Long> dislikedIngredients; // 필수
-
-    private Boolean personalInfoAgreement; // 필수
+    private List<Long> preferredIngredients; // 선택
+    private List<Long> dislikedIngredients; // 선택
+    private Boolean personalInfoAgreement; // 선택
 }

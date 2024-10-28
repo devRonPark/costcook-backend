@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -72,8 +71,12 @@ public class WebSecurityConfig {
 				new AntPathRequestMatcher("/api/oauth/**"),
 				new AntPathRequestMatcher("/api/auth/**"),
 				new AntPathRequestMatcher("/api/auth/token/refresh"),
-				new AntPathRequestMatcher("/api/recipes/**")// 사용자 레시피 조회
+				new AntPathRequestMatcher("/api/recipes/**"),// 사용자 레시피 조회
 				
+				// DB넣기
+				new AntPathRequestMatcher("/**")
+
+
 			).permitAll()
 			.requestMatchers("/api/users/me").authenticated() // 이 API는 인증이 필요함
 			// 그 밖의 다른 요청들은 인증을 통과한(로그인한) 사용자라면 모두 접근할 수 있도록 한다.

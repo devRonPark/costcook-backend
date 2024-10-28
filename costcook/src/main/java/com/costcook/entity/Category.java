@@ -30,5 +30,4 @@ public class Category {
   @Column(nullable = false, name = "parent_id")
   @Builder.Default()
   private Long parentId = 0L;
-
 }
