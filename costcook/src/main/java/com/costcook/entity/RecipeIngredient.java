@@ -21,39 +21,41 @@ import lombok.NoArgsConstructor;
 @Table(name = "recipe_ingredients")
 public class RecipeIngredient {
 
-   @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
-   @Column(updatable = false)
-   private Long id;
-   
-   // 레시피의 ID
-   @ManyToOne
-   @JoinColumn(name = "recipe_id", nullable = true)
-   private RecipeItem recipe;
-   
-   // 재료의 ID
-   @ManyToOne
-   @JoinColumn(name = "ingredient_id", nullable = true)
-   private Ingredient ingredient;
-   
-   // 재료의 양
-   @Column(nullable = false)
-   @Builder.Default()
-   private double quantity = 0.0;
-   
-   // 포함된 재료의 가격
-   @Column(nullable = false)
-   @Builder.Default()
-   private int price = 0;
-   
-   
-   // 레시피 가격 계산 로직
-   public void calculatePrice() {
-      if (recipe != null) {
-         this.price = (int) (recipe.getPrice() * this.quantity);
-      }
-   }
-   
-   
-   
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(updatable = false)
+	private Long id;
+	
+	// 레시피의 ID
+	@ManyToOne
+	@JoinColumn(name = "recipe_id", nullable = true)
+	private Recipe recipe;
+	
+	// 재료의 ID
+	@ManyToOne
+	@JoinColumn(name = "ingredient_id", nullable = true)
+	private Ingredient ingredient;
+	
+	// 재료의 양
+	@Column(nullable = false)
+	@Builder.Default()
+	private double quantity = 0.0;
+	
+//	// 포함된 재료의 가격
+//	@Column(nullable = false)
+//	@Builder.Default()
+//	private int price = 0;
+	
+	
+//	// -> response 이동
+//	// 레시피 가격 계산 로직
+//	public void calculatePrice() {
+//		if (recipe != null) {
+//			this.price = (int) (recipe.getPrice() * this.quantity);
+//		}
+//	}
+	
+	
+	
+	
 }

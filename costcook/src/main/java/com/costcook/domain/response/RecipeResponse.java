@@ -3,7 +3,7 @@ package com.costcook.domain.response;
 import java.time.format.DateTimeFormatter;
 
 import com.costcook.entity.Category;
-import com.costcook.entity.RecipeItem;
+import com.costcook.entity.Recipe;
 
 import lombok.Builder;
 import lombok.Data;
@@ -15,12 +15,15 @@ public class RecipeResponse {
 	private Long id;
 	private int rcpSno;
 	private String title, description, createdAt, updatedAt;
-	private int servings, price, viewCount, favoriteCount, commentCount;
+	private int servings, price, viewCount, bookmarkCount, commentCount;
 	private double avgRatings;
   private Category category;
 
 	// Recipe -> response 변환
-	public static RecipeResponse toDTO(RecipeItem recipe) {
+	// 전체 목록
+//	public static RecipeResponse toDTO(Recipe recipe) {		
+	public static RecipeResponse toDTO(Recipe recipe, double avgRatings, int commentCount, Long totalPrice) {		
+		
 		return RecipeResponse.builder()
 				.id(recipe.getId())
 				.category(recipe.getCategory())
@@ -28,14 +31,15 @@ public class RecipeResponse {
 				.title(recipe.getTitle())
 				.description(recipe.getDescription())
 				.createdAt(recipe.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
-				.createdAt(recipe.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
+				.updatedAt(recipe.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
 				.servings(recipe.getServings())
-				.price(recipe.getPrice())
+				//.price(totalPrice.intValue())
 				.viewCount(recipe.getViewCount())
-				.favoriteCount(recipe.getFavoriteCount())
-				.commentCount(recipe.getCommentCount())
-				.avgRatings(recipe.getAvgRatings())
+				//.bookmarkCount(recipe.getBookmarkCount())
+				//.commentCount(recipe.getCommentCount())
+				//.avgRatings(recipe.getAvgRatings())
 				.build();
 	}
+	
 	
 }

@@ -13,7 +13,7 @@ import com.costcook.domain.response.RecipeIngredientResponse;
 import com.costcook.entity.Category;
 import com.costcook.entity.Ingredient;
 import com.costcook.entity.RecipeIngredient;
-import com.costcook.entity.RecipeItem;
+import com.costcook.entity.Recipe;
 import com.costcook.repository.CategoryRepository;
 import com.costcook.repository.IngredientRepository;
 import com.costcook.repository.RecipeIngredientRepository;
@@ -95,16 +95,16 @@ public class AdminServiceImpl implements AdminService {
       }
 
       // 레시피 저장
-      RecipeItem recipeItem = RecipeItem.builder()
+      Recipe recipeItem = Recipe.builder()
           .title(recipe.getTitle())
           .description(recipe.getDescription())
           .category(category)
           .servings(recipe.getServings() != null ? recipe.getServings() : 1)
-          .price(recipe.getPrice())
+         // .price(recipe.getPrice())
           .thumbnailUrl(thumbnailUrl)
           .build();
 
-      RecipeItem savedRecipe = recipeRepository.save(recipeItem);
+      Recipe savedRecipe = recipeRepository.save(recipeItem);
       log.info("레시피 저장 완료 - 레시피 ID: {}", savedRecipe.getId());
 
       // 재료 저장
@@ -121,7 +121,7 @@ public class AdminServiceImpl implements AdminService {
             .recipe(savedRecipe)
             .ingredient(ingredient)
             .quantity(ingredientDTO.getQuantity())
-            .price((int) (ingredientDTO.getQuantity() * ingredient.getPrice()))
+            // .price((int) (ingredientDTO.getQuantity() * ingredient.getPrice()))
             .build();
 
         recipeIngredientRepository.save(recipeIngredient);
@@ -142,7 +142,7 @@ public class AdminServiceImpl implements AdminService {
   @Override
   public List<RecipeIngredientResponse> findIngredientsByRecipeId(Long id) {
       // 먼저 레시피가 존재하는지 확인
-      RecipeItem recipe = recipeRepository.findById(id)
+      Recipe recipe = recipeRepository.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("해당 레시피가 존재하지 않습니다: " + id));
 
       // 레시피가 존재할 때 재료들을 조회하고 DTO로 변환하여 반환

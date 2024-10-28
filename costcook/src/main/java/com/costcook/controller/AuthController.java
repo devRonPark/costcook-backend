@@ -1,20 +1,14 @@
 package com.costcook.controller;
 
-import java.util.Map;
-import java.util.Random;
-
-import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.costcook.service.AuthService;
 import com.costcook.domain.request.EmailRequest;
 import com.costcook.domain.request.SignUpOrLoginRequest;
 import com.costcook.domain.request.VerificationRequest;
@@ -23,6 +17,7 @@ import com.costcook.domain.response.SignUpOrLoginResponse;
 import com.costcook.domain.response.VerifyCodeResponse;
 import com.costcook.entity.User;
 import com.costcook.exceptions.ErrorResponse;
+import com.costcook.service.AuthService;
 import com.costcook.service.EmailService;
 import com.costcook.util.EmailUtil;
 import com.costcook.util.TokenUtils;
