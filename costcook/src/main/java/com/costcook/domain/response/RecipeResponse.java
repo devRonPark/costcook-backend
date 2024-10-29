@@ -14,14 +14,14 @@ public class RecipeResponse {
 
 	private Long id;
 	private int rcpSno;
-	private String title, description, createdAt, updatedAt;
+	private String title, description, thumbnailUrl, createdAt, updatedAt;
 	private int servings, price, viewCount, bookmarkCount, commentCount;
 	private double avgRatings;
   private Category category;
 
 	// Recipe -> response 변환
 	// 전체 목록
-//	public static RecipeResponse toDTO(Recipe recipe) {		
+  //	public static RecipeResponse toDTO(Recipe recipe) {		
 	public static RecipeResponse toDTO(Recipe recipe, double avgRatings, int commentCount, Long totalPrice) {		
 		
 		return RecipeResponse.builder()
@@ -30,6 +30,7 @@ public class RecipeResponse {
 				.rcpSno(recipe.getRcpSno())
 				.title(recipe.getTitle())
 				.description(recipe.getDescription())
+        .thumbnailUrl(recipe.getThumbnailUrl())
 				.createdAt(recipe.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
 				.updatedAt(recipe.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
 				.servings(recipe.getServings())

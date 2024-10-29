@@ -7,7 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +21,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "ingredients")
 public class Ingredient {
-  @Id
+	
+	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(updatable = false)
 	private Long id;
@@ -30,17 +31,17 @@ public class Ingredient {
 	@Column(nullable = false, length = 255)
 	private String name;
 
-  // 카테고리
-  @OneToOne
-  @JoinColumn(name = "category_id", nullable = true)
+	// 카테고리
+	@ManyToOne
+	@JoinColumn(name = "category_id", nullable = true)
 	private Category category;
 
-  // 단위
-  @OneToOne
-  @JoinColumn(name = "unit_id", nullable = false)
+	// 단위
+	@ManyToOne
+	@JoinColumn(name = "unit_id", nullable = true)
 	private Unit unit;
 
-  // 단위당 가격
+	// 단위당 가격
 	@Column(nullable = false)
 	@Builder.Default()
 	private int price = 0;

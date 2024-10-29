@@ -16,4 +16,8 @@ public interface AdminService {
 
   public List<RecipeIngredientResponse> findIngredientsByRecipeId(Long id);
 
+  boolean updateRecipe(Long id, AdminRecipeRegisterRequest recipe, MultipartFile thumbnailFile);
+
+  void deleteRecipe(Long id);
+
 }
