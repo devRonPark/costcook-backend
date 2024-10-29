@@ -91,6 +91,8 @@ public class AdminController {
 
       if (thumbnailFile != null) {
         log.info("새로운 파일 이름: " + thumbnailFile.getOriginalFilename());
+      } else {
+        log.info("이미지 파일 삭제");
       }
 
       // 수정 서비스 호출

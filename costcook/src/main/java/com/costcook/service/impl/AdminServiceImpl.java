@@ -156,7 +156,10 @@ public class AdminServiceImpl implements AdminService {
 
   @Transactional
   @Override
-  public boolean updateRecipe(Long id, AdminRecipeRegisterRequest recipeRequest, MultipartFile thumbnailFile) {
+  public boolean updateRecipe(
+    Long id, 
+    AdminRecipeRegisterRequest recipeRequest,
+    MultipartFile newThumbnailFile) {
       try {
           // 레시피 ID와 레시피 요청 데이터의 유효성 검증
           if (id == null || recipeRequest == null) {
@@ -175,11 +178,16 @@ public class AdminServiceImpl implements AdminService {
 
           // 썸네일 파일 처리
           String thumbnailUrl = recipe.getThumbnailUrl();
-          if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
-              log.info("새 썸네일 파일 업로드 시작 - 파일명: {}", thumbnailFile.getOriginalFilename());
-              String savedFileName = fileUploadService.uploadRecipeFile(thumbnailFile);
-              thumbnailUrl = RECIPE_THUMBNAIL_ACCESS_PATH + savedFileName;
-              log.info("썸네일 파일 업로드 완료 - 저장된 파일명: {}", savedFileName);
+          if (newThumbnailFile != null && !newThumbnailFile.isEmpty()) {
+            // 새로운 썸네일 파일이 있는 경우: 새 파일을 업로드하고 URL을 업데이트
+            log.info("새 썸네일 파일 업로드 시작 - 파일명: {}", newThumbnailFile.getOriginalFilename());
+            String savedFileName = fileUploadService.uploadRecipeFile(newThumbnailFile);
+            thumbnailUrl = RECIPE_THUMBNAIL_ACCESS_PATH + savedFileName;
+            log.info("썸네일 파일 업로드 완료 - 저장된 파일명: {}", savedFileName);
+          } else {
+              // 새로운 파일이 없는 경우: URL을 null로 설정하여 DB에서 제거되도록 함
+              thumbnailUrl = null;
+              log.info("썸네일 파일 제거 - URL이 null로 설정됨");
           }
 
           // 레시피 정보 업데이트
@@ -258,30 +266,9 @@ public class AdminServiceImpl implements AdminService {
   }
 
 
-  @Transactional
   @Override
   public void deleteRecipe(Long id) {
-    try {
-      // 레시피 존재 여부 확인
-      Recipe recipe = recipeRepository.findById(id)
-          .orElseThrow(() -> new IllegalArgumentException("해당 레시피가 존재하지 않습니다. ID: " + id));
-
-      // 관련된 재료 삭제
-      log.info("레시피에 연결된 재료 삭제 시작 - 레시피 ID: {}", id);
-      recipeIngredientRepository.deleteByRecipeId(id);
-      log.info("레시피에 연결된 재료 삭제 완료 - 레시피 ID: {}", id);
-
-      // 레시피 삭제
-      recipeRepository.deleteById(id);
-      log.info("레시피가 성공적으로 삭제되었습니다. ID: {}", id);
-
-    } catch (IllegalArgumentException e) {
-      log.warn("삭제하려는 레시피가 존재하지 않습니다: {}", e.getMessage());
-      throw e;
-    } catch (Exception e) {
-      log.error("레시피 삭제 중 오류 발생: " + e.getMessage(), e);
-      throw new RuntimeException("레시피 삭제 중 예기치 못한 오류가 발생했습니다.", e);
-    }
+    
   }
   
 }
