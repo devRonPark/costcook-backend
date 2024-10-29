@@ -3,21 +3,16 @@ package com.costcook.service.impl;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException.NotFound;
 
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.request.UpdateReviewRequest;
 import com.costcook.domain.response.CreateReviewResponse;
 import com.costcook.domain.response.ReviewResponse;
-import com.costcook.domain.response.UpdateReviewResponse;
 import com.costcook.entity.Recipe;
 import com.costcook.entity.Review;
 import com.costcook.entity.User;
-import com.costcook.exceptions.ErrorResponse;
-import com.costcook.exceptions.MessageExcepiton;
+import com.costcook.exceptions.ForbiddenException;
 import com.costcook.exceptions.NotFoundException;
 import com.costcook.repository.RecipeRepository;
 import com.costcook.repository.ReviewRepository;
@@ -88,10 +83,12 @@ public class ReviewServiceImpl implements ReviewService {
 			throw new NotFoundException("해당 리뷰를 찾을 수 없습니다.");
 		}
 		
-		// 유저 아이디와 리뷰 아이디의 값이 같은지 비교를 한다 .
+		// 유저 아이디와 리뷰 작성자의 아이디의 값이 같은지 비교를 한다 .
 		if( !optReview.get().getUser().getId().equals(user.getId())) {
 			
-			throw new IllegalArgumentException("리뷰를 수정할 권한이 없습니다.");
+			
+			// 403 Forbidden
+			throw new ForbiddenException("리뷰를 수정할 권한이 없습니다.");
 		}
 		
 		
