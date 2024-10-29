@@ -56,10 +56,10 @@ public class RecipeServiceImpl implements RecipeService {
         	}
         }
 
-        log.info("element:{}", recipePage.getTotalElements());
-        log.info("element:{}", recipePage.getTotalPages());
-        log.info("element:{}", recipePage.getContent());
-        log.info("element:{}", recipePage.getNumber());
+//        log.info("element:{}", recipePage.getTotalElements());
+//        log.info("element:{}", recipePage.getTotalPages());
+//        log.info("element:{}", recipePage.getContent());
+//        log.info("element:{}", recipePage.getNumber());
         
 		// 응답할 데이터 
         return RecipeListResponse.builder()

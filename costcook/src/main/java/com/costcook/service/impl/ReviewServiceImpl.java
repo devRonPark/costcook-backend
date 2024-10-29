@@ -38,6 +38,12 @@ public class ReviewServiceImpl implements ReviewService {
 		Pageable pageable = PageRequest.of(page - 1, size);
 		Page<Review> reviewPage = reviewRepository.findByRecipeId(recipeId, pageable);
 
+//		log.info("리뷰정보: {}", reviewPage.getContent());
+//		log.info("리뷰정보: {}", reviewPage.getNumber());
+//		log.info("리뷰정보: {}", reviewPage.getTotalPages());
+//		log.info("리뷰정보: {}", reviewPage.getSort());
+//		log.info("리뷰정보: {}", reviewPage.getPageable());
+		
 		// 응답할 데이터
 		return ReviewListResponse.builder()
 			.page(page)
@@ -48,8 +54,11 @@ public class ReviewServiceImpl implements ReviewService {
 				reviewPage.getContent().stream().map(ReviewResponse::toDTO).toList()		
 			)
 			.build();
+		
 	}
 
+	
+	// 리뷰 등록
 	@Override
 	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
 		Optional<Recipe> optRecipe = recipeRepository.findById(reviewRequest.getRecipeId());
@@ -67,6 +76,7 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 
+	// 리뷰 삭제
 	@Override
 	public boolean deleteReview(User user, Long reviewId) {
 		

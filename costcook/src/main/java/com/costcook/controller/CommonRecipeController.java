@@ -10,16 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.costcook.domain.response.IngredientResponse;
+import com.costcook.domain.response.RecipeDetailResponse;
 import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
 import com.costcook.domain.response.ReviewListResponse;
-import com.costcook.domain.response.ReviewResponse;
+import com.costcook.service.RecipeIngredientService;
 import com.costcook.service.RecipeService;
 import com.costcook.service.ReviewService;
-import com.costcook.domain.response.IngredientResponse;
-import com.costcook.domain.response.RecipeDetailResponse;
-import com.costcook.repository.RecipeIngredientRepository;
-import com.costcook.service.RecipeIngredientService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +36,7 @@ public class CommonRecipeController {
 	// 레시피 전체 목록 조회 
 	@GetMapping(value = {"", "/"})
 	public ResponseEntity<RecipeListResponse> getAllRecipe(
-		@RequestParam(name = "page", defaultValue = "0") int page, 
+		@RequestParam(name = "page", defaultValue = "1") int page, 
 		@RequestParam(name = "size", defaultValue = "9") int size, 
 		@RequestParam(name = "sort", defaultValue = "createdAt") String sort,
 		@RequestParam(name = "order", defaultValue = "desc") String order
@@ -62,12 +60,12 @@ public class CommonRecipeController {
 	// 레시피 리뷰 전체보기 (http://localhost:8080/api/recipes/1/reviews?page=0)
 	@GetMapping("/{recipeId}/reviews")
 	public ResponseEntity<ReviewListResponse> getRecipeReviews(
-		@PathVariable("recipeId") Long id,
-		@RequestParam(name = "page", defaultValue = "0") int page,
+		@PathVariable("recipeId") Long recipeId,
+		@RequestParam(name = "page", defaultValue = "1") int page,
 		@RequestParam(name = "size", defaultValue = "3") int size
 	) {
 		// 리뷰 목록 가져오기
-		ReviewListResponse response = reviewService.getReviewList(id, page, size);
+		ReviewListResponse response = reviewService.getReviewList(recipeId, page, size);
 		return ResponseEntity.ok(response);		 
 	}
 }
