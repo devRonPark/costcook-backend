@@ -15,15 +15,17 @@ public class RecipeResponse {
 	private Long id;
 	private int rcpSno;
 	private String title, description, thumbnailUrl, createdAt, updatedAt;
-	private int servings, price, viewCount, favoriteCount, commentCount;
+	private int servings, price, viewCount, favoriteCount, reviewCount;
 	private double avgRatings;
 	private Category category;
 	
 	
 	// Recipe -> response 변환
 	// 전체 목록
-//	public static RecipeResponse toDTO(Recipe recipe) {		
-	public static RecipeResponse toDTO(Recipe recipe, double avgRatings, int commentCount, Long totalPrice) {		
+	public static RecipeResponse toDTO(Recipe recipe, double avgRatings, int reviewCount, Long totalPrice) {		
+		
+		// 평점 소수점 첫째자리까지 반올림
+		double roundedAvgRatings = Math.round(avgRatings * 10) / 10.0;
 		
 		return RecipeResponse.builder()
 				.id(recipe.getId())
@@ -37,8 +39,8 @@ public class RecipeResponse {
 				.price(totalPrice.intValue())
 				.viewCount(recipe.getViewCount())
 				// .favoriteCount(recipe.getFavoriteCount())
-				.commentCount(commentCount)
-				.avgRatings(avgRatings)
+				.reviewCount(reviewCount)
+				.avgRatings(roundedAvgRatings)
 				.thumbnailUrl(recipe.getThumbnailUrl())
 				.build();
 	}

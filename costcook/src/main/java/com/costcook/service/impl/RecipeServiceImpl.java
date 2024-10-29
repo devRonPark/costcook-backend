@@ -1,17 +1,17 @@
 package com.costcook.service.impl;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.costcook.domain.ReviewStatsDTO;
+import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
-import com.costcook.entity.Category;
 import com.costcook.entity.Recipe;
-import com.costcook.repository.CategoryRepository;
 import com.costcook.repository.RecipeIngredientRepository;
 import com.costcook.repository.RecipeRepository;
 import com.costcook.service.RecipeService;
@@ -30,9 +30,9 @@ public class RecipeServiceImpl implements RecipeService {
 	
 	// 레시피 목록 조회
 	@Override
-	public List<RecipeResponse> getRecipes(int page, int size, String sort, String order) {
+	public RecipeListResponse getRecipes(int page, int size, String sort, String order) {
 		
-		Pageable pageable = PageRequest.of(page, size);
+		Pageable pageable = PageRequest.of(page - 1, size);
 		Page<Recipe> recipePage;
 		
 		// 정렬
@@ -55,21 +55,31 @@ public class RecipeServiceImpl implements RecipeService {
         		recipePage = recipeRepository.findAllByOrderByCreatedAtDesc(pageable);        		
         	}
         }
+
+        log.info("element:{}", recipePage.getTotalElements());
+        log.info("element:{}", recipePage.getTotalPages());
+        log.info("element:{}", recipePage.getContent());
+        log.info("element:{}", recipePage.getNumber());
         
-        // 아이디, 이름, 이미지, [가격], [평점], [조회수]
-//		응답할 데이터 
-		return recipePage.getContent().stream()
-				.map(recipe -> {
-					ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
-					Long totalPrice = recipeRepository.getTotalPrice(recipe.getId());
-					double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
-					int commentCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
-					return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice);
-				})
-				.toList();
-		
-		
-}
+		// 응답할 데이터 
+        return RecipeListResponse.builder()
+        	.page(page)
+        	.size(size)
+        	.totalPages(recipePage.getTotalPages())
+        	.totalRecipes(recipePage.getTotalElements())
+        	.recipes(
+        		// 아이디, 이름, 이미지, [가격], [평점], [조회수]
+        		recipePage.getContent().stream()
+    				.map(recipe -> {
+    					ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
+    					Long totalPrice = recipeRepository.getTotalPrice(recipe.getId());
+    					double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
+    					int reviewCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
+    					return RecipeResponse.toDTO(recipe, averageScore, reviewCount, totalPrice);
+    				})
+    				.toList())
+        	.build();
+	}
 	
 	
 	// 전체 레시피 수 조회 : 총 페이지를 미리 입력하여, 무한 로딩 방지
