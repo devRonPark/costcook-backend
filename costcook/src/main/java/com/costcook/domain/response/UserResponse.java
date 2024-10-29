@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+import com.costcook.domain.RoleEnum;
 import com.costcook.entity.User;
 
 @Data
@@ -22,6 +23,7 @@ public class UserResponse {
     private String createdAt; // String으로 변환된 생성일
     private List<Long> preferredIngredients; // 선호 재료 ({id: 1, name: ""})
     private List<Long> dislikedIngredients; // 기피 재료 ({id: 1, name: ""})
+    private RoleEnum role;
 
     // User 객체를 UserResponse로 변환하는 정적 메소드
     public static UserResponse from(User user, Map<String, List<Long>> userTaste) {
@@ -34,6 +36,7 @@ public class UserResponse {
             .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().format(formatter) : null) // LocalDateTime을 String으로 변환)
             .preferredIngredients(userTaste.get("preferredIngredients"))
             .dislikedIngredients(userTaste.get("dislikedIngredients"))
+            .role(user.getRole())
             .build(); 
     }
 }
