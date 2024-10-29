@@ -1,13 +1,9 @@
 package com.costcook.controller;
 
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +16,6 @@ import com.costcook.domain.request.UpdateReviewRequest;
 import com.costcook.domain.response.CreateReviewResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.entity.User;
-import com.costcook.exceptions.NotFoundException;
 import com.costcook.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
@@ -46,22 +41,18 @@ public class ReviewController {
 	
 	// 리뷰 삭제
 	@DeleteMapping("/{reviewId}")
-	public ResponseEntity<?> deleteReview(@AuthenticationPrincipal User user, @PathVariable("reviewId") Long id){
-		boolean isReviewDeleted = reviewService.deleteReview(user, id);
+	public ResponseEntity<ReviewResponse> deleteReview(@AuthenticationPrincipal User user, @PathVariable("reviewId") Long id) {
 
-		if (!isReviewDeleted) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-		}
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();				
-	}
+		ReviewResponse deletedReview = reviewService.deleteReview(user, id);
+		return ResponseEntity.ok(deletedReview);  
+    }
 	
 	
 	// 리뷰 수정
 	@PatchMapping("/{reviewId}")
 	public ResponseEntity<?> updateReview(@RequestBody UpdateReviewRequest updateReviewRequest, @AuthenticationPrincipal User user, @PathVariable("reviewId") Long id ){
 			ReviewResponse result = reviewService.modifyReview(updateReviewRequest, user, id);
-			
-			return ResponseEntity.ok("리뷰가 수정되었습니다.");
+			return ResponseEntity.ok(result);
 	}
 	
 	
