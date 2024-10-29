@@ -32,11 +32,11 @@ public class AdminController {
   private final AdminService adminService;
 
   @GetMapping("/ingredients")
-  public ResponseEntity<List<IngredientSearchResponse>> getIngredientList(@RequestParam("keyword") String keyword) {
+  public ResponseEntity<List<IngredientSearchResponse>> searchIngredientList(@RequestParam("keyword") String keyword) {
 
     log.info("Keyword received: {}", keyword);
 
-    List<IngredientSearchResponse> responseList = adminService.getIngredientsByName(keyword);
+    List<IngredientSearchResponse> responseList = adminService.searchIngredientsByName(keyword);
 
     return ResponseEntity.ok(responseList);
   }

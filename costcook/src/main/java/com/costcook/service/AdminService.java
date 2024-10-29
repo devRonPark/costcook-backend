@@ -10,7 +10,7 @@ import com.costcook.domain.response.RecipeIngredientResponse;
 
 public interface AdminService {
 
-  List<IngredientSearchResponse> getIngredientsByName(String keyword);
+  List<IngredientSearchResponse> searchIngredientsByName(String keyword);
 
   boolean saveRecipe(AdminRecipeRegisterRequest recipe, MultipartFile thumbnailFile);
 

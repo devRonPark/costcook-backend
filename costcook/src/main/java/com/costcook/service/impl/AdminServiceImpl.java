@@ -46,7 +46,7 @@ public class AdminServiceImpl implements AdminService {
    * @return List<IngredientSearchResponse> - 검색된 재료 정보를 담은 DTO 리스트
    */
   @Override
-  public List<IngredientSearchResponse> getIngredientsByName(String keyword) {
+  public List<IngredientSearchResponse> searchIngredientsByName(String keyword) {
     String validKeyword = keyword == null ? "" : keyword;
     log.info("재료 검색 요청 - 키워드: {}", validKeyword);
     // 키워드로 재료를 검색
