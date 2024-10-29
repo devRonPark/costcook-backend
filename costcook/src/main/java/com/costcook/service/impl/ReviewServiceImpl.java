@@ -3,13 +3,18 @@ package com.costcook.service.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.request.UpdateReviewRequest;
 import com.costcook.domain.response.CreateReviewResponse;
+import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.entity.Recipe;
 import com.costcook.entity.Review;
@@ -115,5 +120,28 @@ public class ReviewServiceImpl implements ReviewService {
 		
 		 // 수정된 리뷰 정보를 반환
 		return ReviewResponse.toDTO(updatedReview);
+	}
+
+	@Override
+	public ReviewListResponse getReviewListByUserWithPagination(User user, int page) {
+		int size = 9; // 기본 페이지 크기 설정
+		int validPage = Math.max(page, 1) - 1; // 최소 1 이상의 값을 보장
+
+		// 페이지네이션 설정
+		Pageable pageable = PageRequest.of(validPage, size);
+		Page<Review> reviewPage = reviewRepository.findAllByUserId(user.getId(), pageable);
+
+		// 빌더 패턴을 사용하여 응답 구성
+		return ReviewListResponse.builder()
+			.page(page)
+			.size(reviewPage.getNumberOfElements()) // 현재 페이지의 리뷰 개수 
+			.totalPages(reviewPage.getTotalPages())
+			.totalReviews(reviewPage.getTotalElements())
+			.reviews(
+				reviewPage.getContent().stream() // Page에서 List로 변환 후 스트림 처리
+					.map(review -> ReviewResponse.toDTO(review)) // 각 리뷰를 DTO로 변환
+					.collect(Collectors.toList()) // 변환 결과를 리스트로 수집
+			)
+			.build();
 	}
 }

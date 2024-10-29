@@ -1,9 +1,11 @@
 package com.costcook.domain.response;
 
+import lombok.Builder;
 import lombok.Data;
 import java.util.List;
 
 @Data
+@Builder
 public class ReviewListResponse {
     private int page; // 현재 페이지 번호
     private int size; // 한 페이지에 포함된 리뷰 수
