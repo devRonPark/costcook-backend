@@ -1,2 +1,4 @@
 /.metadata/
-/costcook/
+.classpath
+.project
+bin/
