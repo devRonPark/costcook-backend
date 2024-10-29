@@ -32,6 +32,9 @@ public class AdminRecipeRegisterRequest {
   // 총 가격
   private Integer price;
 
+  // 썸네일 삭제 여부 플래그 추가
+  private boolean thumbnailDeleted;
+
   @Getter
   @Setter
   public static class IngredientDTO {

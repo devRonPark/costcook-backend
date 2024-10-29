@@ -88,6 +88,7 @@ public class AdminController {
       
       log.info("레시피 수정 요청: 레시피 ID: " + id);
       log.info("수정할 레시피 제목: " + recipe.getTitle());
+      log.info("레시피 썸네일 삭제 상태 : {}", recipe.isThumbnailDeleted());
 
       if (thumbnailFile != null) {
         log.info("새로운 파일 이름: " + thumbnailFile.getOriginalFilename());

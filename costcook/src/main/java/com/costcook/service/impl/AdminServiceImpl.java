@@ -180,13 +180,12 @@ public class AdminServiceImpl implements AdminService {
           // 썸네일 파일 처리
           String thumbnailUrl = recipe.getThumbnailUrl();
           if (newThumbnailFile != null && !newThumbnailFile.isEmpty()) {
-            // 새로운 썸네일 파일이 있는 경우: 새 파일을 업로드하고 URL을 업데이트
             log.info("새 썸네일 파일 업로드 시작 - 파일명: {}", newThumbnailFile.getOriginalFilename());
             String savedFileName = fileUploadService.uploadRecipeFile(newThumbnailFile);
             thumbnailUrl = RECIPE_THUMBNAIL_ACCESS_PATH + savedFileName;
             log.info("썸네일 파일 업로드 완료 - 저장된 파일명: {}", savedFileName);
-          } else {
-              // 새로운 파일이 없는 경우: URL을 null로 설정하여 DB에서 제거되도록 함
+          } else if (recipeRequest.isThumbnailDeleted()) {
+              // 클라이언트에서 삭제 요청 시 URL을 null로 설정
               thumbnailUrl = null;
               log.info("썸네일 파일 제거 - URL이 null로 설정됨");
           }
