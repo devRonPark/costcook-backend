@@ -35,8 +35,8 @@ public class Budget {
 	private Long id;
 	
 	@ManyToOne
-    @JoinColumn(name = "user_id", updatable = false) // user_id는 변경 불가
-    private User user;
+   	@JoinColumn(name = "user_id", updatable = false) // user_id는 변경 불가
+    	private User user;
 	
 	// 예산이 설정된 년도
 	@Column(nullable = false)
