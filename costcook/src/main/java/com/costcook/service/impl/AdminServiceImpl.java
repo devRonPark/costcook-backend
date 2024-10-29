@@ -98,6 +98,7 @@ public class AdminServiceImpl implements AdminService {
       // 레시피 저장
       Recipe recipeItem = Recipe.builder()
           .title(recipe.getTitle())
+          .rcpSno(recipe.getRcpSno())
           .description(recipe.getDescription())
           .category(category)
           .servings(recipe.getServings() != null ? recipe.getServings() : 1)
@@ -192,6 +193,7 @@ public class AdminServiceImpl implements AdminService {
 
           // 레시피 정보 업데이트
           recipe.setTitle(recipeRequest.getTitle());
+          recipe.setRcpSno(recipeRequest.getRcpSno());
           recipe.setDescription(recipeRequest.getDescription());
           recipe.setCategory(category);
           recipe.setServings(recipeRequest.getServings() != null ? recipeRequest.getServings() : 1);
@@ -266,9 +268,30 @@ public class AdminServiceImpl implements AdminService {
   }
 
 
+  @Transactional
   @Override
   public void deleteRecipe(Long id) {
-    
+    try {
+      // 레시피 존재 여부 확인
+      Recipe recipe = recipeRepository.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("해당 레시피가 존재하지 않습니다. ID: " + id));
+
+      // 관련된 재료 삭제
+      log.info("레시피에 연결된 재료 삭제 시작 - 레시피 ID: {}", id);
+      recipeIngredientRepository.deleteByRecipeId(id);
+      log.info("레시피에 연결된 재료 삭제 완료 - 레시피 ID: {}", id);
+
+      // 레시피 삭제
+      recipeRepository.deleteById(id);
+      log.info("레시피가 성공적으로 삭제되었습니다. ID: {}", id);
+
+    } catch (IllegalArgumentException e) {
+      log.warn("삭제하려는 레시피가 존재하지 않습니다: {}", e.getMessage());
+      throw e;
+    } catch (Exception e) {
+      log.error("레시피 삭제 중 오류 발생: " + e.getMessage(), e);
+      throw new RuntimeException("레시피 삭제 중 예기치 못한 오류가 발생했습니다.", e);
+    }
   }
   
 }

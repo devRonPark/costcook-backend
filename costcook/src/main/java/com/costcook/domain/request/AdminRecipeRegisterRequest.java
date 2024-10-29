@@ -11,6 +11,9 @@ public class AdminRecipeRegisterRequest {
   // 레시피 제목
   private String title;
 
+  // 레시피 만개번호
+  private int rcpSno = 0;
+
   // 레시피 설명
   private String description;
 
