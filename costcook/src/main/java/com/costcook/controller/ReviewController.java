@@ -37,19 +37,17 @@ public class ReviewController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(result);
 	}
 	
-
-	
 	// 리뷰 삭제
 	@DeleteMapping("/{reviewId}")
-	public  ResponseEntity<?> deleteReview(@AuthenticationPrincipal User user, @PathVariable("reviewId") Long id) {
-		reviewService.deleteReview(user, id);
+	public ResponseEntity<?> deleteReview(@AuthenticationPrincipal User user, @PathVariable("reviewId") Long reviewId) {
+		reviewService.deleteReview(user, reviewId);
 		return ResponseEntity.noContent().build();
     }
 	
 	// 리뷰 수정
 	@PatchMapping("/{reviewId}")
-	public ResponseEntity<?> updateReview(@RequestBody UpdateReviewRequest updateReviewRequest, @AuthenticationPrincipal User user, @PathVariable("reviewId") Long id ){
-			ReviewResponse result = reviewService.modifyReview(updateReviewRequest, user, id);
+	public ResponseEntity<?> updateReview(@RequestBody UpdateReviewRequest updateReviewRequest, @AuthenticationPrincipal User user, @PathVariable("reviewId") Long reviewId ){
+			ReviewResponse result = reviewService.modifyReview(updateReviewRequest, user, reviewId);
 			return ResponseEntity.ok(result);
 	}
 	

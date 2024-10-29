@@ -10,13 +10,7 @@ import lombok.NoArgsConstructor;
 @Setter
 @NoArgsConstructor
 public class UpdateReviewRequest {
-	
-	private Long reviewId;
 	private int score;
 	private String comment;
-	
-	
-	//수정
-	
 	
 }
