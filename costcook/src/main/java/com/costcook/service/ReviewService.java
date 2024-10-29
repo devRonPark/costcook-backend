@@ -17,7 +17,7 @@ public interface ReviewService {
 
 	List<ReviewResponse> getReviewList(Long id);
 
-	ReviewResponse deleteReview(User user, Long reviewId);
+	boolean deleteReview(User user, Long reviewId);
 
 	ReviewResponse modifyReview(UpdateReviewRequest updateReviewRequest, User user, Long reviewId);
 

@@ -13,7 +13,6 @@ import com.costcook.entity.Recipe;
 import com.costcook.entity.Review;
 import com.costcook.entity.User;
 import com.costcook.exceptions.ForbiddenException;
-import com.costcook.exceptions.NoContentException;
 import com.costcook.exceptions.NotFoundException;
 import com.costcook.repository.RecipeRepository;
 import com.costcook.repository.ReviewRepository;
@@ -57,33 +56,31 @@ public class ReviewServiceImpl implements ReviewService {
 	// 삭제
 
 	@Override
-	public ReviewResponse deleteReview(User user, Long reviewId) {
-	    // 리뷰를 아이디로 조회
-	    Optional<Review> optReview = reviewRepository.findByRecipeIdAndUserId(reviewId, user.getId());
-	    if (optReview.isEmpty()) {
-	        // 해당 리뷰를 찾을 수 없을 때 404 Not Found
-	        throw new NotFoundException("해당 리뷰를 찾을 수 없습니다.");
-	    }
+	public boolean deleteReview(User user, Long reviewId) {
+		
+		
+		// 리뷰를 아이디를 통해서 가져온다
+		Optional<Review> optReview = reviewRepository.findById(reviewId);
+		if (optReview.isEmpty() || optReview.get().getDeletedAt() != null) {
+			// 해당 리뷰를 찾을 수 없습니다 404 Not Found
+			throw new NotFoundException("해당 리뷰를 찾을 수 없습니다.");
+		}
+		
+		// 유저 아이디와 리뷰 작성자의 아이디의 값이 같은지 비교를 한다 .
+		if( !optReview.get().getUser().getId().equals(user.getId())) {
+			
+			
+			// 403 Forbidden
+			throw new ForbiddenException("리뷰를 수정할 권한이 없습니다.");
+		}
+		
+		
+		// 같으면 지운다.
+		reviewRepository.deleteById(reviewId);
+		// 반환 204 No Content
+		return true;
 
-	  
-	    Review review = optReview.get();
-
-	    // 현재 로그인한 유저가 해당 리뷰 작성자인지 확인
-	    if (!review.getUser().getId().equals(user.getId())) {
-	        // 권한이 없을 때 403 Forbidden
-	        throw new ForbiddenException("리뷰를 삭제할 권한이 없습니다.");
-	    }
-
-	    // deleted_at 필드를 현재 시간으로 설정
-	    review.setDeletedAt(java.time.LocalDateTime.now());
-
-	    // 변경 사항 저장
-	    Review updatedReview = reviewRepository.save(review);
-
-	    // 삭제된 리뷰 정보를 반환
-	    return ReviewResponse.toDTO(updatedReview);
 	}
-	
 	
 	// 수정
 

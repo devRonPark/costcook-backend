@@ -31,12 +31,7 @@ public class GlobalExceptionHandler {
     	ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
     	return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
-    @ExceptionHandler(NoContentException.class)
-    public ResponseEntity<ErrorResponse> handleNoContentException(NoContentException ex) {
-    	ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
-    	return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
-    }
-    
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse("서버 에러가 발생했습니다.");
