@@ -4,10 +4,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.costcook.controller.CommonRecipeController;
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.request.UpdateReviewRequest;
 import com.costcook.domain.response.CreateReviewResponse;
@@ -37,14 +39,13 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public ReviewListResponse getReviewList(Long recipeId, int page, int size) {
 		Pageable pageable = PageRequest.of(page - 1, size);
-		Page<Review> reviewPage = reviewRepository.findByRecipeId(recipeId, pageable);
+//		Page<Review> reviewPage = reviewRepository.findByRecipeId(recipeId, pageable);
 
 //		log.info("리뷰정보: {}", reviewPage.getContent());
-//		log.info("리뷰정보: {}", reviewPage.getNumber());
-//		log.info("리뷰정보: {}", reviewPage.getTotalPages());
-//		log.info("리뷰정보: {}", reviewPage.getSort());
-//		log.info("리뷰정보: {}", reviewPage.getPageable());
 		
+		// 생성일 기준으로 정렬된 리뷰 목록을 가져옴
+	    Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByCreatedAtDesc(recipeId, pageable);
+
 		// 응답할 데이터
 		return ReviewListResponse.builder()
 			.page(page)

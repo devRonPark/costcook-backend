@@ -54,12 +54,10 @@ public class RecipeServiceImpl implements RecipeService {
         	} else {
         		recipePage = recipeRepository.findAllByOrderByCreatedAtDesc(pageable);        		
         	}
+        	
         }
-
 //        log.info("element:{}", recipePage.getTotalElements());
-//        log.info("element:{}", recipePage.getTotalPages());
-//        log.info("element:{}", recipePage.getContent());
-//        log.info("element:{}", recipePage.getNumber());
+     
         
 		// 응답할 데이터 
         return RecipeListResponse.builder()
@@ -81,7 +79,6 @@ public class RecipeServiceImpl implements RecipeService {
         	.build();
 	}
 	
-	
 	// 전체 레시피 수 조회 : 총 페이지를 미리 입력하여, 무한 로딩 방지
 	@Override
 	public long getTotalRecipes() {
@@ -95,6 +92,7 @@ public class RecipeServiceImpl implements RecipeService {
 	public RecipeResponse getRecipeById(Long id) {
 		Recipe recipe = recipeRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("레시피 정보가 없습니다."));
+		// 조회수 증가
 		recipeRepository.updateViewCount(id);
 		// 리뷰 평점 가져오기
 		ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(id);
@@ -103,7 +101,14 @@ public class RecipeServiceImpl implements RecipeService {
 		
 		// 총 금액 가져오기
 		Long totalPrice = recipeRepository.getTotalPrice(recipe.getId());
+		// 레시피 테이블에 가격 반영
+		recipe.setPrice(totalPrice.intValue());
+		
 		// 리뷰 개수 가져오기
 		return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice);
 	}
+	
+	
+	
+	
 }
