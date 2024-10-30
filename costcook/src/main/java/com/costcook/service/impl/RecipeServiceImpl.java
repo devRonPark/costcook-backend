@@ -1,7 +1,7 @@
 package com.costcook.service.impl;
 
 import java.util.List;
-
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,11 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class RecipeServiceImpl implements RecipeService {
-	
 	private final RecipeRepository recipeRepository;
-	private RecipeIngredientRepository recipeIngredientRepository;
+	private final RecipeIngredientRepository recipeIngredientRepository;
 
-	
 	// 레시피 목록 조회
 	@Override
 	public RecipeListResponse getRecipes(int page, int size, String sort, String order) {
@@ -54,10 +52,7 @@ public class RecipeServiceImpl implements RecipeService {
         	} else {
         		recipePage = recipeRepository.findAllByOrderByCreatedAtDesc(pageable);        		
         	}
-        	
         }
-//        log.info("element:{}", recipePage.getTotalElements());
-     
         
 		// 응답할 데이터 
         return RecipeListResponse.builder()
@@ -78,6 +73,7 @@ public class RecipeServiceImpl implements RecipeService {
     				.toList())
         	.build();
 	}
+	
 	
 	// 전체 레시피 수 조회 : 총 페이지를 미리 입력하여, 무한 로딩 방지
 	@Override
@@ -107,8 +103,4 @@ public class RecipeServiceImpl implements RecipeService {
 		// 리뷰 개수 가져오기
 		return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice);
 	}
-	
-	
-	
-	
 }

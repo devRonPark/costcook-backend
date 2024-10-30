@@ -46,7 +46,6 @@ public class CommonRecipeController {
 		return ResponseEntity.ok(response);
 	}
 	
-	
     // 레시피별 상세보기
 	@GetMapping("/{recipeId}")
 	public ResponseEntity<RecipeDetailResponse> getIngredientsByRecipeId(@PathVariable("recipeId") Long id) {
