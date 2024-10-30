@@ -59,13 +59,17 @@ public class ReviewServiceImpl implements ReviewService {
 	
 	// 리뷰 등록
 	@Override
-	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
+//	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
+	
+	// 리뷰 등록 TEST(로그인 상태라 가정)
+	
+	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest) {
 		Optional<Recipe> optRecipe = recipeRepository.findById(reviewRequest.getRecipeId());
 		if (optRecipe.isEmpty()) {
 			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
 		}
 		Review review = Review.builder()
-			.user(user)
+//			.user(user)
 			.recipe(optRecipe.get())
 			.score(reviewRequest.getScore())
 			.comment(reviewRequest.getComment())
@@ -74,6 +78,11 @@ public class ReviewServiceImpl implements ReviewService {
 		Review result = reviewRepository.save(review);
 		return CreateReviewResponse.toDTO(result);
 	}
+	
+	
+	
+	
+	
 	
 	// 삭제
 	@Transactional

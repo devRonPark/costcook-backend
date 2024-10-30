@@ -13,6 +13,7 @@ public class RecipeDetailResponse {
     private String title;
     private String description;
     private String thumbnailUrl;
+    private int rcpSno;
     private int servings;
     private int viewCount;
     private int favoriteCount;
@@ -27,6 +28,7 @@ public class RecipeDetailResponse {
     		.title(recipeResponse.getTitle())
     		.description(recipeResponse.getDescription())
     		.thumbnailUrl(recipeResponse.getThumbnailUrl())
+    		.rcpSno(recipeResponse.getRcpSno())
     		.servings(recipeResponse.getServings())
     		.viewCount(recipeResponse.getViewCount())
     		.price(recipeResponse.getPrice())
