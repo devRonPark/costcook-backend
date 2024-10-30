@@ -13,6 +13,7 @@ public class RecipeDetailResponse {
     private String title;
     private String description;
     private String thumbnailUrl;
+    private int rcpSno;
     private int servings;
     private int viewCount;
     private int favoriteCount;
@@ -27,6 +28,7 @@ public class RecipeDetailResponse {
     		.title(recipeResponse.getTitle())
     		.description(recipeResponse.getDescription())
     		.thumbnailUrl(recipeResponse.getThumbnailUrl())
+    		.rcpSno(recipeResponse.getRcpSno()) // 레시피 상세페이지 > 만개의 레시피 조리방법 경로 이동에 필요
     		.servings(recipeResponse.getServings())
     		.viewCount(recipeResponse.getViewCount())
     		.price(recipeResponse.getPrice())

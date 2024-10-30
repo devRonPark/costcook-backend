@@ -62,7 +62,7 @@ public class RecipeServiceImpl implements RecipeService {
 		// 응답할 데이터 
         return RecipeListResponse.builder()
         	.page(page)
-        	.size(size)
+        	.size(recipePage.getNumberOfElements())
         	.totalPages(recipePage.getTotalPages())
         	.totalRecipes(recipePage.getTotalElements())
         	.recipes(

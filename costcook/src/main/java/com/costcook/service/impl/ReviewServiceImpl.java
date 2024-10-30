@@ -50,7 +50,7 @@ public class ReviewServiceImpl implements ReviewService {
 		// 응답할 데이터
 		return ReviewListResponse.builder()
 			.page(page)
-			.size(size)
+			.size(reviewPage.getNumberOfElements())
 			.totalPages(reviewPage.getTotalPages())
 			.totalReviews(reviewPage.getTotalElements())
 			.reviews(
