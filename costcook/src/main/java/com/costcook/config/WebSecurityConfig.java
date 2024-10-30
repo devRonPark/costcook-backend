@@ -71,10 +71,12 @@ public class WebSecurityConfig {
 				new AntPathRequestMatcher("/api/oauth/**"),
 				new AntPathRequestMatcher("/api/auth/**"),
 				new AntPathRequestMatcher("/api/auth/token/refresh"),
-				new AntPathRequestMatcher("/api/recipes/**")// 사용자 레시피 조회
-
+				new AntPathRequestMatcher("/api/recipes/**"),// 사용자 레시피 조회
+				// 임시 admin 
+				new AntPathRequestMatcher("/api/admin/ingredients/**"),
+				new AntPathRequestMatcher("/api/admin/recipes/**") 
 			).permitAll()
-			.requestMatchers("/api/users/me").authenticated() // 이 API는 인증이 필요함
+			.requestMatchers("/api/users/me/**").authenticated() // 이 API는 인증이 필요함
 			// 그 밖의 다른 요청들은 인증을 통과한(로그인한) 사용자라면 모두 접근할 수 있도록 한다.
 			.anyRequest().authenticated()
 		);

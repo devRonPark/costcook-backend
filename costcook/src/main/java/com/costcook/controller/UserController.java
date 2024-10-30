@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.costcook.domain.request.UserUpdateRequest;
+import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.domain.response.UserResponse;
 import com.costcook.entity.User;
 import com.costcook.exceptions.ErrorResponse;
 import com.costcook.service.FileUploadService;
+import com.costcook.service.ReviewService;
 import com.costcook.service.UserService;
 
 import java.io.IOException;
@@ -22,6 +24,8 @@ import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Slf4j
 @RestController
@@ -29,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final ReviewService reviewService;
 
     @GetMapping("/me")
     public ResponseEntity<?> getMyInfo(
@@ -64,6 +69,18 @@ public class UserController {
             throw e;
         }
     }
+
+    // 내 리뷰 목록 조회
+    // 단, 액세스 토큰이 없거나 만료된 액세스 토큰과 함께 요청시 403 Forbidden 에러 발생.
+    @GetMapping("/me/reviews")
+    public ResponseEntity<?> getMyReviews(
+        @RequestParam(name = "page", defaultValue = "1") int page, 
+        @AuthenticationPrincipal User userDetails // 사용자 정보 가져오기
+    ) {
+        ReviewListResponse response = reviewService.getReviewListByUserWithPagination(userDetails, page);
+        return ResponseEntity.ok(response);
+    }
+    
 
     @PatchMapping("/me")
     public ResponseEntity<String> updateMyInfo(

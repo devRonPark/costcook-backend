@@ -13,9 +13,10 @@ import org.springframework.data.repository.query.Param;
 import com.costcook.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long>{
-
+    // 특정 recipeId를 가진 모든 리뷰 목록 조회
 	List<Review> findAllByRecipeId(Long recipeId);
 	
+    // soft delete 구현을 위한 메서드 (deletedAt 필드를 업데이트하여 삭제 처리)
     @Modifying
     @Query("UPDATE Review r SET r.deletedAt = :deletedAt WHERE r.id = :id")
     void softDelete(@Param("id") Long id, @Param("deletedAt") LocalDateTime deletedAt);

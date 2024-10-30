@@ -5,7 +5,11 @@ import org.springframework.stereotype.Repository;
 
 import com.costcook.entity.Ingredient;
 
+import java.util.List;
+
 @Repository
 public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
+
+  List<Ingredient> findByNameContaining(String keyword);
 
 }

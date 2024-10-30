@@ -45,7 +45,7 @@ public class Recipe {
 	private String description;
 	
 	// 만개 레시피 제공 데이터 고유번호
-	@Column(nullable = false)
+	@Column(name="rcp_sno", nullable = false)
 	@Builder.Default()
 	private int rcpSno = 0;
 	
