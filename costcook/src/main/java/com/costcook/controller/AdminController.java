@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,37 +56,42 @@ public class AdminController {
 
   @PostMapping("/recipes")
   public ResponseEntity<String> createRecipe(
-        @RequestPart("recipe") AdminRecipeRegisterRequest recipe,
-        @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnailFile) {
-    try {
+    @ModelAttribute AdminRecipeRegisterRequest recipe,
+    @RequestPart(value = "thumbnailFile", required = false) MultipartFile thumbnailFile) {
       
-      log.info("레시피 제목: " + recipe.getTitle());
-      if (thumbnailFile != null) {
-        log.info("파일 이름: " + thumbnailFile.getOriginalFilename());
-      }
+    // [로그] 레시피 주요 정보 
+    log.info("레시피 등록 요청 - 제목: {}, 고유번호: {}, 카테고리ID: {}", 
+      recipe.getTitle(), recipe.getRcpSno(), recipe.getCategoryId());
 
-      boolean result = adminService.saveRecipe(recipe, thumbnailFile);
-      
-      if(result == false) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 등록에 실패했습니다.");
-      }
-
-      log.info("레시피 등록 완료 : " + recipe.getTitle());
-      return ResponseEntity.ok("레시피가 성공적으로 등록되었습니다.");
-
-    } catch (Exception e) {
-      log.error("레시피 생성 중 오류 발생: " + e.getMessage(), e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 등록에 실패했습니다.");
+    // [로그] 썸네일 파일 이름
+    if (thumbnailFile != null) {
+      log.info("파일 이름: " + thumbnailFile.getOriginalFilename());
     }
+
+    // 레시피 등록 로직 수행
+    boolean result = adminService.saveRecipe(recipe, thumbnailFile);
+
+    // [예외] 레시피 등록에 실패하면 IllegalStateException 발생.
+    if (!result) {
+      throw new IllegalStateException("레시피 등록에 실패했습니다."); 
+    }
+
+    // [로그] 레시피 등록 성공
+    log.info("레시피 등록 완료 : " + recipe.getTitle());
+
+    // OK 응답 반환
+    return ResponseEntity.ok("레시피가 성공적으로 등록되었습니다.");
   }
+
 
   @PatchMapping("/recipes/{recipeId}")
   public ResponseEntity<String> updateRecipe(
       @PathVariable("recipeId") Long recipeId,
-      @RequestPart("recipe") AdminRecipeRegisterRequest recipe,  // JSON 데이터를 받음 (Blob으로 감싸진 JSON)
+      @RequestPart("recipe") AdminRecipeRegisterRequest recipe,  //  JSON 데이터를받음 (Blob으로 감싸진 JSON)
       @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnailFile) {
     try {
-      
+      log.info("레시피 정보: " + recipe.toString());
+
       log.info("레시피 수정 요청: 레시피 ID: " + recipeId);
       log.info("수정할 레시피 제목: " + recipe.getTitle());
       log.info("레시피 썸네일 삭제 상태 : {}", recipe.isThumbnailDeleted());
