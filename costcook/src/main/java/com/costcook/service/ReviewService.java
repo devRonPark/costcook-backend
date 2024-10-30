@@ -19,8 +19,6 @@ public interface ReviewService {
 
 	ReviewListResponse getReviewList(Long recipeId, int page, int size);
 
-	List<ReviewResponse> getReviewList(Long recipeId);
-
 	ReviewListResponse getReviewListByUserWithPagination(User user, int page);
 
 }
