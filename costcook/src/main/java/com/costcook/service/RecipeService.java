@@ -13,4 +13,6 @@ public interface RecipeService {
 	
 	// 레시피 ID를 통해 레시피 가져오기 -> 상세보기
 	RecipeResponse getRecipeById(Long id);
+
+	RecipeListResponse searchRecipes(String keyword, int page);
 }

@@ -38,4 +38,11 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
 	@Query("SELECT SUM(i.price * ri.quantity) FROM Recipe recipe LEFT JOIN RecipeIngredient ri ON ri.recipe.id = recipe.id LEFT JOIN Ingredient i on ri.ingredient.id = i.id WHERE recipe.id = :id")
 	Long getTotalPrice(@Param("id") Long id);
+
+	// 레시피 검색(검색 대상: 레시피 이름, 레시피 구성 재료명)
+	@Query("SELECT DISTINCT r FROM Recipe r " +
+	"LEFT JOIN RecipeIngredient ri ON r.id = ri.recipe.id " +
+	"LEFT JOIN Ingredient i ON ri.ingredient.id = i.id " +
+	"WHERE r.title LIKE %:keyword% OR i.name LIKE %:keyword%")
+	Page<Recipe> findByTitleOrIngredientNameContaining(@Param("keyword") String keyword, Pageable pageable);
 }

@@ -1,7 +1,6 @@
 package com.costcook.service.impl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -102,5 +101,55 @@ public class RecipeServiceImpl implements RecipeService {
 		
 		// 리뷰 개수 가져오기
 		return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice);
+	}
+
+	@Override
+	public RecipeListResponse searchRecipes(String keyword, int page) {
+		try {
+			// 예외 처리: keyword가 null이거나 빈 문자열 또는 공백만 있는 경우
+			if (keyword == null || keyword.trim().isEmpty()) {
+				throw new IllegalArgumentException("검색어를 입력해 주세요.");
+			}
+
+			// 기본 페이지 크기 설정
+			int size = 9; 
+			// 최소 1 이상의 값을 보장
+			int validPage = Math.max(page, 1) - 1; 
+	
+			// 페이지네이션 설정
+			Pageable pageable = PageRequest.of(validPage, size);
+		
+			// 공백을 제거한 후 검색을 수행
+			String trimmedKeyword = keyword.trim();
+		
+            // 새로운 요구사항: keyword, page 로 검색된 레시피 목록 중에서 레시피를 구성하는 재료명까지도 검색 대상에 포함시키고 싶어.
+
+			// 키워드를 포함하는 레시피 검색 로직
+			Page<Recipe> recipePage = recipeRepository.findByTitleOrIngredientNameContaining(trimmedKeyword, pageable);
+			
+			return RecipeListResponse.builder()
+				.page(validPage + 1)
+				.size(recipePage.getNumberOfElements())
+				.totalPages(recipePage.getTotalPages())
+				.totalRecipes(recipePage.getTotalElements())
+				.recipes(
+					recipePage.getContent().stream()
+					.map(recipe -> {
+						ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
+						Long totalPrice = recipeRepository.getTotalPrice(recipe.getId());
+						double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
+						int commentCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
+						return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice);
+					})
+					.toList()
+				)
+				.build();
+		} catch (IllegalArgumentException e) {
+			log.error("잘못된 검색어가 입력되었습니다: {}", keyword, e);
+			throw e;
+		} catch (Exception e) {
+			log.error("레시피 검색 중 오류가 발생했습니다. 검색어: {}", keyword, e);
+			throw e;
+		}
 	}
 }
