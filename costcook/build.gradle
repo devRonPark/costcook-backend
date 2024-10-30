@@ -24,6 +24,9 @@ repositories {
 }
 
 dependencies {
+	// Jsoup : 크롤링
+    implementation 'org.jsoup:jsoup:1.18.1'
+
     // JWT 추가
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
