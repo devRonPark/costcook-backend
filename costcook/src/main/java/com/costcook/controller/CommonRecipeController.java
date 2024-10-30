@@ -45,6 +45,17 @@ public class CommonRecipeController {
 		RecipeListResponse response = recipeService.getRecipes(page, size, sort, order);
 		return ResponseEntity.ok(response);
 	}
+
+	// 레시피 검색
+	@GetMapping("/search")
+	public ResponseEntity<RecipeListResponse> searchRecipes(
+		@RequestParam(value = "keyword", required = false) String keyword,
+		@RequestParam(value = "page", defaultValue = "0") int page
+	) {
+		log.info("레시피 검색 API 호출");
+		RecipeListResponse response = recipeService.searchRecipes(keyword, page);
+		return ResponseEntity.ok(response);
+	}
 	
 	
     // 레시피별 상세보기

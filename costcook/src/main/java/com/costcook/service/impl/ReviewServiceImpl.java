@@ -36,16 +36,14 @@ public class ReviewServiceImpl implements ReviewService {
 	private final RecipeRepository recipeRepository;
 	private final ReviewRepository reviewRepository;
 	
-	
 	// 레시피 상세페이지 > 리뷰 목록 가져오기
 	@Override
 	public ReviewListResponse getReviewList(Long recipeId, int page, int size) {
 		int validPage = Math.max(page, 1) - 1; // 최소 페이지 설정: 1부터
 		Pageable pageable = PageRequest.of(validPage, size);
-//		생성일 기준으로 정렬된 리뷰 목록을 가져옴
+		// 생성일 기준으로 정렬된 리뷰 목록을 가져옴
+		// FIX: deleted_at 필드가 null 이 아닌 즉 삭제되지 않은 리뷰 목록만 조회 필요.
 		Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByCreatedAtDesc(recipeId, pageable);
-
-//		log.info("리뷰정보: {}", reviewPage.getContent());
 		
 		// 응답할 데이터
 		return ReviewListResponse.builder()
@@ -57,9 +55,7 @@ public class ReviewServiceImpl implements ReviewService {
 				reviewPage.getContent().stream().map(ReviewResponse::toDTO).toList()		
 			)
 			.build();
-		
 	}
-
 	
 	// 리뷰 등록
 	@Override
@@ -78,15 +74,6 @@ public class ReviewServiceImpl implements ReviewService {
 		Review result = reviewRepository.save(review);
 		return CreateReviewResponse.toDTO(result);
 	}
-
-	@Override
-	public List<ReviewResponse> getReviewList(Long recipeId) {
-		List<Review> reviewList = reviewRepository.findAllByRecipeId(recipeId);
-		return reviewList.stream()
-	        .filter(review -> review.getDeletedAt() == null) // 삭제되지 않은 리뷰만 필터링
-	        .map(ReviewResponse::toDTO)
-	        .toList();
-		}
 	
 	// 삭제
 	@Transactional
