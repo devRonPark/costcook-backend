@@ -26,7 +26,7 @@ public class RecipeDetailResponse {
     		.recipeId(recipeResponse.getId())
     		.title(recipeResponse.getTitle())
     		.description(recipeResponse.getDescription())
-    		// .thumbnailUrl(recipeResponse.getThumbnailUrl())
+    		.thumbnailUrl(recipeResponse.getThumbnailUrl())
     		.servings(recipeResponse.getServings())
     		.viewCount(recipeResponse.getViewCount())
     		.price(recipeResponse.getPrice())

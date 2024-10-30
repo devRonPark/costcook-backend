@@ -27,7 +27,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long>{
     @Query("SELECT r FROM Review r WHERE r.recipe.id = :recipeId ORDER BY r.createdAt DESC")
     Page<Review> findByRecipeIdOrderByCreatedAtDesc(@Param("recipeId") Long recipeId, Pageable pageable);
 
-
     // 특정 userId를 가진 리뷰 목록을 페이지 단위로 조회 (page와 size 활용)
     Page<Review> findAllByUserId(Long userId, Pageable pageable);
 }

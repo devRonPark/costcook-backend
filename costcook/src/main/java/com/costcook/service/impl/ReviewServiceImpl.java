@@ -37,10 +37,11 @@ public class ReviewServiceImpl implements ReviewService {
 	private final ReviewRepository reviewRepository;
 	
 	
-	// 리뷰 목록 가져오기
+	// 레시피 상세페이지 > 리뷰 목록 가져오기
 	@Override
 	public ReviewListResponse getReviewList(Long recipeId, int page, int size) {
-		Pageable pageable = PageRequest.of(page - 1, size);
+		int validPage = Math.max(page, 1) - 1; // 최소 페이지 설정: 1부터
+		Pageable pageable = PageRequest.of(validPage, size);
 //		생성일 기준으로 정렬된 리뷰 목록을 가져옴
 		Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByCreatedAtDesc(recipeId, pageable);
 
