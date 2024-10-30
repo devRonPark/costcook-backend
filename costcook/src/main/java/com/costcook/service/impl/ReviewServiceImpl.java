@@ -39,13 +39,11 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public ReviewListResponse getReviewList(Long recipeId, int page, int size) {
 		Pageable pageable = PageRequest.of(page - 1, size);
-//		Page<Review> reviewPage = reviewRepository.findByRecipeId(recipeId, pageable);
+//		생성일 기준으로 정렬된 리뷰 목록을 가져옴
+		Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByCreatedAtDesc(recipeId, pageable);
 
 //		log.info("리뷰정보: {}", reviewPage.getContent());
 		
-		// 생성일 기준으로 정렬된 리뷰 목록을 가져옴
-	    Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByCreatedAtDesc(recipeId, pageable);
-
 		// 응답할 데이터
 		return ReviewListResponse.builder()
 			.page(page)

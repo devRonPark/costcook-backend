@@ -22,11 +22,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long>{
 
 	Page<Review> findByRecipeId(Long recipeId, Pageable pageable);
 
-	// 리뷰 목록 정렬
+	// 리뷰 목록 생성일 순으로 정렬
     @Query("SELECT r FROM Review r WHERE r.recipe.id = :recipeId ORDER BY r.createdAt DESC")
     Page<Review> findByRecipeIdOrderByCreatedAtDesc(@Param("recipeId") Long recipeId, Pageable pageable);
-
-
 
 
 }
