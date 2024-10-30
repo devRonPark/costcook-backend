@@ -1,6 +1,8 @@
 package com.costcook.repository;
 
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +12,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.costcook.domain.ReviewStatsDTO;
+import com.costcook.domain.response.RecipeResponse;
+import com.costcook.domain.response.WeeklyRecipesResponse;
 import com.costcook.entity.Recipe;
 
 @Repository
@@ -45,4 +49,9 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 	"LEFT JOIN Ingredient i ON ri.ingredient.id = i.id " +
 	"WHERE r.title LIKE %:keyword% OR i.name LIKE %:keyword%")
 	Page<Recipe> findByTitleOrIngredientNameContaining(@Param("keyword") String keyword, Pageable pageable);
+	
+	@Query("SELECT r FROM Recipe r WHERE r.price <= :price")
+	List<Recipe> findByPriceLessThanEqual(@Param("price") int price);
+
+
 }

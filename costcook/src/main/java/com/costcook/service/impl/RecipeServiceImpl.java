@@ -1,6 +1,9 @@
 package com.costcook.service.impl;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.costcook.domain.ReviewStatsDTO;
 import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
+import com.costcook.domain.response.WeeklyRecipesResponse;
 import com.costcook.entity.Recipe;
 import com.costcook.repository.RecipeIngredientRepository;
 import com.costcook.repository.RecipeRepository;
@@ -152,4 +156,42 @@ public class RecipeServiceImpl implements RecipeService {
 			throw e;
 		}
 	}
+
+
+	@Override
+	public WeeklyRecipesResponse getRecipesByBudget(int budget) {
+	    List<Recipe> recipes = recipeRepository.findByPriceLessThanEqual(budget);
+	    System.out.println(budget);
+	    
+
+	    // Recipe를 WeeklyRecipesResponse.Recipe으로 변환
+	    List<WeeklyRecipesResponse.Recipe> recipeList = recipes.stream()
+	            .map(recipe -> {
+	                // 리뷰 통계 가져오기
+	                ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
+	                
+	                // 평균 평점 계산
+	                double averageScore = (stats != null && stats.getAverageScore() != null) ? stats.getAverageScore() : 0.0;
+	                int favoriteCount = (stats != null && stats.getReviewCount() != null) ? stats.getReviewCount().intValue() : 0;
+
+	                return WeeklyRecipesResponse.Recipe.builder()
+	                        .id(recipe.getId())
+	                        .title(recipe.getTitle())
+	                        .thumbnailUrl(recipe.getThumbnailUrl())
+	                        .price(recipe.getPrice())
+	                        .favoriteCount(favoriteCount) // 계산된 즐겨찾기 개수
+	                        .avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
+	                        .build();
+	            })
+	            .collect(Collectors.toList());
+	    
+	    Collections.shuffle(recipeList);
+
+	    // WeeklyRecipesResponse 반환
+	    return WeeklyRecipesResponse.builder()
+	            .budget(budget)
+	            .recipes(recipeList)
+	            .build();
+	}
+
 }
