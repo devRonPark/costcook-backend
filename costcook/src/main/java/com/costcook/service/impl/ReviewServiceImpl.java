@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.request.UpdateReviewRequest;
@@ -26,13 +27,41 @@ import com.costcook.repository.ReviewRepository;
 import com.costcook.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 	private final RecipeRepository recipeRepository;
 	private final ReviewRepository reviewRepository;
+	
+	
+	// 레시피 상세페이지 > 리뷰 목록 가져오기
+	@Override
+	public ReviewListResponse getReviewList(Long recipeId, int page, int size) {
+		int validPage = Math.max(page, 1) - 1; // 최소 페이지 설정: 1부터
+		Pageable pageable = PageRequest.of(validPage, size);
+//		생성일 기준으로 정렬된 리뷰 목록을 가져옴
+		Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByCreatedAtDesc(recipeId, pageable);
 
+//		log.info("리뷰정보: {}", reviewPage.getContent());
+		
+		// 응답할 데이터
+		return ReviewListResponse.builder()
+			.page(page)
+			.size(size)
+			.totalPages(reviewPage.getTotalPages())
+			.totalReviews(reviewPage.getTotalElements())
+			.reviews(
+				reviewPage.getContent().stream().map(ReviewResponse::toDTO).toList()		
+			)
+			.build();
+		
+	}
+
+	
+	// 리뷰 등록
 	@Override
 	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
 		Optional<Recipe> optRecipe = recipeRepository.findById(reviewRequest.getRecipeId());
