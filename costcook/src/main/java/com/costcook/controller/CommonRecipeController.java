@@ -88,6 +88,7 @@ public class CommonRecipeController {
 	// 타 사이트 영역 가져오기
 	@GetMapping("/test")
 	   public ResponseEntity<?> testMan(@RequestParam("number") int number) {
+		System.out.println(number);
 	      String url = "https://m.10000recipe.com/recipe/" + number;
 	      RestTemplate restTemplate = new RestTemplate();
 	      String htmlContent = restTemplate.getForObject(url, String.class);
