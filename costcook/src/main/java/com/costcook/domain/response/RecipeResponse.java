@@ -36,7 +36,7 @@ public class RecipeResponse {
 				.createdAt(recipe.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
 				.updatedAt(recipe.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
 				.servings(recipe.getServings())
-				//.price(totalPrice.intValue())
+				.price(totalPrice.intValue())
 				.viewCount(recipe.getViewCount())
 				// .favoriteCount(recipe.getFavoriteCount())
 				.reviewCount(reviewCount)
