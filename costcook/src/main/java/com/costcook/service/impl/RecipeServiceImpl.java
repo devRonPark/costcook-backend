@@ -102,7 +102,6 @@ public class RecipeServiceImpl implements RecipeService {
 		Long totalPrice = recipeRepository.getTotalPrice(recipe.getId());
 		// 레시피 테이블에 가격 반영
 		recipe.setPrice(totalPrice.intValue());
-		
 		// 리뷰 개수 가져오기
 		return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice);
 	}
