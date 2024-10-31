@@ -13,7 +13,7 @@ public class AdminRecipeRegisterRequest {
   private String title;
 
   // 레시피 만개번호
-  private Integer rcpSno = 0;
+  private Integer rcpSno;
 
   // 레시피 설명
   private String description;

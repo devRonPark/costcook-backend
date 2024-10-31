@@ -158,118 +158,6 @@ public class AdminServiceImpl implements AdminService {
 
   @Transactional
   @Override
-  public boolean updateRecipe(
-    Long id, 
-    AdminRecipeRegisterRequest recipeRequest,
-    MultipartFile newThumbnailFile) {
-      try {
-          // 레시피 ID와 레시피 요청 데이터의 유효성 검증
-          if (id == null || recipeRequest == null) {
-              throw new IllegalArgumentException("레시피 ID나 요청 데이터가 null일 수 없습니다.");
-          }
-
-          // 기존 레시피 조회
-          log.info("레시피 조회 - 레시피 ID: {}", id);
-          Recipe recipe = recipeRepository.findById(id)
-              .orElseThrow(() -> new IllegalArgumentException("해당 레시피가 존재하지 않습니다: " + id));
-
-          // 카테고리 조회
-          log.info("카테고리 조회 - 카테고리 ID: {}", recipeRequest.getCategoryId());
-          Category category = categoryRepository.findById(recipeRequest.getCategoryId())
-              .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다: " + recipeRequest.getCategoryId()));
-
-          // 썸네일 파일 처리
-          String thumbnailUrl = recipe.getThumbnailUrl();
-          if (newThumbnailFile != null && !newThumbnailFile.isEmpty()) {
-            log.info("새 썸네일 파일 업로드 시작 - 파일명: {}", newThumbnailFile.getOriginalFilename());
-            String savedFileName = fileUploadService.uploadRecipeFile(newThumbnailFile);
-            thumbnailUrl = RECIPE_THUMBNAIL_ACCESS_PATH + savedFileName;
-            log.info("썸네일 파일 업로드 완료 - 저장된 파일명: {}", savedFileName);
-          } else if (recipeRequest.isThumbnailDeleted()) {
-              // 클라이언트에서 삭제 요청 시 URL을 null로 설정
-              thumbnailUrl = null;
-              log.info("썸네일 파일 제거 - URL이 null로 설정됨");
-          }
-
-          // 레시피 정보 업데이트
-          recipe.setTitle(recipeRequest.getTitle());
-          recipe.setRcpSno(recipeRequest.getRcpSno());
-          recipe.setDescription(recipeRequest.getDescription());
-          recipe.setCategory(category);
-          recipe.setServings(recipeRequest.getServings() != null ? recipeRequest.getServings() : 1);
-          // recipe.setPrice(recipeRequest.getPrice());
-          recipe.setThumbnailUrl(thumbnailUrl);
-
-          // 레시피 저장 (업데이트)
-          recipeRepository.save(recipe);
-          log.info("레시피 수정 완료 - 레시피 ID: {}", recipe.getId());
-
-          // 기존 재료 목록을 Map으로 변환 (ingredientId -> RecipeIngredient)
-          List<RecipeIngredient> existingIngredients = recipeIngredientRepository.findByRecipeId(id);
-          Map<Long, RecipeIngredient> existingIngredientMap = existingIngredients.stream()
-              .collect(Collectors.toMap(ri -> ri.getIngredient().getId(), ri -> ri));
-
-          // 요청된 재료 목록의 유효성 검증
-          if (recipeRequest.getIngredients() == null || recipeRequest.getIngredients().isEmpty()) {
-              throw new IllegalArgumentException("레시피에 최소 한 개 이상의 재료가 필요합니다.");
-          }
-
-          // 요청된 재료를 반복하며 업데이트 또는 새로 추가
-          for (IngredientDTO ingredientDTO : recipeRequest.getIngredients()) {
-              if (ingredientDTO.getIngredientId() == null) {
-                  throw new IllegalArgumentException("재료 ID가 null일 수 없습니다.");
-              }
-              Long ingredientId = ingredientDTO.getIngredientId();
-              RecipeIngredient existingIngredient = existingIngredientMap.get(ingredientId);
-
-              if (existingIngredient != null) {
-                  // 기존 재료 업데이트
-                  log.info("기존 재료 업데이트 - 재료 ID: {}", ingredientId);
-                  existingIngredient.setQuantity(ingredientDTO.getQuantity());
-                  // existingIngredient.setPrice((int) (ingredientDTO.getQuantity() * existingIngredient.getIngredient().getPrice()));
-                  log.info("기존 재료 업데이트 완료 - 재료 ID: {}, 레시피 ID: {}", ingredientId, recipe.getId());
-              } else {
-                  // 새로운 재료 추가
-                  log.info("새로운 재료 추가 - 재료 ID: {}", ingredientId);
-                  Ingredient ingredient = ingredientRepository.findById(ingredientId)
-                      .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 재료 ID입니다: " + ingredientId));
-
-                  RecipeIngredient newRecipeIngredient = RecipeIngredient.builder()
-                      .recipe(recipe)
-                      .ingredient(ingredient)
-                      .quantity(ingredientDTO.getQuantity())
-                      // .price((int) (ingredientDTO.getQuantity() * ingredient.getPrice()))
-                      .build();
-
-                  recipeIngredientRepository.save(newRecipeIngredient);
-                  log.info("새로운 재료 추가 완료 - 재료 ID: {}, 레시피 ID: {}", ingredientId, recipe.getId());
-              }
-
-              // 업데이트된 재료는 삭제 후보 목록에서 제거
-              existingIngredientMap.remove(ingredientId);
-          }
-
-          // 요청에 포함되지 않은 기존 재료 삭제
-          for (RecipeIngredient ingredientToDelete : existingIngredientMap.values()) {
-              recipeIngredientRepository.delete(ingredientToDelete);
-              log.info("기존 재료 삭제 완료 - 재료 ID: {}, 레시피 ID: {}", ingredientToDelete.getIngredient().getId(), recipe.getId());
-          }
-
-          log.info("레시피 및 재료 수정이 성공적으로 완료되었습니다 - 레시피 ID: {}", recipe.getId());
-          return true;
-
-      } catch (IllegalArgumentException e) {
-          log.error("유효하지 않은 데이터로 인해 업데이트 실패: {}", e.getMessage());
-          return false;
-      } catch (Exception e) {
-          log.error("레시피 및 재료 수정 중 오류 발생: " + e.getMessage(), e);
-          throw new RuntimeException("레시피 수정 중 예기치 못한 오류가 발생했습니다.", e);
-      }
-  }
-
-
-  @Transactional
-  @Override
   public void deleteRecipe(Long id) {
     try {
       // 레시피 존재 여부 확인
@@ -293,5 +181,155 @@ public class AdminServiceImpl implements AdminService {
       throw new RuntimeException("레시피 삭제 중 예기치 못한 오류가 발생했습니다.", e);
     }
   }
+
+  @Transactional
+  @Override
+  public boolean updateRecipe(
+    Long id, 
+    AdminRecipeRegisterRequest recipeRequest,
+    MultipartFile newThumbnailFile) {
+    
+    // [1] 기존 레시피 조회
+    Recipe recipe = recipeRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("해당 레시피가 존재하지 않습니다: " + id));
+
+    // [2] 썸네일 파일 처리
+    String thumbnailUrl = processThumbnailFile(newThumbnailFile, recipeRequest.isThumbnailDeleted(), recipe);
+
+    // [3] 레시피 필드 업데이트 (null이 아닌 필드만 수정)
+    updateRecipeFields(recipe, recipeRequest, thumbnailUrl);
+
+    // [4] 재료 업데이트
+    updateIngredients(id, recipeRequest.getIngredients(), recipe);
+
+    log.info("레시피 및 재료 수정 완료 - 레시피 ID: {}", recipe.getId());
+    return true;
+  }
+
+
+  // [2] 썸네일 파일 처리
+  private String processThumbnailFile(MultipartFile newThumbnailFile, boolean thumbnailDeleted, Recipe recipe) {
+    
+    // 새로운 썸네일 파일이 있을 경우 파일 업데이트
+    if (newThumbnailFile != null && !newThumbnailFile.isEmpty()) {
+      log.info("새 썸네일 파일 업로드 - 파일명: {}", newThumbnailFile.getOriginalFilename());
+      String savedFileName = fileUploadService.uploadRecipeFile(newThumbnailFile);
+      return RECIPE_THUMBNAIL_ACCESS_PATH + savedFileName;  // 파일의 서버 경로
+    } 
+
+    // 썸네일 삭제 플래그가 설정된 경우, 썸네일 URL을 null로 설정
+    else if (thumbnailDeleted) {
+      log.info("썸네일 이미지가 삭제됩니다.");
+      return null;
+    }
+
+    // 기존 썸네일 URL 유지
+    return recipe.getThumbnailUrl();
+  }
+
+
+  // [3] 변경된 필드만 update
+  private void updateRecipeFields(Recipe recipe, AdminRecipeRegisterRequest request, String thumbnailUrl) {
+    
+    // 제목이 null이 아닌 경우에만 업데이트
+    recipe.setTitle(request.getTitle() != null ? request.getTitle() : recipe.getTitle());
+    
+    // 고유번호가 null이 아닌 경우에만 업데이트
+    recipe.setRcpSno(request.getRcpSno() != null ? request.getRcpSno() : recipe.getRcpSno());
+    
+    // 설명이 null이 아닌 경우에만 업데이트
+    recipe.setDescription(request.getDescription() != null ? request.getDescription() : recipe.getDescription());
+    
+    // 서빙 수가 null이 아닌 경우에만 업데이트
+    recipe.setServings(request.getServings() != null ? request.getServings() : recipe.getServings());
+
+    // 카테고리 ID가 null이 아닌 경우에만 카테고리 업데이트
+    if (request.getCategoryId() != null) {
+      Category category = categoryRepository.findById(request.getCategoryId())
+          .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다: " + request.getCategoryId()));
+      recipe.setCategory(category);
+    }
+    
+    // 썸네일 URL은 삭제 요청이 있거나 새 URL이 설정될 때만 업데이트
+    if (request.isThumbnailDeleted()) {
+      recipe.setThumbnailUrl(null); // 삭제 요청이 있는 경우 URL을 null로 설정
+    } else if (thumbnailUrl != null) {
+      recipe.setThumbnailUrl(thumbnailUrl); // 새 URL이 있는 경우 업데이트
+    }
+  }
+
+
+  // [4] 재료 업데이트 처리
+  private void updateIngredients(Long recipeId, List<IngredientDTO> ingredients, Recipe recipe) {
+    if (ingredients == null || ingredients.isEmpty()) {
+      throw new IllegalArgumentException("레시피에는 최소 한 개 이상의 재료가 필요합니다.");
+    }
+    
+    // [4-1] 기존 재료 목록 가져오기
+    Map<Long, RecipeIngredient> existingIngredients = getExistingIngredientsMap(recipeId);
+    
+    for (IngredientDTO dto : ingredients) {
+      validateIngredientDTO(dto);
+
+      // 기존 재료 업데이트 또는 새 재료 추가
+      RecipeIngredient existingIngredient = existingIngredients.remove(dto.getIngredientId());
+      if (existingIngredient != null) {
+        updateExistingIngredient(existingIngredient, dto);
+      } else {
+        addNewIngredient(dto, recipe);
+      }
+    }
+
+    // [4-3] 남아있는 기존 재료 삭제
+    deleteRemainingIngredients(existingIngredients);
+  }
+
+  // [4-1] 기존 재료 목록 가져오기
+  private Map<Long, RecipeIngredient> getExistingIngredientsMap(Long recipeId) {
+    return recipeIngredientRepository.findByRecipeId(recipeId).stream()
+        .collect(Collectors.toMap(ri -> ri.getIngredient().getId(), ri -> ri));
+  }
+
+  // [4-2] 재료 유효성 검사
+  private void validateIngredientDTO(IngredientDTO dto) {
+    if (dto.getIngredientId() == null) {
+        throw new IllegalArgumentException("재료 ID가 null일 수 없습니다.");
+    }
+    if (dto.getQuantity() <= 0) {
+        throw new IllegalArgumentException("재료의 양은 0보다 커야 합니다.");
+    }
+  }
+
+  // [4-3] 기존 재료 업데이트
+  private void updateExistingIngredient(RecipeIngredient existingIngredient, IngredientDTO dto) {
+    existingIngredient.setQuantity(dto.getQuantity());
+    recipeIngredientRepository.save(existingIngredient);
+    log.info("기존 재료 업데이트 - 재료 ID: {}", dto.getIngredientId());
+  }
+
+  // [4-4] 새로운 재료 추가
+  private void addNewIngredient(IngredientDTO dto, Recipe recipe) {
+    Ingredient ingredient = ingredientRepository.findById(dto.getIngredientId())
+        .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 재료 ID입니다: " + dto.getIngredientId()));
+    RecipeIngredient newIngredient = RecipeIngredient.builder()
+        .recipe(recipe)
+        .ingredient(ingredient)
+        .quantity(dto.getQuantity())
+        .build();
+    recipeIngredientRepository.save(newIngredient);
+    log.info("새로운 재료 추가 - 재료 ID: {}", dto.getIngredientId());
+  }
+
+  // [4-5] 남아있는 기존 재료 삭제
+  private void deleteRemainingIngredients(Map<Long, RecipeIngredient> existingIngredients) {
+    existingIngredients.values().forEach(this::deleteIngredient);
+  }
+
+  // [4-6] 재료 삭제
+  private void deleteIngredient(RecipeIngredient ingredient) {
+    recipeIngredientRepository.delete(ingredient);
+    log.info("기존 재료 삭제 - 재료 ID: {}", ingredient.getIngredient().getId());
+  }
+
   
 }
