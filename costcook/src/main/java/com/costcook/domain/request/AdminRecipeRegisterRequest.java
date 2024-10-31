@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Data
 public class AdminRecipeRegisterRequest {
 
@@ -12,7 +13,7 @@ public class AdminRecipeRegisterRequest {
   private String title;
 
   // 레시피 만개번호
-  private int rcpSno = 0;
+  private Integer rcpSno;
 
   // 레시피 설명
   private String description;
@@ -38,11 +39,11 @@ public class AdminRecipeRegisterRequest {
   @Getter
   @Setter
   public static class IngredientDTO {
-      // 재료 ID
-      private Long ingredientId;
+    // 재료 ID
+    private Long ingredientId;
 
-      // 재료 양
-      private double quantity;
+    // 재료 양
+    private double quantity;
   }
 
 }

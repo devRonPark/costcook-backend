@@ -12,4 +12,6 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
 
   List<Ingredient> findByNameContaining(String keyword);
 
+  boolean existsByName(String name);
+
 }
