@@ -5,12 +5,9 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.costcook.domain.request.AdminRecipeRegisterRequest;
-import com.costcook.domain.response.IngredientSearchResponse;
 import com.costcook.domain.response.RecipeIngredientResponse;
 
-public interface AdminService {
-
-  List<IngredientSearchResponse> getIngredientsByName(String keyword);
+public interface AdminRecipeService {
 
   boolean saveRecipe(AdminRecipeRegisterRequest recipe, MultipartFile thumbnailFile);
 

@@ -1,11 +1,14 @@
 package com.costcook.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,9 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.costcook.domain.request.AdminRecipeRegisterRequest;
-import com.costcook.domain.response.IngredientSearchResponse;
+import com.costcook.domain.response.AdminIngredientResponse;
 import com.costcook.domain.response.RecipeIngredientResponse;
-import com.costcook.service.AdminService;
+import com.costcook.service.AdminIngredientService;
+import com.costcook.service.AdminRecipeService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,23 +33,46 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/admin")
 public class AdminController {
 
-  private final AdminService adminService;
+  private final AdminRecipeService adminRecipeService;
+  private final AdminIngredientService adminIngredientService;
 
   @GetMapping("/ingredients")
-  public ResponseEntity<List<IngredientSearchResponse>> getIngredientList(@RequestParam String keyword) {
+  public ResponseEntity<List<AdminIngredientResponse>> getAllIngredients() {
+    log.info("모든 재료를 가져오라는 요청을 받았습니다.");
+
+    List<AdminIngredientResponse> ingredientList = adminIngredientService.getAllIngredients();
+
+    return ResponseEntity.ok(ingredientList);
+  }
+  
+
+  @GetMapping("/ingredients/search")
+  public ResponseEntity<List<AdminIngredientResponse>> searchIngredients(@RequestParam("keyword") String keyword) {
 
     log.info("Keyword received: {}", keyword);
 
-    List<IngredientSearchResponse> responseList = adminService.getIngredientsByName(keyword);
+    List<AdminIngredientResponse> ingredientList = adminIngredientService.searchIngredientsByName(keyword);
 
-    return ResponseEntity.ok(responseList);
+    return ResponseEntity.ok(ingredientList);
   }
 
-  @GetMapping("/recipes/{id}/ingredients")
-  public ResponseEntity<List<RecipeIngredientResponse>> getRecipeIngredients(@PathVariable Long id) {
+  
+  @GetMapping("/ingredients/duplicate")
+  public ResponseEntity<Map<String, Boolean>> checkDuplicateIngredient(
+    @RequestParam("ingredientName") String ingredientName) {
+
+    boolean exists = adminIngredientService.isIngredientDuplicate(ingredientName);
+    Map<String, Boolean> response = new HashMap<>();
+    response.put("exists", exists);
+    return ResponseEntity.ok(response);
+  }
+
+
+  @GetMapping("/recipes/{recipeId}/ingredients")
+  public ResponseEntity<List<RecipeIngredientResponse>> getRecipeIngredients(@PathVariable("recipeId") Long recipeId) {
     try {
       // 서비스에서 이미 변환된 DTO 리스트를 받아옵니다.
-      List<RecipeIngredientResponse> ingredientResponses = adminService.findIngredientsByRecipeId(id);
+      List<RecipeIngredientResponse> ingredientResponses = adminRecipeService.findIngredientsByRecipeId(recipeId);
       return ResponseEntity.ok(ingredientResponses);
     } catch (Exception e) {
       log.error("레시피 재료 조회 중 오류 발생: " + e.getMessage(), e);
@@ -55,76 +82,74 @@ public class AdminController {
 
   @PostMapping("/recipes")
   public ResponseEntity<String> createRecipe(
-        @RequestPart("recipe") AdminRecipeRegisterRequest recipe,
-        @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnailFile) {
-    try {
-      
-      log.info("레시피 제목: " + recipe.getTitle());
-      if (thumbnailFile != null) {
-        log.info("파일 이름: " + thumbnailFile.getOriginalFilename());
-      }
+    @ModelAttribute AdminRecipeRegisterRequest recipe,
+    @RequestPart(value = "thumbnailFile", required = false) MultipartFile thumbnailFile) {
 
-      boolean result = adminService.saveRecipe(recipe, thumbnailFile);
-      
-      if(result == false) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 등록에 실패했습니다.");
-      }
+    // [로그] 레시피 주요 정보 
+    log.info("레시피 등록 요청 - 제목: {}, 고유번호: {}, 카테고리ID: {}", 
+      recipe.getTitle(), recipe.getRcpSno(), recipe.getCategoryId());
 
-      log.info("레시피 등록 완료 : " + recipe.getTitle());
-      return ResponseEntity.ok("레시피가 성공적으로 등록되었습니다.");
-
-    } catch (Exception e) {
-      log.error("레시피 생성 중 오류 발생: " + e.getMessage(), e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 등록에 실패했습니다.");
+    // [로그] 썸네일 파일 이름
+    if (thumbnailFile != null) {
+      log.info("파일 이름: " + thumbnailFile.getOriginalFilename());
     }
+
+    // 레시피 등록 로직 수행
+    boolean result = adminRecipeService.saveRecipe(recipe, thumbnailFile);
+
+    // [예외] 레시피 등록에 실패하면 IllegalStateException 발생.
+    if (!result) {
+      throw new IllegalStateException("레시피 등록에 실패했습니다."); 
+    }
+
+    // [로그] 레시피 등록 성공
+    log.info("레시피 등록 완료 : " + recipe.getTitle());
+
+    // OK 응답 반환
+    return ResponseEntity.ok("레시피가 성공적으로 등록되었습니다.");
   }
 
-  @PatchMapping("/recipes/{id}")
+
+  @PatchMapping("/recipes/{recipeId}")
   public ResponseEntity<String> updateRecipe(
-      @PathVariable Long id,
-      @RequestPart("recipe") AdminRecipeRegisterRequest recipe,  // JSON 데이터를 받음 (Blob으로 감싸진 JSON)
-      @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnailFile) {
-    try {
-      
-      log.info("레시피 수정 요청: 레시피 ID: " + id);
-      log.info("수정할 레시피 제목: " + recipe.getTitle());
-      log.info("레시피 썸네일 삭제 상태 : {}", recipe.isThumbnailDeleted());
-
-      if (thumbnailFile != null) {
-        log.info("새로운 파일 이름: " + thumbnailFile.getOriginalFilename());
-      } else {
-        log.info("이미지 파일 삭제");
-      }
-
-      // 수정 서비스 호출
-      boolean result = adminService.updateRecipe(id, recipe, thumbnailFile);
-
-      if (!result) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 수정에 실패했습니다.");
-      }
-
-      log.info("레시피 수정 완료: " + recipe.getTitle());
-      return ResponseEntity.ok("레시피가 성공적으로 수정되었습니다.");
-
-    } catch (Exception e) {
-      log.error("레시피 수정 중 오류 발생: " + e.getMessage(), e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 수정에 실패했습니다.");
+    @PathVariable("recipeId") Long recipeId,
+    @ModelAttribute AdminRecipeRegisterRequest recipe,
+    @RequestPart(value = "thumbnailFile", required = false) MultipartFile thumbnailFile) {
+    
+    // [로그] 레시피 ID 확인
+    log.info("레시피 수정 요청 - 레시피 ID: {}", recipeId);
+    
+    // [로그] 썸네일 파일 확인
+    if (thumbnailFile != null) {
+      log.info("새로운 썸네일 파일 이름: {}", thumbnailFile.getOriginalFilename());
     }
-  }
-
-  @DeleteMapping("/recipes/{id}")
-  public ResponseEntity<String> deleteRecipe(@PathVariable Long id) {
-    try {
-      adminService.deleteRecipe(id);
-      return ResponseEntity.ok("레시피가 성공적으로 삭제되었습니다.");
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("레시피를 잦을 수 없습니다.");
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 삭제 중 오류가 발생했습니다.");
+  
+    // 레시피 수정 로직
+    boolean result = adminRecipeService.updateRecipe(recipeId, recipe, thumbnailFile);
+  
+    // [예외] 레시피 수정에 실패하면 IllegalStateException 발생.
+    if (!result) {
+      throw new IllegalStateException("레시피 수정에 실패했습니다."); 
     }
-  }
+  
+    // [로그] 레시피 수정 완료
+    log.info("레시피 수정 완료 - 레시피 ID: {}", recipeId);
 
+    // OK 응답 반환
+    return ResponseEntity.ok("레시피가 성공적으로 수정되었습니다.");
+  }
 
   
+  @DeleteMapping("/recipes/{recipeId}")
+  public ResponseEntity<String> deleteRecipe(@PathVariable("recipeId") Long recipeId) {
+    try {
+      adminRecipeService.deleteRecipe(recipeId);
+      return ResponseEntity.ok("레시피가 성공적으로 삭제되었습니다.");
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("레시피를 잦을 수 없습니다.");
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 삭제 중 오류가 발생했습니다.");
+    }
+  }
 
 }
