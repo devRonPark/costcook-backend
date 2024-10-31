@@ -50,4 +50,9 @@ public class AdminIngredientServiceImpl implements AdminIngredientService {
     return responseList;
   }
 
+  @Override
+  public boolean isIngredientDuplicate(String name) {
+    return ingredientRepository.existsByName(name);
+  }
+
 }

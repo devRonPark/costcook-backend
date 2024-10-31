@@ -9,5 +9,7 @@ public interface AdminIngredientService {
   List<AdminIngredientResponse> getAllIngredients();
 
   List<AdminIngredientResponse> searchIngredientsByName(String keyword);
+
+  boolean isIngredientDuplicate(String name);
   
 }

@@ -1,6 +1,8 @@
 package com.costcook.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +55,18 @@ public class AdminController {
 
     return ResponseEntity.ok(ingredientList);
   }
+
+  
+  @GetMapping("/ingredients/duplicate")
+  public ResponseEntity<Map<String, Boolean>> checkDuplicateIngredient(
+    @RequestParam("ingredientName") String ingredientName) {
+
+    boolean exists = adminIngredientService.isIngredientDuplicate(ingredientName);
+    Map<String, Boolean> response = new HashMap<>();
+    response.put("exists", exists);
+    return ResponseEntity.ok(response);
+  }
+
 
   @GetMapping("/recipes/{recipeId}/ingredients")
   public ResponseEntity<List<RecipeIngredientResponse>> getRecipeIngredients(@PathVariable("recipeId") Long recipeId) {
