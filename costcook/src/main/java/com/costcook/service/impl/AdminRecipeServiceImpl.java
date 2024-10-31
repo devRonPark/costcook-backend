@@ -19,7 +19,7 @@ import com.costcook.repository.CategoryRepository;
 import com.costcook.repository.IngredientRepository;
 import com.costcook.repository.RecipeIngredientRepository;
 import com.costcook.repository.RecipeRepository;
-import com.costcook.service.AdminService;
+import com.costcook.service.AdminRecipeService;
 import com.costcook.service.FileUploadService;
 
 import jakarta.transaction.Transactional;
@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AdminServiceImpl implements AdminService {
+public class AdminRecipeServiceImpl implements AdminRecipeService {
 
   private final IngredientRepository ingredientRepository;
   private final RecipeRepository recipeRepository;

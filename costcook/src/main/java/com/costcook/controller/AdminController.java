@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.costcook.domain.request.AdminRecipeRegisterRequest;
 import com.costcook.domain.response.IngredientSearchResponse;
 import com.costcook.domain.response.RecipeIngredientResponse;
-import com.costcook.service.AdminService;
+import com.costcook.service.AdminRecipeService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,14 +30,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/admin")
 public class AdminController {
 
-  private final AdminService adminService;
+  private final AdminRecipeService adminRecipeService;
 
   @GetMapping("/ingredients")
   public ResponseEntity<List<IngredientSearchResponse>> searchIngredientList(@RequestParam("keyword") String keyword) {
 
     log.info("Keyword received: {}", keyword);
 
-    List<IngredientSearchResponse> responseList = adminService.searchIngredientsByName(keyword);
+    List<IngredientSearchResponse> responseList = adminRecipeService.searchIngredientsByName(keyword);
 
     return ResponseEntity.ok(responseList);
   }
@@ -46,7 +46,7 @@ public class AdminController {
   public ResponseEntity<List<RecipeIngredientResponse>> getRecipeIngredients(@PathVariable("recipeId") Long recipeId) {
     try {
       // 서비스에서 이미 변환된 DTO 리스트를 받아옵니다.
-      List<RecipeIngredientResponse> ingredientResponses = adminService.findIngredientsByRecipeId(recipeId);
+      List<RecipeIngredientResponse> ingredientResponses = adminRecipeService.findIngredientsByRecipeId(recipeId);
       return ResponseEntity.ok(ingredientResponses);
     } catch (Exception e) {
       log.error("레시피 재료 조회 중 오류 발생: " + e.getMessage(), e);
@@ -69,7 +69,7 @@ public class AdminController {
     }
 
     // 레시피 등록 로직 수행
-    boolean result = adminService.saveRecipe(recipe, thumbnailFile);
+    boolean result = adminRecipeService.saveRecipe(recipe, thumbnailFile);
 
     // [예외] 레시피 등록에 실패하면 IllegalStateException 발생.
     if (!result) {
@@ -99,7 +99,7 @@ public class AdminController {
     }
   
     // 레시피 수정 로직
-    boolean result = adminService.updateRecipe(recipeId, recipe, thumbnailFile);
+    boolean result = adminRecipeService.updateRecipe(recipeId, recipe, thumbnailFile);
   
     // [예외] 레시피 수정에 실패하면 IllegalStateException 발생.
     if (!result) {
@@ -117,7 +117,7 @@ public class AdminController {
   @DeleteMapping("/recipes/{recipeId}")
   public ResponseEntity<String> deleteRecipe(@PathVariable("recipeId") Long recipeId) {
     try {
-      adminService.deleteRecipe(recipeId);
+      adminRecipeService.deleteRecipe(recipeId);
       return ResponseEntity.ok("레시피가 성공적으로 삭제되었습니다.");
     } catch (IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("레시피를 잦을 수 없습니다.");

@@ -8,7 +8,7 @@ import com.costcook.domain.request.AdminRecipeRegisterRequest;
 import com.costcook.domain.response.IngredientSearchResponse;
 import com.costcook.domain.response.RecipeIngredientResponse;
 
-public interface AdminService {
+public interface AdminRecipeService {
 
   List<IngredientSearchResponse> searchIngredientsByName(String keyword);
 
