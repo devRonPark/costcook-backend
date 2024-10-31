@@ -16,7 +16,7 @@ public class RecipeDetailResponse {
     private int servings;
     private int viewCount;
     private int favoriteCount;
-    private int commentCount;
+    private int reviewCount;
     private int price;
     private double avgRatings;
     private List<IngredientResponse> ingredients;
@@ -26,12 +26,12 @@ public class RecipeDetailResponse {
     		.recipeId(recipeResponse.getId())
     		.title(recipeResponse.getTitle())
     		.description(recipeResponse.getDescription())
-    		// .thumbnailUrl(recipeResponse.getThumbnailUrl())
+    		.thumbnailUrl(recipeResponse.getThumbnailUrl())
     		.servings(recipeResponse.getServings())
     		.viewCount(recipeResponse.getViewCount())
     		.price(recipeResponse.getPrice())
     		// .favoriteCount(recipeResponse.getFavoriteCount())
-    		.commentCount(recipeResponse.getCommentCount())
+    		.reviewCount(recipeResponse.getReviewCount())
     		.avgRatings(recipeResponse.getAvgRatings())
     		.ingredients(ingredients)
     		.build();

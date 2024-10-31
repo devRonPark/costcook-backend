@@ -3,13 +3,19 @@ package com.costcook.service.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.request.UpdateReviewRequest;
 import com.costcook.domain.response.CreateReviewResponse;
+import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.entity.Recipe;
 import com.costcook.entity.Review;
@@ -21,13 +27,37 @@ import com.costcook.repository.ReviewRepository;
 import com.costcook.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 	private final RecipeRepository recipeRepository;
 	private final ReviewRepository reviewRepository;
-
+	
+	// 레시피 상세페이지 > 리뷰 목록 가져오기
+	@Override
+	public ReviewListResponse getReviewList(Long recipeId, int page, int size) {
+		int validPage = Math.max(page, 1) - 1; // 최소 페이지 설정: 1부터
+		Pageable pageable = PageRequest.of(validPage, size);
+		// 생성일 기준으로 정렬된 리뷰 목록을 가져옴
+		// FIX: deleted_at 필드가 null 이 아닌 즉 삭제되지 않은 리뷰 목록만 조회 필요.
+		Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByCreatedAtDesc(recipeId, pageable);
+		
+		// 응답할 데이터
+		return ReviewListResponse.builder()
+			.page(page)
+			.size(size)
+			.totalPages(reviewPage.getTotalPages())
+			.totalReviews(reviewPage.getTotalElements())
+			.reviews(
+				reviewPage.getContent().stream().map(ReviewResponse::toDTO).toList()		
+			)
+			.build();
+	}
+	
+	// 리뷰 등록
 	@Override
 	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
 		Optional<Recipe> optRecipe = recipeRepository.findById(reviewRequest.getRecipeId());
@@ -44,15 +74,6 @@ public class ReviewServiceImpl implements ReviewService {
 		Review result = reviewRepository.save(review);
 		return CreateReviewResponse.toDTO(result);
 	}
-
-	@Override
-	public List<ReviewResponse> getReviewList(Long recipeId) {
-		List<Review> reviewList = reviewRepository.findAllByRecipeId(recipeId);
-		return reviewList.stream()
-	        .filter(review -> review.getDeletedAt() == null) // 삭제되지 않은 리뷰만 필터링
-	        .map(ReviewResponse::toDTO)
-	        .toList();
-		}
 	
 	// 삭제
 	@Transactional
@@ -115,5 +136,28 @@ public class ReviewServiceImpl implements ReviewService {
 		
 		 // 수정된 리뷰 정보를 반환
 		return ReviewResponse.toDTO(updatedReview);
+	}
+
+	@Override
+	public ReviewListResponse getReviewListByUserWithPagination(User user, int page) {
+		int size = 9; // 기본 페이지 크기 설정
+		int validPage = Math.max(page, 1) - 1; // 최소 1 이상의 값을 보장
+
+		// 페이지네이션 설정
+		Pageable pageable = PageRequest.of(validPage, size);
+		Page<Review> reviewPage = reviewRepository.findAllByUserId(user.getId(), pageable);
+
+		// 빌더 패턴을 사용하여 응답 구성
+		return ReviewListResponse.builder()
+			.page(page)
+			.size(reviewPage.getNumberOfElements()) // 현재 페이지의 리뷰 개수 
+			.totalPages(reviewPage.getTotalPages())
+			.totalReviews(reviewPage.getTotalElements())
+			.reviews(
+				reviewPage.getContent().stream() // Page에서 List로 변환 후 스트림 처리
+					.map(review -> ReviewResponse.toDTO(review)) // 각 리뷰를 DTO로 변환
+					.collect(Collectors.toList()) // 변환 결과를 리스트로 수집
+			)
+			.build();
 	}
 }

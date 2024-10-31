@@ -35,42 +35,32 @@ public class Recipe {
 	@Column(updatable = false)
 	private Long id;
 	
-	// 카테고리 식별자 (디폴트 null, 외래키(카테고리 테이블))
-	@ManyToOne
-	@JoinColumn(name = "category_id", nullable = true)
-	private Category category;
+	// 등록일
+	@CreatedDate
+	@Column(name = "created_at")
+	private LocalDateTime createdAt;
+	
+	// 레시피 설명 (null 허용)
+	@Column(nullable = true)
+	private String description;
 	
 	// 만개 레시피 제공 데이터 고유번호
 	@Column(name="rcp_sno", nullable = false)
 	@Builder.Default()
 	private int rcpSno = 0;
 	
-	// 레시피 이름
-	@Column(nullable = false)
-	private String title;
-	
-	// 레시피 이미지
-	@Column(nullable = true)
-	private String thumbnailUrl;
-	
-	// 레시피 설명 (null 허용)
-	@Column(nullable = true)
-	private String description;
-	
 	// 몇인분 (디폴트 1)
 	@Column(nullable = false)
 	@Builder.Default()
 	private int servings = 1;
 	
-//	// 가격(1인분 기준)
-//	@Column(nullable = false)
-//	@Builder.Default()
-//	private int price = 0;
+	// 레시피 이미지
+	@Column(nullable = true)
+	private String thumbnailUrl;
 	
-	// 등록일
-	@CreatedDate
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
+	// 레시피 이름
+	@Column(nullable = false)
+	private String title;
 	
 	// 수정일
 	@LastModifiedDate
@@ -81,6 +71,19 @@ public class Recipe {
 	@Column(nullable = false)
 	@Builder.Default()
 	private int viewCount = 0;
+	
+	// 카테고리 식별자 (디폴트 null, 외래키(카테고리 테이블))
+	@ManyToOne
+	@JoinColumn(name = "category_id", nullable = true)
+	private Category category;
+	
+	// 레시피 총 가격
+	@Column(nullable = false)
+	@Builder.Default()
+	private int price = 0;
+	
+	
+	
 	
 //	// 즐겨찾기 수 (디폴트 0)
 //	@Column(nullable = false)
