@@ -21,6 +21,8 @@ public class ReviewResponse {
 	private String comment;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime createdAt;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	private LocalDateTime updatedAt;
 	private User user;
 	private Recipe recipe;
 	
@@ -52,6 +54,7 @@ public class ReviewResponse {
 				.score(review.getScore())
                 .comment(review.getComment())
                 .createdAt(review.getCreatedAt())
+				.updatedAt(review.getUpdatedAt())
                 .user(User.builder()
                 	.id(review.getUser().getId())
                     .nickname(review.getUser().getNickname())

@@ -1,11 +1,9 @@
 package com.costcook.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.request.UpdateReviewRequest;
-import com.costcook.domain.response.CreateReviewResponse;
 import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.entity.Recipe;
@@ -42,8 +39,8 @@ public class ReviewServiceImpl implements ReviewService {
 		int validPage = Math.max(page, 1) - 1; // 최소 페이지 설정: 1부터
 		Pageable pageable = PageRequest.of(validPage, size);
 		// 생성일 기준으로 정렬된 리뷰 목록을 가져옴
-		// FIX: deleted_at 필드가 null 이 아닌 즉 삭제되지 않은 리뷰 목록만 조회 필요.
-		Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByUpdatedAtDesc(recipeId, pageable);
+		// 조회 시 where 조건: deletedAt 이 null 인 경우(삭제되지 않은 경우) && status 가 false 인 경우(비공개 처리가 되지 않은 경우)
+		Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByCreatedAtDesc(recipeId, pageable);
 		
 		// 응답할 데이터
 		return ReviewListResponse.builder()
@@ -150,7 +147,8 @@ public class ReviewServiceImpl implements ReviewService {
 
 		// 페이지네이션 설정
 		Pageable pageable = PageRequest.of(validPage, size);
-		Page<Review> reviewPage = reviewRepository.findAllByUserId(user.getId(), pageable);
+		// 조회 시 where 조건: deletedAt 이 null 인 경우(삭제되지 않은 경우) && status 가 false 인 경우(비공개 처리가 되지 않은 경우)
+		Page<Review> reviewPage = reviewRepository.findAllByUserIdAndStatusFalseAndNotDeleted(user.getId(), pageable);
 
 		// 빌더 패턴을 사용하여 응답 구성
 		return ReviewListResponse.builder()
