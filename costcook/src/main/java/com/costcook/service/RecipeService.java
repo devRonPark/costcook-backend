@@ -2,6 +2,7 @@ package com.costcook.service;
 
 import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
+import com.costcook.domain.response.WeeklyRecipesResponse;
 
 public interface RecipeService {
 
@@ -15,4 +16,6 @@ public interface RecipeService {
 	RecipeResponse getRecipeById(Long id);
 
 	RecipeListResponse searchRecipes(String keyword, int page);
+
+	WeeklyRecipesResponse getRecipesByBudget(int budget);
 }

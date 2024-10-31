@@ -14,10 +14,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReviewResponse {		
+	private Long id;
 	private int score;
 	private String comment;
 	private boolean status;
-	private String createdAt;
+	private String updatedAt;
 	private User user;
 	private Recipe recipe;
 	
@@ -45,22 +46,22 @@ public class ReviewResponse {
 	// Review -> response 변환
 	public static ReviewResponse toDTO(Review review) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-	    String formattedDate = review.getCreatedAt() != null ? review.getCreatedAt().format(formatter) : null;
+	    String formattedDate = review.getUpdatedAt() != null ? review.getUpdatedAt().format(formatter) : null;
 		return ReviewResponse.builder()
-				 .score(review.getScore())
-                 .comment(review.getComment())
-                 .status(review.isStatus())
-                 .createdAt(formattedDate)
-                 .user(User.builder()
-                		  .id(review.getUser().getId())
-                          .nickname(review.getUser().getNickname())
-                          .profileUrl(review.getUser().getProfileUrl())
-                          .build())
-                 .recipe(Recipe.builder()
-                         .id(review.getRecipe().getId())
-                         .thumbnailUrl(review.getRecipe().getThumbnailUrl())
-                         .build())
-                 .build();						
+				.id(review.getId())
+				.score(review.getScore())
+	            .comment(review.getComment())
+	            .updatedAt(formattedDate)
+	            .user(User.builder()
+            		    .id(review.getUser().getId())
+	                    .nickname(review.getUser().getNickname())
+	                    .profileUrl(review.getUser().getProfileUrl())
+	                    .build())
+	            .recipe(Recipe.builder()
+	                    .id(review.getRecipe().getId())
+	                    .thumbnailUrl(review.getRecipe().getThumbnailUrl())
+	                    .build())
+	            .build();						
 	}
 	
 }

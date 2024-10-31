@@ -43,7 +43,7 @@ public class ReviewServiceImpl implements ReviewService {
 		Pageable pageable = PageRequest.of(validPage, size);
 		// 생성일 기준으로 정렬된 리뷰 목록을 가져옴
 		// FIX: deleted_at 필드가 null 이 아닌 즉 삭제되지 않은 리뷰 목록만 조회 필요.
-		Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByCreatedAtDesc(recipeId, pageable);
+		Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByUpdatedAtDesc(recipeId, pageable);
 		
 		// 응답할 데이터
 		return ReviewListResponse.builder()
@@ -59,7 +59,7 @@ public class ReviewServiceImpl implements ReviewService {
 	
 	// 리뷰 등록
 	@Override
-	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
+	public ReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
 		Optional<Recipe> optRecipe = recipeRepository.findById(reviewRequest.getRecipeId());
 		if (optRecipe.isEmpty()) {
 			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
@@ -72,7 +72,7 @@ public class ReviewServiceImpl implements ReviewService {
 			.build();
 		
 		Review result = reviewRepository.save(review);
-		return CreateReviewResponse.toDTO(result);
+		return ReviewResponse.toDTO(result);
 	}
 	
 	// 삭제
@@ -110,6 +110,10 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public ReviewResponse modifyReview(UpdateReviewRequest updateReviewRequest, User user, Long reviewId) {
 		Optional<Review> optReview = reviewRepository.findById(reviewId);
+		
+		log.info("리뷰 작성 유저: {}", optReview.get().getUser().getEmail());
+		log.info("현재 로그인 유저: {}", user.getEmail());
+		
 		if (optReview.isEmpty() || optReview.get().getDeletedAt() != null) {
 			// 해당 리뷰를 찾을 수 없습니다 404 Not Found
 			throw new NotFoundException("해당 리뷰를 찾을 수 없습니다.");
@@ -130,6 +134,7 @@ public class ReviewServiceImpl implements ReviewService {
 		// 변경 사항 반영
 		reviewToUpdate.setScore(updateReviewRequest.getScore());
 		reviewToUpdate.setComment(updateReviewRequest.getComment());
+		reviewToUpdate.setUpdatedAt(LocalDateTime.now()); // 수정 날짜
 		
 		 // 변경 사항 저장
 		Review updatedReview = reviewRepository.save(reviewToUpdate);
