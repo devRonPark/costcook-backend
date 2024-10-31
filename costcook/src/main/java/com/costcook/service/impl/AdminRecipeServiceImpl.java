@@ -9,7 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.costcook.domain.request.AdminRecipeRegisterRequest;
 import com.costcook.domain.request.AdminRecipeRegisterRequest.IngredientDTO;
-import com.costcook.domain.response.IngredientSearchResponse;
 import com.costcook.domain.response.RecipeIngredientResponse;
 import com.costcook.entity.Category;
 import com.costcook.entity.Ingredient;
@@ -38,29 +37,6 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
 
   private final FileUploadService fileUploadService;
   private final String RECIPE_THUMBNAIL_ACCESS_PATH = "/img/recipe/";
-
-  /**
-   * 주어진 키워드를 사용하여 재료를 검색합니다.
-   * 
-   * @param keyword - 검색할 재료의 키워드
-   * @return List<IngredientSearchResponse> - 검색된 재료 정보를 담은 DTO 리스트
-   */
-  @Override
-  public List<IngredientSearchResponse> searchIngredientsByName(String keyword) {
-    String validKeyword = keyword == null ? "" : keyword;
-    log.info("재료 검색 요청 - 키워드: {}", validKeyword);
-    // 키워드로 재료를 검색
-    List<Ingredient> ingredients = ingredientRepository.findByNameContaining(validKeyword);
-
-    // 검색된 재료들을 DTO로 변환하여 리스트에 모음
-    List<IngredientSearchResponse> responseList = ingredients.stream()
-        .map(IngredientSearchResponse::toDTO) 
-        .collect(Collectors.toList());
-
-    log.info("재료 검색 결과 - {}개의 재료가 검색됨", responseList.size());
-    return responseList;
-  }
-
 
   /**
    * 레시피를 저장하는 메소드. 이 메소드는 주어진 레시피와 썸네일 파일을 통해

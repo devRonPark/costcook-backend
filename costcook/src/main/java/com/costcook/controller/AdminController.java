@@ -17,8 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.costcook.domain.request.AdminRecipeRegisterRequest;
-import com.costcook.domain.response.IngredientSearchResponse;
+import com.costcook.domain.response.AdminIngredientResponse;
 import com.costcook.domain.response.RecipeIngredientResponse;
+import com.costcook.service.AdminIngredientService;
 import com.costcook.service.AdminRecipeService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,15 +32,26 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminController {
 
   private final AdminRecipeService adminRecipeService;
+  private final AdminIngredientService adminIngredientService;
 
   @GetMapping("/ingredients")
-  public ResponseEntity<List<IngredientSearchResponse>> searchIngredientList(@RequestParam("keyword") String keyword) {
+  public ResponseEntity<List<AdminIngredientResponse>> getAllIngredients() {
+    log.info("모든 재료를 가져오라는 요청을 받았습니다.");
+
+    List<AdminIngredientResponse> ingredientList = adminIngredientService.getAllIngredients();
+
+    return ResponseEntity.ok(ingredientList);
+  }
+  
+
+  @GetMapping("/ingredients/search")
+  public ResponseEntity<List<AdminIngredientResponse>> searchIngredients(@RequestParam("keyword") String keyword) {
 
     log.info("Keyword received: {}", keyword);
 
-    List<IngredientSearchResponse> responseList = adminRecipeService.searchIngredientsByName(keyword);
+    List<AdminIngredientResponse> ingredientList = adminIngredientService.searchIngredientsByName(keyword);
 
-    return ResponseEntity.ok(responseList);
+    return ResponseEntity.ok(ingredientList);
   }
 
   @GetMapping("/recipes/{recipeId}/ingredients")
@@ -120,9 +132,9 @@ public class AdminController {
       adminRecipeService.deleteRecipe(recipeId);
       return ResponseEntity.ok("레시피가 성공적으로 삭제되었습니다.");
     } catch (IllegalArgumentException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("레시피를 잦을 수 없습니다.");
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("레시피를 잦을 수 없습니다.");
     } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 삭제 중 오류가 발생했습니다.");
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 삭제 중 오류가 발생했습니다.");
     }
   }
 

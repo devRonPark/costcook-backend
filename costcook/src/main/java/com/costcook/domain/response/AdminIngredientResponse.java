@@ -7,7 +7,7 @@ import com.costcook.entity.Ingredient;
 
 @Data
 @Builder
-public class IngredientSearchResponse {
+public class AdminIngredientResponse {
 
   private Long id;
   private String name;
@@ -16,8 +16,8 @@ public class IngredientSearchResponse {
   private Double pricePerUnit;
 
   // Entity -> DTO 변환하는 빌더 메서드
-  public static IngredientSearchResponse toDTO(Ingredient ingredient) {
-    return IngredientSearchResponse.builder()
+  public static AdminIngredientResponse toDTO(Ingredient ingredient) {
+    return AdminIngredientResponse.builder()
             .id(ingredient.getId())
             .name(ingredient.getName())
             .categoryName(ingredient.getCategory() != null ? ingredient.getCategory().getName() : "기타")  // 카테고리 이름이 없을 때 "기타" 반환
