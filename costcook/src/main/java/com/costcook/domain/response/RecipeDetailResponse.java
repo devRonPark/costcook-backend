@@ -28,7 +28,7 @@ public class RecipeDetailResponse {
     		.title(recipeResponse.getTitle())
     		.description(recipeResponse.getDescription())
     		.thumbnailUrl(recipeResponse.getThumbnailUrl())
-    		.rcpSno(recipeResponse.getRcpSno()) // 레시피 상세페이지 > 만개의 레시피 조리방법 경로 이동에 필요
+    		.rcpSno(recipeResponse.getRcpSno())
     		.servings(recipeResponse.getServings())
     		.viewCount(recipeResponse.getViewCount())
     		.price(recipeResponse.getPrice())

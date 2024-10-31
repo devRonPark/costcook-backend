@@ -62,7 +62,7 @@ public class ReviewServiceImpl implements ReviewService {
 			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
 		}
 		Review review = Review.builder()
-			.user(user)
+//			.user(user)
 			.recipe(optRecipe.get())
 			.score(reviewRequest.getScore())
 			.comment(reviewRequest.getComment())
@@ -71,6 +71,11 @@ public class ReviewServiceImpl implements ReviewService {
 		Review result = reviewRepository.save(review);
 		return ReviewResponse.toDTO(result);
 	}
+	
+	
+	
+	
+	
 	
 	// 삭제
 	@Transactional

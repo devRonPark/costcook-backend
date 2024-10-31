@@ -17,7 +17,7 @@ public class RecipeResponse {
 	private String title, description, thumbnailUrl, createdAt, updatedAt;
 	private int servings, price, viewCount, favoriteCount, reviewCount;
 	private double avgRatings;
-  private Category category;
+	private Category category;
 
 	// Recipe -> response 변환
 	// 전체 목록

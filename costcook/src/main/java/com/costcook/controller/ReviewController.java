@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.request.UpdateReviewRequest;
-import com.costcook.domain.response.CreateReviewResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.entity.User;
 import com.costcook.service.ReviewService;
