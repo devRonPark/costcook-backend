@@ -1,15 +1,15 @@
 package com.costcook.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.costcook.domain.ReviewStatsDTO;
-import com.costcook.domain.request.CreateFavoriteRequest;
+import com.costcook.domain.request.CreateFavoritesRequest;
+import com.costcook.domain.response.CreateFavoritesResponse;
 import com.costcook.domain.response.FavoriteListResponse;
 import com.costcook.domain.response.FavoriteResponse;
 import com.costcook.entity.Favorite;
@@ -17,10 +17,12 @@ import com.costcook.entity.FavoriteId;
 import com.costcook.entity.Recipe;
 import com.costcook.entity.User;
 import com.costcook.exceptions.AlreadyExistsException;
+import com.costcook.exceptions.NotFoundException;
 import com.costcook.repository.FavoriteRepository;
 import com.costcook.repository.RecipeRepository;
 import com.costcook.service.FavoriteService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,41 +64,77 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
 
 	@Override
-	public FavoriteResponse createFavorite(User userDetails, CreateFavoriteRequest request) {
-		log.info("Request DTO 유효성 검증 시작");
-	    if (request.getRecipeId() == null) {
-			throw new IllegalArgumentException("recipeId 는 필수 값입니다.");
+	@Transactional
+	public CreateFavoritesResponse createFavorites(User userDetails, CreateFavoritesRequest request) {
+		List<FavoriteResponse> addedFavorites = new ArrayList<>();
+	
+		log.info("{}", request.getRecipeIds());
+		for (Long recipeId : request.getRecipeIds()) {
+			// 이미 존재하는 즐겨찾기인지 확인
+			Optional<Favorite> existingFavorite = favoriteRepository.findByUserIdAndRecipeId(userDetails.getId(), recipeId);
+	
+			if (!existingFavorite.isPresent()) {
+				// recipeId로 Recipe 엔티티 조회
+				Recipe recipe = recipeRepository.findById(recipeId)
+					.orElseThrow(() -> new RuntimeException("레시피를 찾을 수 없습니다."));
+	
+				int price = recipeRepository.getTotalPrice(recipe.getId());
+				ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
+				double avgRatings = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
+	
+				// 즐겨찾기 추가
+				Favorite favorite = Favorite.builder()
+						.id(new FavoriteId(userDetails.getId(), recipeId))
+						.user(userDetails)
+						.recipe(recipe)
+						.build();
+				
+				favoriteRepository.save(favorite);
+	
+				// FavoriteResponse로 변환하여 추가
+				FavoriteResponse favoriteResponse = FavoriteResponse.toDTO(favorite, price, avgRatings);
+				addedFavorites.add(favoriteResponse);
+			} else {
+				log.info("이미 존재하는 즐겨찾기지만 삭제된 상태인 경우");
+				// 이미 존재하는 즐겨찾기지만 삭제된 상태인 경우
+				Favorite favorite = existingFavorite.get();
+				
+				log.info("{}", favorite.toString());
+				if (favorite.getDeletedAt() != null) {
+					// deletedAt을 null로 설정하여 즐겨찾기 복원
+					log.info("deletedAt을 null로 설정하여 즐겨찾기 복원");
+					favorite.setDeletedAt(null);
+					favoriteRepository.save(favorite); // 변경 사항 저장
+					
+					// 레시피 정보 업데이트 (필요한 경우)
+					int price = recipeRepository.getTotalPrice(recipeId);
+					ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipeId);
+					double avgRatings = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
+					
+					// FavoriteResponse로 변환하여 추가
+					FavoriteResponse favoriteResponse = FavoriteResponse.toDTO(favorite, price, avgRatings);
+					addedFavorites.add(favoriteResponse);
+				}
+			}
 		}
-		Long recipeId = request.getRecipeId();
-		log.info("Request DTO 유효성 검증 완료");
+	
+		return new CreateFavoritesResponse(addedFavorites); // 추가된 FavoriteResponse 목록 반환
+	}
+	
+	
 
-		log.info("이미 존재하는 즐겨찾기인지 확인 시작");
-		// 이미 존재하는 즐겨찾기인지 확인
-        if (favoriteRepository.existsByUserIdAndRecipeId(userDetails.getId(), recipeId)) {
-            throw new AlreadyExistsException("이미 즐겨찾기에 추가된 레시피입니다.");
-        }
-		log.info("이미 존재하는 즐겨찾기인지 확인 완료");
-		
-		log.info("recipeId로 Recipe 엔티티 조회 시작");
-		// recipeId로 Recipe 엔티티 조회
-		Recipe recipe = recipeRepository.findById(recipeId)
-		.orElseThrow(() -> new RuntimeException("레시피를 찾을 수 없습니다."));
-		log.info("recipeId로 Recipe 엔티티 조회 완료");
 
-		ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
-    	int price = recipeRepository.getTotalPrice(recipe.getId());
-    	double avgRatings = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
-
-		// 즐겨찾기 추가
-		Favorite favorite = Favorite.builder()
-				.id(new FavoriteId(userDetails.getId(), recipeId))
-				.user(userDetails)
-				.recipe(recipe)
-				.build();
-		
-		favoriteRepository.save(favorite);
-
-		// TODO: recipe 의 price 및 avgRatings 어떻게 계산해서 반영할 지 고민
-		return FavoriteResponse.toDTO(favorite, price, avgRatings);
+	@Override
+	public void deleteFavorites(Long userId, List<Long> recipeIds) {
+		for (Long recipeId : recipeIds) {
+			// 즐겨찾기 엔티티를 찾기
+			FavoriteId favoriteId = new FavoriteId(userId, recipeId);
+			Favorite favorite = favoriteRepository.findById(favoriteId)
+				.orElseThrow(() -> new NotFoundException("해당 즐겨찾기를 찾을 수 없습니다."));
+	
+			// 즐겨찾기 삭제
+			favorite.softDelete(); // 소프트 삭제 메소드 호출
+			favoriteRepository.save(favorite);
+		}
 	}
 }

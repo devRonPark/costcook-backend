@@ -1,8 +1,10 @@
 package com.costcook.service;
 
-import com.costcook.domain.request.CreateFavoriteRequest;
+import java.util.List;
+
+import com.costcook.domain.request.CreateFavoritesRequest;
+import com.costcook.domain.response.CreateFavoritesResponse;
 import com.costcook.domain.response.FavoriteListResponse;
-import com.costcook.domain.response.FavoriteResponse;
 import com.costcook.entity.User;
 
 public interface FavoriteService {
@@ -11,5 +13,8 @@ public interface FavoriteService {
 	FavoriteListResponse getFavoritesByUserId(Long userId, int page);
 
 	// 즐겨찾기 추가
-	FavoriteResponse createFavorite(User userDetails, CreateFavoriteRequest request);
+	CreateFavoritesResponse createFavorites(User userDetails, CreateFavoritesRequest request);
+
+	// 즐겨찾기 삭제
+	void deleteFavorites(Long userId, List<Long> recipeIds);
 }
