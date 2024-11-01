@@ -52,6 +52,10 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 	
 	@Query("SELECT r FROM Recipe r WHERE r.price <= :price")
 	List<Recipe> findByPriceLessThanEqual(@Param("price") int price);
+	
+	
+	@Query("SELECT r FROM Recipe r WHERE r.price >= :minPrice AND r.price < :maxPrice")
+    List<Recipe> findByPriceRange(@Param("minPrice") int minPrice, @Param("maxPrice") int maxPrice);
 
 
 }
