@@ -18,10 +18,11 @@ public class RecipeResponse {
 	private int servings, price, viewCount, favoriteCount, reviewCount;
 	private double avgRatings;
 	private Category category;
+	private boolean isFavorite;
 
 	// Recipe -> response 변환
 	// 전체 목록
-	public static RecipeResponse toDTO(Recipe recipe, double avgRatings, int reviewCount, int totalPrice) {		
+	public static RecipeResponse toDTO(Recipe recipe, double avgRatings, int reviewCount, int totalPrice, boolean isFavorite) {		
 		// 평점 소수점 첫째자리까지 반올림
 		double roundedAvgRatings = Math.round(avgRatings * 10) / 10.0;
 		
@@ -39,6 +40,7 @@ public class RecipeResponse {
 				.viewCount(recipe.getViewCount())
 				.reviewCount(reviewCount)
 				.avgRatings(roundedAvgRatings)
+				.isFavorite(isFavorite)
 				.build();
 	}
 }

@@ -15,6 +15,8 @@ import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
 import com.costcook.domain.response.WeeklyRecipesResponse;
 import com.costcook.entity.Recipe;
+import com.costcook.entity.User;
+import com.costcook.repository.FavoriteRepository;
 import com.costcook.repository.RecipeIngredientRepository;
 import com.costcook.repository.RecipeRepository;
 import com.costcook.service.RecipeService;
@@ -28,10 +30,11 @@ import lombok.extern.slf4j.Slf4j;
 public class RecipeServiceImpl implements RecipeService {
 	private final RecipeRepository recipeRepository;
 	private final RecipeIngredientRepository recipeIngredientRepository;
+	private final FavoriteRepository favoriteRepository;
 
 	// 레시피 목록 조회
 	@Override
-	public RecipeListResponse getRecipes(int page, int size, String sort, String order) {
+	public RecipeListResponse getRecipes(int page, int size, String sort, String order, User user) {
 		
 		Pageable pageable = PageRequest.of(page - 1, size);
 		Page<Recipe> recipePage;
@@ -71,7 +74,8 @@ public class RecipeServiceImpl implements RecipeService {
     					int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
     					double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
     					int reviewCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
-    					return RecipeResponse.toDTO(recipe, averageScore, reviewCount, totalPrice);
+						boolean isFavorite = user != null ? favoriteRepository.existsByUserIdAndRecipeIdAndDeletedAtIsNull(user.getId(), recipe.getId()) : false;
+    					return RecipeResponse.toDTO(recipe, averageScore, reviewCount, totalPrice, isFavorite);
     				})
     				.toList())
         	.build();
@@ -88,7 +92,7 @@ public class RecipeServiceImpl implements RecipeService {
 	// 레시피 상세 조회
 	@Override
 	@Transactional
-	public RecipeResponse getRecipeById(Long id) {
+	public RecipeResponse getRecipeById(Long id, User user) {
 		Recipe recipe = recipeRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("레시피 정보가 없습니다."));
 		// 조회수 증가
@@ -97,17 +101,19 @@ public class RecipeServiceImpl implements RecipeService {
 		ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(id);
 		double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
 		int commentCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
+
+		boolean isFavorite = user != null ? favoriteRepository.existsByUserIdAndRecipeIdAndDeletedAtIsNull(user.getId(), recipe.getId()) : false;
 		
 		// 총 금액 가져오기
 		int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
 		// 레시피 테이블에 가격 반영
 		recipe.setPrice(totalPrice);
 		// 리뷰 개수 가져오기
-		return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice);
+		return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice, isFavorite);
 	}
 
 	@Override
-	public RecipeListResponse searchRecipes(String keyword, int page) {
+	public RecipeListResponse searchRecipes(String keyword, int page, User user) {
 		try {
 			// 예외 처리: keyword가 null이거나 빈 문자열 또는 공백만 있는 경우
 			if (keyword == null || keyword.trim().isEmpty()) {
@@ -142,7 +148,8 @@ public class RecipeServiceImpl implements RecipeService {
 						int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
 						double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
 						int commentCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
-						return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice);
+						boolean isFavorite = user != null ? favoriteRepository.existsByUserIdAndRecipeIdAndDeletedAtIsNull(user.getId(), recipe.getId()) : false;
+						return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice, isFavorite);
 					})
 					.toList()
 				)
