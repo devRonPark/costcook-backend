@@ -42,7 +42,7 @@ public class ReviewServiceImpl implements ReviewService {
 		int validPage = Math.max(page, 1) - 1; // 최소 페이지 설정: 1부터
 		Pageable pageable = PageRequest.of(validPage, size);
 		// 생성일 기준으로 정렬된 리뷰 목록을 가져옴
-		// FIX: deleted_at 필드가 null 이 아닌 즉 삭제되지 않은 리뷰 목록만 조회 필요.
+		// 조회 시 where 조건: deletedAt 이 null 인 경우(삭제되지 않은 경우) && status 가 false 인 경우(비공개 처리가 되지 않은 경우)
 		Page<Review> reviewPage = reviewRepository.findByRecipeIdOrderByCreatedAtDesc(recipeId, pageable);
 		
 		// 응답할 데이터
@@ -59,13 +59,17 @@ public class ReviewServiceImpl implements ReviewService {
 	
 	// 리뷰 등록
 	@Override
-	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
+//	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
+	
+	// 리뷰 등록 TEST(로그인 상태라 가정)
+	
+	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest) {
 		Optional<Recipe> optRecipe = recipeRepository.findById(reviewRequest.getRecipeId());
 		if (optRecipe.isEmpty()) {
 			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
 		}
 		Review review = Review.builder()
-			.user(user)
+//			.user(user)
 			.recipe(optRecipe.get())
 			.score(reviewRequest.getScore())
 			.comment(reviewRequest.getComment())
@@ -74,6 +78,11 @@ public class ReviewServiceImpl implements ReviewService {
 		Review result = reviewRepository.save(review);
 		return CreateReviewResponse.toDTO(result);
 	}
+	
+	
+	
+	
+	
 	
 	// 삭제
 	@Transactional
@@ -145,7 +154,8 @@ public class ReviewServiceImpl implements ReviewService {
 
 		// 페이지네이션 설정
 		Pageable pageable = PageRequest.of(validPage, size);
-		Page<Review> reviewPage = reviewRepository.findAllByUserId(user.getId(), pageable);
+		// 조회 시 where 조건: deletedAt 이 null 인 경우(삭제되지 않은 경우) && status 가 false 인 경우(비공개 처리가 되지 않은 경우)
+		Page<Review> reviewPage = reviewRepository.findAllByUserIdAndStatusFalseAndNotDeleted(user.getId(), pageable);
 
 		// 빌더 패턴을 사용하여 응답 구성
 		return ReviewListResponse.builder()

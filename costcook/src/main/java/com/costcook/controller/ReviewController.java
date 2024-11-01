@@ -30,8 +30,10 @@ public class ReviewController {
 	
 	// 리뷰 작성
 	@PostMapping("")
-	public ResponseEntity<CreateReviewResponse> createReview(@RequestBody CreateReviewRequest reviewRequest, @AuthenticationPrincipal User user) {
-		CreateReviewResponse result = reviewService.createReview(reviewRequest, user);
+//	public ResponseEntity<CreateReviewResponse> createReview(@RequestBody CreateReviewRequest reviewRequest, @AuthenticationPrincipal User user) {
+	public ResponseEntity<CreateReviewResponse> createReview(@RequestBody CreateReviewRequest reviewRequest) {
+//		CreateReviewResponse result = reviewService.createReview(reviewRequest, user);
+		CreateReviewResponse result = reviewService.createReview(reviewRequest);
 		if (result.getReviewId() == null) 
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
 		return ResponseEntity.status(HttpStatus.CREATED).body(result);
