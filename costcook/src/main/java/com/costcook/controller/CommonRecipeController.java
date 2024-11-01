@@ -3,6 +3,9 @@ package com.costcook.controller;
 
 import java.util.List;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.costcook.domain.response.IngredientResponse;
 import com.costcook.domain.response.RecipeDetailResponse;
@@ -34,7 +38,19 @@ public class CommonRecipeController {
 	private final RecipeService recipeService;
 	private final ReviewService reviewService;
 	private final RecipeIngredientService recipeIngredientService;
-
+	
+	@GetMapping("/test")
+	public ResponseEntity<?> testMan(@RequestParam("number") int number) {
+		String url = "https://m.10000recipe.com/recipe/" + number;
+		RestTemplate restTemplate = new RestTemplate();
+		String htmlContent = restTemplate.getForObject(url, String.class);
+		
+		Document doc = Jsoup.parse(htmlContent, "UTF-8");
+		Element specificTag = doc.selectFirst("ul.step_list");
+		
+		return ResponseEntity.ok().header("Content-type", "text/html; charset=UTF-8").body(specificTag != null ? specificTag.html() : "레시피 없음");
+	}
+	
 	// 레시피 전체 목록 조회 
 	@GetMapping(value = {"", "/"})
 	public ResponseEntity<RecipeListResponse> getAllRecipe(

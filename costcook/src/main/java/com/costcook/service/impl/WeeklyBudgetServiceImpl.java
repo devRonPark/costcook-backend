@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.costcook.domain.request.WeeklyBudgetQueryRequest;
 import com.costcook.domain.request.WeeklyBudgetRequest;
 import com.costcook.domain.response.WeeklyBudgetResponse;
 import com.costcook.domain.response.WeeklyBudgetUpdateResponse;
@@ -76,4 +77,27 @@ public class WeeklyBudgetServiceImpl implements WeeklyBudgetService {
 		Budget result = budgetRepository.save(weeklyBudget.get());
 		return WeeklyBudgetUpdateResponse.toDTO(result);
 	}
+
+	@Override
+	public WeeklyBudgetResponse getWeeklyBudget(WeeklyBudgetQueryRequest weeklyBudgetQueryRequest, User user) {
+	    Optional<User> optUser = userRepository.findById(user.getId());
+
+	    if (optUser.isEmpty()) {
+	        throw new NotFoundException("해당 유저를 찾을 수 없습니다.");
+	    }
+
+	    Optional<Budget> thisWeekBudget = budgetRepository.findByUserAndYearAndWeekNumber(
+	            user, 
+	            weeklyBudgetQueryRequest.getYear(), 
+	            weeklyBudgetQueryRequest.getWeekNumber()
+	    );
+
+	    return WeeklyBudgetResponse.builder()
+	    	.budget(thisWeekBudget.map(Budget::getWeeklyBudget).orElse(10000))
+	    	.message(thisWeekBudget.isPresent() ? "예산 가져오기 성공" : "기본값 설정")
+	    	.year(weeklyBudgetQueryRequest.getYear())
+	    	.weekNumber(weeklyBudgetQueryRequest.getWeekNumber())
+	    	.build();
+	}
+
 }

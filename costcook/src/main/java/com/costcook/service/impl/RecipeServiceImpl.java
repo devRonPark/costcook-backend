@@ -11,14 +11,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.costcook.domain.ReviewStatsDTO;
+import com.costcook.domain.request.RecommendedRecipeRequest;
 import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
 import com.costcook.domain.response.WeeklyRecipesResponse;
 import com.costcook.entity.Recipe;
 import com.costcook.entity.User;
 import com.costcook.repository.FavoriteRepository;
+import com.costcook.entity.RecommendedRecipe;
 import com.costcook.repository.RecipeIngredientRepository;
 import com.costcook.repository.RecipeRepository;
+import com.costcook.repository.RecommendedRecipeRepository;
 import com.costcook.service.RecipeService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +34,7 @@ public class RecipeServiceImpl implements RecipeService {
 	private final RecipeRepository recipeRepository;
 	private final RecipeIngredientRepository recipeIngredientRepository;
 	private final FavoriteRepository favoriteRepository;
+	private final RecommendedRecipeRepository recommendedRecipeRepository;
 
 	// 레시피 목록 조회
 	@Override
@@ -38,7 +42,7 @@ public class RecipeServiceImpl implements RecipeService {
 		
 		Pageable pageable = PageRequest.of(page - 1, size);
 		Page<Recipe> recipePage;
-		
+
 		// 정렬
         if (sort.equals("viewCount")) {
         	if (order.equals("asc")) { // 오름차순
@@ -80,15 +84,13 @@ public class RecipeServiceImpl implements RecipeService {
     				.toList())
         	.build();
 	}
-	
-	
+
 	// 전체 레시피 수 조회 : 총 페이지를 미리 입력하여, 무한 로딩 방지
 	@Override
 	public long getTotalRecipes() {
 		return recipeRepository.count();
 	}
 
-	
 	// 레시피 상세 조회
 	@Override
 	@Transactional
@@ -121,29 +123,24 @@ public class RecipeServiceImpl implements RecipeService {
 			}
 
 			// 기본 페이지 크기 설정
-			int size = 9; 
+			int size = 9;
 			// 최소 1 이상의 값을 보장
-			int validPage = Math.max(page, 1) - 1; 
-	
+			int validPage = Math.max(page, 1) - 1;
+
 			// 페이지네이션 설정
 			Pageable pageable = PageRequest.of(validPage, size);
-		
+
 			// 공백을 제거한 후 검색을 수행
 			String trimmedKeyword = keyword.trim();
-		
-            // 새로운 요구사항: keyword, page 로 검색된 레시피 목록 중에서 레시피를 구성하는 재료명까지도 검색 대상에 포함시키고 싶어.
+
+			// 새로운 요구사항: keyword, page 로 검색된 레시피 목록 중에서 레시피를 구성하는 재료명까지도 검색 대상에 포함시키고 싶어.
 
 			// 키워드를 포함하는 레시피 검색 로직
 			Page<Recipe> recipePage = recipeRepository.findByTitleOrIngredientNameContaining(trimmedKeyword, pageable);
-			
-			return RecipeListResponse.builder()
-				.page(validPage + 1)
-				.size(recipePage.getNumberOfElements())
-				.totalPages(recipePage.getTotalPages())
-				.totalRecipes(recipePage.getTotalElements())
-				.recipes(
-					recipePage.getContent().stream()
-					.map(recipe -> {
+
+			return RecipeListResponse.builder().page(validPage + 1).size(recipePage.getNumberOfElements())
+					.totalPages(recipePage.getTotalPages()).totalRecipes(recipePage.getTotalElements())
+					.recipes(recipePage.getContent().stream().map(recipe -> {
 						ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
 						int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
 						double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
@@ -163,41 +160,47 @@ public class RecipeServiceImpl implements RecipeService {
 		}
 	}
 
+	@Override
+	public WeeklyRecipesResponse getRecipesByBudget(int minPrice, int maxPrice) {
+		List<Recipe> recipes = recipeRepository.findByPriceRange(minPrice, maxPrice);
+
+
+		// Recipe를 WeeklyRecipesResponse.Recipe으로 변환
+		List<WeeklyRecipesResponse.Recipe> recipeList = recipes.stream().map(recipe -> {
+			// 리뷰 통계 가져오기
+			ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
+
+			// 평균 평점 계산
+			double averageScore = (stats != null && stats.getAverageScore() != null) ? stats.getAverageScore() : 0.0;
+			int favoriteCount = (stats != null && stats.getReviewCount() != null) ? stats.getReviewCount().intValue()
+					: 0;
+
+			return WeeklyRecipesResponse.Recipe.builder().id(recipe.getId()).title(recipe.getTitle())
+					.thumbnailUrl(recipe.getThumbnailUrl()).price(recipe.getPrice()).favoriteCount(favoriteCount) // 계산된
+																													// 즐겨찾기
+																													// 개수
+					.avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
+					.build();
+		}).collect(Collectors.toList());
+
+		Collections.shuffle(recipeList);
+
+		// WeeklyRecipesResponse 반환
+		return WeeklyRecipesResponse.builder().budget(maxPrice).recipes(recipeList).build();
+	}
 
 	@Override
-	public WeeklyRecipesResponse getRecipesByBudget(int budget) {
-	    List<Recipe> recipes = recipeRepository.findByPriceLessThanEqual(budget);
-	    System.out.println(budget);
-	    
+	public void addRecommendedRecipe(List<RecommendedRecipeRequest> recipesRequest, User user) {
+		List<RecommendedRecipe> recipes = recipesRequest.stream().map((RecommendedRecipeRequest request) -> { // 타입을
+																												// 명시적으로
+																												// 지정
+			Recipe recipe = recipeRepository.findById(request.getRecipeId())
+					.orElseThrow(() -> new RuntimeException("레시피를 찾을 수 없습니다. ID: " + request.getRecipeId()));
+			return RecommendedRecipe.builder().year(request.getYear()).weekNumber(request.getWeekNumber())
+					.isUsed(request.isUsed()).recipe(recipe).user(user).build();
+		}).collect(Collectors.toList());
 
-	    // Recipe를 WeeklyRecipesResponse.Recipe으로 변환
-	    List<WeeklyRecipesResponse.Recipe> recipeList = recipes.stream()
-	            .map(recipe -> {
-	                // 리뷰 통계 가져오기
-	                ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
-	                
-	                // 평균 평점 계산
-	                double averageScore = (stats != null && stats.getAverageScore() != null) ? stats.getAverageScore() : 0.0;
-	                int favoriteCount = (stats != null && stats.getReviewCount() != null) ? stats.getReviewCount().intValue() : 0;
-
-	                return WeeklyRecipesResponse.Recipe.builder()
-	                        .id(recipe.getId())
-	                        .title(recipe.getTitle())
-	                        .thumbnailUrl(recipe.getThumbnailUrl())
-	                        .price(recipe.getPrice())
-	                        .favoriteCount(favoriteCount) // 계산된 즐겨찾기 개수
-	                        .avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
-	                        .build();
-	            })
-	            .collect(Collectors.toList());
-	    
-	    Collections.shuffle(recipeList);
-
-	    // WeeklyRecipesResponse 반환
-	    return WeeklyRecipesResponse.builder()
-	            .budget(budget)
-	            .recipes(recipeList)
-	            .build();
+		recommendedRecipeRepository.saveAll(recipes);
 	}
 
 }

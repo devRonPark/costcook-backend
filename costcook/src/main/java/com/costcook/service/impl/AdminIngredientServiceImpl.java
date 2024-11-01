@@ -5,9 +5,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.costcook.domain.request.AdminIngredientRegisterRequest;
 import com.costcook.domain.response.AdminIngredientResponse;
+import com.costcook.entity.Category;
 import com.costcook.entity.Ingredient;
+import com.costcook.entity.Unit;
+import com.costcook.repository.CategoryRepository;
 import com.costcook.repository.IngredientRepository;
+import com.costcook.repository.UnitRepository;
 import com.costcook.service.AdminIngredientService;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminIngredientServiceImpl implements AdminIngredientService {
 
   private final IngredientRepository ingredientRepository;
+  private final CategoryRepository categoryRepository;
+  private final UnitRepository unitRepository;
 
   @Override
   public List<AdminIngredientResponse> getAllIngredients() {
@@ -53,6 +60,92 @@ public class AdminIngredientServiceImpl implements AdminIngredientService {
   @Override
   public boolean isIngredientDuplicate(String name) {
     return ingredientRepository.existsByName(name);
+  }
+
+  @Override
+  public boolean saveIngredient(AdminIngredientRegisterRequest request) {
+    try {
+      // 카테고리 
+      log.info("카테고리 조회 - 카테고리 ID: {}", request.getCategoryId());
+      Category category = categoryRepository.findById(request.getCategoryId())
+        .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다: " + request.getCategoryId()));
+
+      // 단위
+      log.info("단위 조회 - 단위 ID: {}", request.getUnitId());
+      Unit unit = unitRepository.findById(request.getUnitId())
+        .orElseThrow(() -> new IllegalArgumentException("해당 단위가 존재하지 않습니다: " + request.getUnitId()));
+
+      Ingredient ingredientDto = Ingredient.builder()
+                                  .name(request.getName())
+                                  .category(category)
+                                  .unit(unit)
+                                  .price(request.getPrice())
+                                  .build();
+
+      ingredientRepository.save(ingredientDto);
+
+      log.info("재료 저장이 성공적으로 완료되었습니다 - 재료 ID: {}", ingredientDto.getId());
+      return true;
+
+    } catch (Exception e) {
+      // 에러 발생 시 로그 출력 및 실패 코드 반환
+      log.error("재료 저장 중 오류 발생: " + e.getMessage(), e);
+      return false;
+    }
+  }
+
+
+  @Override
+  public boolean updateIngredient(Long ingredientId, AdminIngredientRegisterRequest request) {
+    try {
+      Ingredient ingredient = ingredientRepository.findById(ingredientId)
+        .orElseThrow(() -> new IllegalArgumentException("해당 레시피가 존재하지 않습니다: " + ingredientId));
+
+      // 카테고리 
+      Long categoryId = request.getCategoryId();
+
+      if(categoryId != null && categoryId > 0) {
+        log.info("카테고리 조회 - 카테고리 ID: {}", categoryId);
+        Category category = categoryRepository.findById(categoryId)
+          .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다: " + categoryId));
+        ingredient.setCategory(category);
+      } 
+      
+      // 단위
+      Long unitId = request.getUnitId();
+
+      if(unitId != null && unitId > 0) {
+        log.info("단위 조회 - 단위 ID: {}", unitId);
+        Unit unit = unitRepository.findById(unitId)
+          .orElseThrow(() -> new IllegalArgumentException("해당 단위가 존재하지 않습니다: " + unitId));
+        ingredient.setUnit(unit);
+      }
+
+      // 단위 가격
+      Integer price = request.getPrice();
+      ingredient.setPrice(price);
+      ingredientRepository.save(ingredient);  
+      log.info("재료 수정 완료 - 재료 ID: {}", ingredientId);
+      return true;
+    } catch(Exception e) {
+      // 예외가 발생하면 로그를 기록하고 false 반환
+      log.error("재료 수정 중 오류 발생 - 재료 ID: {}, 오류: {}", ingredientId, e.getMessage());
+      return false;
+    }
+  }
+
+  @Override
+  public boolean deleteIngredient(Long ingredientId) {
+    try {
+      Ingredient ingredient = ingredientRepository.findById(ingredientId)
+      .orElseThrow(() -> new IllegalArgumentException("해당 재료가 존재하지 않습니다: " + ingredientId));
+      
+      ingredientRepository.delete(ingredient);
+      return true;
+    } catch(Exception e) {
+      log.error("재료 삭제 중 오류 발생 - 재료 ID: {}, 오류: {}", ingredientId, e.getMessage());
+      return false;
+    }
   }
 
 }
