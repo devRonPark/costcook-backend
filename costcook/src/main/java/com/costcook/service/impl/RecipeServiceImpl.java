@@ -68,7 +68,7 @@ public class RecipeServiceImpl implements RecipeService {
         		recipePage.getContent().stream()
     				.map(recipe -> {
     					ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
-    					Long totalPrice = recipeRepository.getTotalPrice(recipe.getId());
+    					int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
     					double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
     					int reviewCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
     					return RecipeResponse.toDTO(recipe, averageScore, reviewCount, totalPrice);
@@ -99,9 +99,9 @@ public class RecipeServiceImpl implements RecipeService {
 		int commentCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
 		
 		// 총 금액 가져오기
-		Long totalPrice = recipeRepository.getTotalPrice(recipe.getId());
+		int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
 		// 레시피 테이블에 가격 반영
-		recipe.setPrice(totalPrice.intValue());
+		recipe.setPrice(totalPrice);
 		// 리뷰 개수 가져오기
 		return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice);
 	}
@@ -139,7 +139,7 @@ public class RecipeServiceImpl implements RecipeService {
 					recipePage.getContent().stream()
 					.map(recipe -> {
 						ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
-						Long totalPrice = recipeRepository.getTotalPrice(recipe.getId());
+						int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
 						double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
 						int commentCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
 						return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice);
