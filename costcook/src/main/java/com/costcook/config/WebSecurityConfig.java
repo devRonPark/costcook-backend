@@ -72,10 +72,8 @@ public class WebSecurityConfig {
 				new AntPathRequestMatcher("/api/auth/**"),
 				new AntPathRequestMatcher("/api/auth/token/refresh"),
 				new AntPathRequestMatcher("/api/recipes/**"),// 사용자 레시피 조회
+				new AntPathRequestMatcher("/api/recommendations/**"),// 추천부분
 				
-				new AntPathRequestMatcher("/**"), // (임시)
-				
-
 				// 임시 admin 
 				new AntPathRequestMatcher("/api/admin/ingredients/**"),
 				new AntPathRequestMatcher("/api/admin/recipes/**") 

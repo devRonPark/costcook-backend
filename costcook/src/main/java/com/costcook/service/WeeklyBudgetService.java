@@ -1,5 +1,6 @@
 package com.costcook.service;
 
+import com.costcook.domain.request.WeeklyBudgetQueryRequest;
 import com.costcook.domain.request.WeeklyBudgetRequest;
 import com.costcook.domain.response.WeeklyBudgetResponse;
 import com.costcook.domain.response.WeeklyBudgetUpdateResponse;
@@ -10,5 +11,7 @@ public interface WeeklyBudgetService {
 	WeeklyBudgetResponse settingWeeklyBudget(WeeklyBudgetRequest budgetRequest, User user);
 
 	WeeklyBudgetUpdateResponse modifyWeeklyBudget(WeeklyBudgetRequest budgetRequest, User user);
+
+	WeeklyBudgetResponse getWeeklyBudget(WeeklyBudgetQueryRequest weeklyBudgetQueryRequest, User user);
 
 }
