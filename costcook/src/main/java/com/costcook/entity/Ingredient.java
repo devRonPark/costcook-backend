@@ -44,5 +44,5 @@ public class Ingredient {
 	// 단위당 가격
 	@Column(nullable = false)
 	@Builder.Default()
-	private int price;
+	private int price = 0;
 }
