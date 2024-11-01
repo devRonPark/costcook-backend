@@ -145,6 +145,18 @@ public class AdminController {
     }
   }
 
+  @GetMapping("/recipes/duplicate")
+  public ResponseEntity<Map<String, Boolean>> checkDuplicateRecipe(
+    @RequestParam("recipeTitle") String recipeTitle) {
+
+    boolean exists = adminRecipeService.isRecipeDuplicate(recipeTitle);
+
+    Map<String, Boolean> response = new HashMap<>();
+    response.put("exists", exists);
+
+    return ResponseEntity.ok(response);
+  }
+
   @PostMapping("/recipes")
   public ResponseEntity<String> saveRecipe(
     @ModelAttribute AdminRecipeRegisterRequest recipe,

@@ -17,4 +17,6 @@ public interface AdminRecipeService {
 
   void deleteRecipe(Long id);
 
+  boolean isRecipeDuplicate(String name);
+
 }

@@ -53,5 +53,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 	@Query("SELECT r FROM Recipe r WHERE r.price <= :price")
 	List<Recipe> findByPriceLessThanEqual(@Param("price") int price);
 
+  // 이름 중복 검사
+  boolean existsByTitle(String title);
 
 }
