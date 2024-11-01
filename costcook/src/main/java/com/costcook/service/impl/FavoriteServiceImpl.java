@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import com.costcook.domain.ReviewStatsDTO;
 import com.costcook.domain.request.CreateFavoritesRequest;
@@ -16,7 +19,6 @@ import com.costcook.entity.Favorite;
 import com.costcook.entity.FavoriteId;
 import com.costcook.entity.Recipe;
 import com.costcook.entity.User;
-import com.costcook.exceptions.AlreadyExistsException;
 import com.costcook.exceptions.NotFoundException;
 import com.costcook.repository.FavoriteRepository;
 import com.costcook.repository.RecipeRepository;
