@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.Builder;
 
 import com.costcook.entity.Ingredient;
+import com.costcook.entity.Unit;
+import com.costcook.entity.Category;;
 
 @Data
 @Builder
@@ -11,8 +13,8 @@ public class AdminIngredientResponse {
 
   private Long id;
   private String name;
-  private String categoryName;
-  private String unitName;
+  private Category category;
+  private Unit unit;
   private Double pricePerUnit;
 
   // Entity -> DTO 변환하는 빌더 메서드
@@ -20,8 +22,8 @@ public class AdminIngredientResponse {
     return AdminIngredientResponse.builder()
             .id(ingredient.getId())
             .name(ingredient.getName())
-            .categoryName(ingredient.getCategory() != null ? ingredient.getCategory().getName() : "기타")  // 카테고리 이름이 없을 때 "기타" 반환
-            .unitName(ingredient.getUnit().getName())      // 단위 이름
+            .category(ingredient.getCategory())
+            .unit(ingredient.getUnit())
             .pricePerUnit((double) ingredient.getPrice())  // 단위당 가격
             .build();
     }
