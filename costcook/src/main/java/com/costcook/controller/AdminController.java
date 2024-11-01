@@ -94,7 +94,7 @@ public class AdminController {
 
 
   @PatchMapping("/ingredients/{ingredientId}")
-  public ResponseEntity<String> saveIngredient(
+  public ResponseEntity<String> editIngredient(
     @PathVariable("ingredientId") Long ingredientId,
     @ModelAttribute AdminIngredientRegisterRequest ingredient) {
 

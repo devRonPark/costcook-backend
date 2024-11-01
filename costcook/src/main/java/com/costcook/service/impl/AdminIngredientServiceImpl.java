@@ -63,23 +63,23 @@ public class AdminIngredientServiceImpl implements AdminIngredientService {
   }
 
   @Override
-  public boolean saveIngredient(AdminIngredientRegisterRequest ingredient) {
+  public boolean saveIngredient(AdminIngredientRegisterRequest request) {
     try {
       // 카테고리 
-      log.info("카테고리 조회 - 카테고리 ID: {}", ingredient.getCategoryId());
-      Category category = categoryRepository.findById(ingredient.getCategoryId())
-        .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다: " + ingredient.getCategoryId()));
+      log.info("카테고리 조회 - 카테고리 ID: {}", request.getCategoryId());
+      Category category = categoryRepository.findById(request.getCategoryId())
+        .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다: " + request.getCategoryId()));
 
       // 단위
-      log.info("단위 조회 - 단위 ID: {}", ingredient.getUnitId());
-      Unit unit = unitRepository.findById(ingredient.getUnitId())
-        .orElseThrow(() -> new IllegalArgumentException("해당 단위가 존재하지 않습니다: " + ingredient.getUnitId()));
+      log.info("단위 조회 - 단위 ID: {}", request.getUnitId());
+      Unit unit = unitRepository.findById(request.getUnitId())
+        .orElseThrow(() -> new IllegalArgumentException("해당 단위가 존재하지 않습니다: " + request.getUnitId()));
 
       Ingredient ingredientDto = Ingredient.builder()
-                                  .name(ingredient.getName())
+                                  .name(request.getName())
                                   .category(category)
                                   .unit(unit)
-                                  .price(ingredient.getPrice())
+                                  .price(request.getPrice())
                                   .build();
 
       ingredientRepository.save(ingredientDto);
@@ -96,8 +96,46 @@ public class AdminIngredientServiceImpl implements AdminIngredientService {
 
 
   @Override
-  public boolean updateIngredient(Long ingredientId, AdminIngredientRegisterRequest ingredient) {
-    return false;
+  public boolean updateIngredient(Long ingredientId, AdminIngredientRegisterRequest request) {
+    try {
+      Ingredient ingredient = ingredientRepository.findById(ingredientId)
+        .orElseThrow(() -> new IllegalArgumentException("해당 레시피가 존재하지 않습니다: " + ingredientId));
+
+      // 카테고리 
+      Long categoryId = request.getCategoryId();
+
+      if(categoryId != null && categoryId > 0) {
+        log.info("카테고리 조회 - 카테고리 ID: {}", categoryId);
+        Category category = categoryRepository.findById(categoryId)
+          .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다: " + categoryId));
+        ingredient.setCategory(category);
+      } 
+      
+      // 단위
+      Long unitId = request.getUnitId();
+
+      if(unitId != null && unitId > 0) {
+        log.info("단위 조회 - 단위 ID: {}", unitId);
+        Unit unit = unitRepository.findById(unitId)
+          .orElseThrow(() -> new IllegalArgumentException("해당 단위가 존재하지 않습니다: " + unitId));
+        ingredient.setUnit(unit);
+      }
+
+      // 단위 가격
+      Integer price = request.getPrice();
+
+      if(price != null && price >= 0) {
+        ingredient.setPrice(price);
+      }
+
+      ingredientRepository.save(ingredient);  
+      log.info("재료 수정 완료 - 재료 ID: {}", ingredientId);
+      return true;
+    } catch(Exception e) {
+      // 예외가 발생하면 로그를 기록하고 false 반환
+      log.error("재료 수정 중 오류 발생 - 재료 ID: {}, 오류: {}", ingredientId, e.getMessage());
+      return false;
+    }
   }
 
 }
