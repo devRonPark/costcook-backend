@@ -1,5 +1,10 @@
 package com.costcook.service.impl;
 
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -27,9 +32,33 @@ public class FavoriteServiceImpl implements FavoriteService {
 	private final FavoriteRepository favoriteRepository;
 	
 	// 유저ID로 유저가 작성한 즐겨찾기 목록 가져오기
-    public FavoriteListResponse getFavoritesByUserId(Long userId) {
-    	log.info("즐겨찾기 목록 가져오기{}: " );
-		return null;
+	@Override
+    public FavoriteListResponse getFavoritesByUserId(Long userId, int page) {
+		log.info("{}", userId);
+		int validPage = Math.max(page, 1) - 1; // 최소 페이지 설정: 1부터
+		int size = 9;
+		Pageable pageable = PageRequest.of(validPage, size); // 페이지는 0부터 시작
+
+		Page<Favorite> favoritePage = favoriteRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+    	log.info("{}", favoritePage.getTotalElements());
+		// 응답할 데이터
+		return FavoriteListResponse.builder()
+			.page(page)
+			.size(favoritePage.getContent().size()) // 현재 페이지의 즐겨찾기 수
+			.totalPages(favoritePage.getTotalPages())
+			.totalFavorites(favoritePage.getTotalElements())
+			.favorites(
+				favoritePage.getContent().stream().map(favorite -> {
+					// 레시피에 대한 통계 및 가격 정보 가져오기
+					ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(favorite.getRecipe().getId());
+					int price = recipeRepository.getTotalPrice(favorite.getRecipe().getId());
+					double avgRatings = (stats != null && stats.getAverageScore() != null) ? stats.getAverageScore() : 0.0;
+
+					// FavoriteResponse DTO로 변환
+					return FavoriteResponse.toDTO(favorite, price, avgRatings);
+				}).collect(Collectors.toList()) // 스트림 결과를 리스트로 수집
+			)
+			.build();
     }
 
 	@Override

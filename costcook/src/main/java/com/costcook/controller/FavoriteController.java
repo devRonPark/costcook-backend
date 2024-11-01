@@ -14,6 +14,7 @@ import com.costcook.domain.request.CreateFavoriteRequest;
 import com.costcook.domain.response.FavoriteListResponse;
 import com.costcook.domain.response.FavoriteResponse;
 import com.costcook.entity.User;
+import com.costcook.exceptions.ErrorResponse;
 import com.costcook.service.FavoriteService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,12 +30,15 @@ public class FavoriteController {
 	
 	// 즐겨찾기 조회
 	@GetMapping(value = {"", "/"})
-	public ResponseEntity<FavoriteListResponse> getAllFavorite(@RequestParam Long userId) {
+	public ResponseEntity<FavoriteListResponse> getFavoriteList(
+		@RequestParam(name="page", defaultValue = "1") int page,
+		@AuthenticationPrincipal User userDetails
+	) {
+		Long userId = userDetails.getId();
 		// 즐겨찾기 목록 가져오기
-		FavoriteListResponse response = favoriteService.getFavoritesByUserId(userId);
+		FavoriteListResponse response = favoriteService.getFavoritesByUserId(userId, page);
 		return ResponseEntity.ok(response);
 	}
-	
 	
 	/**
      * 즐겨찾기 추가
@@ -42,7 +46,7 @@ public class FavoriteController {
      * @param userDetails 현재 로그인한 사용자 정보
      * @return 추가된 즐겨찾기
      */
-    @PostMapping
+    @PostMapping(value = {"", "/"})
     public ResponseEntity<FavoriteResponse> createFavorite(
 		@RequestBody CreateFavoriteRequest request,
         @AuthenticationPrincipal User userDetails
@@ -50,8 +54,6 @@ public class FavoriteController {
         FavoriteResponse response = favoriteService.createFavorite(userDetails, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-	
-	
 	
 	// 즐겨찾기 삭제(취소)
 	
