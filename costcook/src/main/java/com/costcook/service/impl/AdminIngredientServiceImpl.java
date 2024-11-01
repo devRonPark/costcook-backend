@@ -134,4 +134,18 @@ public class AdminIngredientServiceImpl implements AdminIngredientService {
     }
   }
 
+  @Override
+  public boolean deleteIngredient(Long ingredientId) {
+    try {
+      Ingredient ingredient = ingredientRepository.findById(ingredientId)
+      .orElseThrow(() -> new IllegalArgumentException("해당 재료가 존재하지 않습니다: " + ingredientId));
+      
+      ingredientRepository.delete(ingredient);
+      return true;
+    } catch(Exception e) {
+      log.error("재료 삭제 중 오류 발생 - 재료 ID: {}, 오류: {}", ingredientId, e.getMessage());
+      return false;
+    }
+  }
+
 }

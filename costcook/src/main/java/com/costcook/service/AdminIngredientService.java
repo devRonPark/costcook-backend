@@ -16,5 +16,7 @@ public interface AdminIngredientService {
   boolean saveIngredient(AdminIngredientRegisterRequest ingredient);
 
   boolean updateIngredient(Long ingredientId, AdminIngredientRegisterRequest ingredient);
+
+  boolean deleteIngredient(Long ingredientId);
   
 }

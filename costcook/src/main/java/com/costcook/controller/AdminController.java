@@ -116,6 +116,23 @@ public class AdminController {
 
   }
 
+  @DeleteMapping("/ingredients/{ingredientId}")
+  public ResponseEntity<String> deleteIngredient(
+    @PathVariable("ingredientId") Long ingredientId) {
+
+    boolean result = adminIngredientService.deleteIngredient(ingredientId);
+
+    // [예외] 재료 삭제에 실패하면 IllegalStateException 발생.
+    if(!result) {
+      throw new IllegalStateException("재료 수정에 실패했습니다."); 
+    }
+
+    // [로그] 재료 수정 성공
+    log.info("재료 삭제 완료 - 재료 ID: {} ", ingredientId);
+
+    return ResponseEntity.ok("재료가 성공적으로 삭제되었습니다.");
+  }
+
 
   @GetMapping("/recipes/{recipeId}/ingredients")
   public ResponseEntity<List<RecipeIngredientResponse>> getRecipeIngredients(@PathVariable("recipeId") Long recipeId) {
