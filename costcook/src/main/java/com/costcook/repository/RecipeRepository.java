@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import com.costcook.domain.ReviewStatsDTO;
 import com.costcook.domain.response.RecipeResponse;
-import com.costcook.domain.response.WeeklyRecipesResponse;
+import com.costcook.domain.response.BudgetRecipesResponse;
 import com.costcook.entity.Recipe;
 
 @Repository

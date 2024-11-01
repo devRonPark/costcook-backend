@@ -3,10 +3,12 @@ package com.costcook.service;
 import java.util.List;
 
 import com.costcook.domain.request.RecommendedRecipeRequest;
+import com.costcook.domain.response.BudgetRecipesResponse;
 import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
 import com.costcook.domain.response.WeeklyRecipesResponse;
 import com.costcook.entity.User;
+
 
 public interface RecipeService {
 
@@ -21,9 +23,12 @@ public interface RecipeService {
 
 	RecipeListResponse searchRecipes(String keyword, int page);
 
-	WeeklyRecipesResponse getRecipesByBudget(int minPrice, int maxPrice);
+	BudgetRecipesResponse getRecipesByBudget(int minPrice, int maxPrice);
 
 	void addRecommendedRecipe(List<RecommendedRecipeRequest> recipesRequest, User user);
+
+	List<WeeklyRecipesResponse.Recipe> getRecommendedRecipes(int year, int weekNumber, User user);
+
 
 
 }

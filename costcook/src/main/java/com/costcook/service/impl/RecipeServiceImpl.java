@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.costcook.domain.ReviewStatsDTO;
 import com.costcook.domain.request.RecommendedRecipeRequest;
+import com.costcook.domain.response.BudgetRecipesResponse;
 import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
 import com.costcook.domain.response.WeeklyRecipesResponse;
@@ -155,12 +156,11 @@ public class RecipeServiceImpl implements RecipeService {
 	}
 
 	@Override
-	public WeeklyRecipesResponse getRecipesByBudget(int minPrice, int maxPrice) {
+	public BudgetRecipesResponse getRecipesByBudget(int minPrice, int maxPrice) {
 		List<Recipe> recipes = recipeRepository.findByPriceRange(minPrice, maxPrice);
 
-
 		// Recipe를 WeeklyRecipesResponse.Recipe으로 변환
-		List<WeeklyRecipesResponse.Recipe> recipeList = recipes.stream().map(recipe -> {
+		List<BudgetRecipesResponse.Recipe> recipeList = recipes.stream().map(recipe -> {
 			// 리뷰 통계 가져오기
 			ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
 
@@ -169,7 +169,7 @@ public class RecipeServiceImpl implements RecipeService {
 			int favoriteCount = (stats != null && stats.getReviewCount() != null) ? stats.getReviewCount().intValue()
 					: 0;
 
-			return WeeklyRecipesResponse.Recipe.builder().id(recipe.getId()).title(recipe.getTitle())
+			return BudgetRecipesResponse.Recipe.builder().id(recipe.getId()).title(recipe.getTitle())
 					.thumbnailUrl(recipe.getThumbnailUrl()).price(recipe.getPrice()).favoriteCount(favoriteCount) // 계산된
 																													// 즐겨찾기
 																													// 개수
@@ -180,7 +180,7 @@ public class RecipeServiceImpl implements RecipeService {
 		Collections.shuffle(recipeList);
 
 		// WeeklyRecipesResponse 반환
-		return WeeklyRecipesResponse.builder().budget(maxPrice).recipes(recipeList).build();
+		return BudgetRecipesResponse.builder().budget(maxPrice).recipes(recipeList).build();
 	}
 
 	@Override
@@ -195,6 +195,32 @@ public class RecipeServiceImpl implements RecipeService {
 		}).collect(Collectors.toList());
 
 		recommendedRecipeRepository.saveAll(recipes);
+	}
+
+	@Override
+	public List<WeeklyRecipesResponse.Recipe> getRecommendedRecipes(int year, int weekNumber, User user) {
+		// 추천 레시피를 가져옵니다.
+		List<RecommendedRecipe> recommendedRecipes = recommendedRecipeRepository.findByYearAndWeekNumberAndUserId(year,
+				weekNumber, user.getId());
+
+		// 추천 레시피를 DTO로 변환
+		return recommendedRecipes.stream().map((RecommendedRecipe recommendedRecipe) -> {
+			Recipe recipe = recommendedRecipe.getRecipe(); // 추천 레시피에서 실제 레시피 정보 가져오기
+
+			// 리뷰 통계 가져오기
+			ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
+
+			// 평균 평점 및 북마크 수 계산
+			double averageScore = (stats != null && stats.getAverageScore() != null) ? stats.getAverageScore() : 0.0;
+			int favoriteCount = (stats != null && stats.getReviewCount() != null) ? stats.getReviewCount().intValue()
+					: 0;
+
+			return WeeklyRecipesResponse.Recipe.builder() // WeeklyRecipesResponse.Recipe로 반환
+					.id(recipe.getId()).title(recipe.getTitle()).thumbnailUrl(recipe.getThumbnailUrl())
+					.price(recipe.getPrice()).favoriteCount(favoriteCount) // 북마크 수
+					.avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
+					.build();
+		}).collect(Collectors.toList());
 	}
 
 }

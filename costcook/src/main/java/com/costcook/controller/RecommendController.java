@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.costcook.domain.request.RecommendedRecipeRequest;
-import com.costcook.domain.response.WeeklyRecipesResponse;
+import com.costcook.domain.response.BudgetRecipesResponse;
 import com.costcook.entity.User;
 import com.costcook.service.RecipeService;
 
@@ -32,7 +32,7 @@ public class RecommendController {
 	@GetMapping("/recipes")
 	public ResponseEntity<?> getRecipesByBudget( @RequestParam(value = "minBudget") int minBudget,
 	        @RequestParam(value = "maxBudget") int maxBudget) {
-		WeeklyRecipesResponse response = recipeService.getRecipesByBudget(minBudget, maxBudget);
+		BudgetRecipesResponse response = recipeService.getRecipesByBudget(minBudget, maxBudget);
 		return ResponseEntity.ok(response);
 	}
 
