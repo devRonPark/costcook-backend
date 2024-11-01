@@ -307,5 +307,10 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
     log.info("기존 재료 삭제 - 재료 ID: {}", ingredient.getIngredient().getId());
   }
 
+  @Override
+  public boolean isRecipeDuplicate(String title) {
+    return recipeRepository.existsByTitle(title);
+  }
+
   
 }

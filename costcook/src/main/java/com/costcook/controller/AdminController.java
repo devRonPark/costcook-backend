@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.costcook.domain.request.AdminIngredientRegisterRequest;
 import com.costcook.domain.request.AdminRecipeRegisterRequest;
 import com.costcook.domain.response.AdminIngredientResponse;
 import com.costcook.domain.response.RecipeIngredientResponse;
@@ -62,16 +63,80 @@ public class AdminController {
     @RequestParam("ingredientName") String ingredientName) {
 
     boolean exists = adminIngredientService.isIngredientDuplicate(ingredientName);
+
     Map<String, Boolean> response = new HashMap<>();
     response.put("exists", exists);
+
     return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/ingredients")
+  public ResponseEntity<String> saveIngredient(
+    @ModelAttribute AdminIngredientRegisterRequest ingredient) {
+
+    // [로그] 재료 이름 확인
+    log.info("재료 등록 요청 - {}", ingredient.getName());
+
+    // 재료 등록 로직
+    boolean result = adminIngredientService.saveIngredient(ingredient);
+
+    // [예외] 재료 등록에 실패하면 IllegalStateException 발생.
+    if (!result) {
+      throw new IllegalStateException("재료 등록에 실패했습니다."); 
+    }
+
+    // [로그] 재료 등록 성공
+    log.info("재료 등록 완료 : " + ingredient.getName());
+
+    return ResponseEntity.ok("재료가 성공적으로 등록되었습니다.");
+
+  }
+
+
+  @PatchMapping("/ingredients/{ingredientId}")
+  public ResponseEntity<String> editIngredient(
+    @PathVariable("ingredientId") Long ingredientId,
+    @ModelAttribute AdminIngredientRegisterRequest ingredient) {
+
+    // [로그] 재료 ID 확인
+    log.info("재료 수정 요청 - 재료 ID: {}", ingredientId);
+
+    // 재료 수정 로직
+    boolean result = adminIngredientService.updateIngredient(ingredientId, ingredient);
+
+    // [예외] 재료 수정에 실패하면 IllegalStateException 발생.
+    if (!result) {
+      throw new IllegalStateException("재료 수정에 실패했습니다."); 
+    }
+
+    // [로그] 재료 수정 성공
+    log.info("재료 수정 완료 - 재료 ID: {} ", ingredientId);
+
+    return ResponseEntity.ok("재료가 성공적으로 수정되었습니다.");
+
+  }
+
+  @DeleteMapping("/ingredients/{ingredientId}")
+  public ResponseEntity<String> deleteIngredient(
+    @PathVariable("ingredientId") Long ingredientId) {
+
+    boolean result = adminIngredientService.deleteIngredient(ingredientId);
+
+    // [예외] 재료 삭제에 실패하면 IllegalStateException 발생.
+    if(!result) {
+      throw new IllegalStateException("재료 수정에 실패했습니다."); 
+    }
+
+    // [로그] 재료 수정 성공
+    log.info("재료 삭제 완료 - 재료 ID: {} ", ingredientId);
+
+    return ResponseEntity.ok("재료가 성공적으로 삭제되었습니다.");
   }
 
 
   @GetMapping("/recipes/{recipeId}/ingredients")
   public ResponseEntity<List<RecipeIngredientResponse>> getRecipeIngredients(@PathVariable("recipeId") Long recipeId) {
     try {
-      // 서비스에서 이미 변환된 DTO 리스트를 받아옵니다.
       List<RecipeIngredientResponse> ingredientResponses = adminRecipeService.findIngredientsByRecipeId(recipeId);
       return ResponseEntity.ok(ingredientResponses);
     } catch (Exception e) {
@@ -80,8 +145,20 @@ public class AdminController {
     }
   }
 
+  @GetMapping("/recipes/duplicate")
+  public ResponseEntity<Map<String, Boolean>> checkDuplicateRecipe(
+    @RequestParam("recipeTitle") String recipeTitle) {
+
+    boolean exists = adminRecipeService.isRecipeDuplicate(recipeTitle);
+
+    Map<String, Boolean> response = new HashMap<>();
+    response.put("exists", exists);
+
+    return ResponseEntity.ok(response);
+  }
+
   @PostMapping("/recipes")
-  public ResponseEntity<String> createRecipe(
+  public ResponseEntity<String> saveRecipe(
     @ModelAttribute AdminRecipeRegisterRequest recipe,
     @RequestPart(value = "thumbnailFile", required = false) MultipartFile thumbnailFile) {
 
