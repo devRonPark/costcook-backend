@@ -123,11 +123,7 @@ public class AdminIngredientServiceImpl implements AdminIngredientService {
 
       // 단위 가격
       Integer price = request.getPrice();
-
-      if(price != null && price >= 0) {
-        ingredient.setPrice(price);
-      }
-
+      ingredient.setPrice(price);
       ingredientRepository.save(ingredient);  
       log.info("재료 수정 완료 - 재료 ID: {}", ingredientId);
       return true;
