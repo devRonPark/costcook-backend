@@ -41,7 +41,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 	ReviewStatsDTO findCountAndAverageScoreByRecipeId(@Param("id") Long id);
 
 	@Query("SELECT SUM(i.price * ri.quantity) FROM Recipe recipe LEFT JOIN RecipeIngredient ri ON ri.recipe.id = recipe.id LEFT JOIN Ingredient i on ri.ingredient.id = i.id WHERE recipe.id = :id")
-	Long getTotalPrice(@Param("id") Long id);
+	int getTotalPrice(@Param("id") Long id);
 
 	// 레시피 검색(검색 대상: 레시피 이름, 레시피 구성 재료명)
 	@Query("SELECT DISTINCT r FROM Recipe r " +
