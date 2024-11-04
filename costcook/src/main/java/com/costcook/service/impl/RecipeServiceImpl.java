@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.costcook.domain.ReviewStatsDTO;
 import com.costcook.domain.request.RecipeUsageRequest;
@@ -19,9 +20,10 @@ import com.costcook.domain.response.RecipeResponse;
 import com.costcook.domain.response.RecipeUsageResponse;
 import com.costcook.domain.response.WeeklyRecipesResponse;
 import com.costcook.entity.Recipe;
-import com.costcook.entity.User;
-import com.costcook.repository.FavoriteRepository;
 import com.costcook.entity.RecommendedRecipe;
+import com.costcook.entity.User;
+import com.costcook.exceptions.NotFoundException;
+import com.costcook.repository.FavoriteRepository;
 import com.costcook.repository.RecipeIngredientRepository;
 import com.costcook.repository.RecipeRepository;
 import com.costcook.repository.RecommendedRecipeRepository;
@@ -42,50 +44,51 @@ public class RecipeServiceImpl implements RecipeService {
 	// 레시피 목록 조회
 	@Override
 	public RecipeListResponse getRecipes(int page, int size, String sort, String order, User user) {
-		
+
 		Pageable pageable = PageRequest.of(page - 1, size);
 		Page<Recipe> recipePage;
 
 		// 정렬
-        if (sort.equals("viewCount")) {
-        	if (order.equals("asc")) { // 오름차순
-        		recipePage = recipeRepository.findAllByOrderByViewCountAsc(pageable);
-        	} else { // 내림차순
-        		recipePage = recipeRepository.findAllByOrderByViewCountDesc(pageable);
-        	}
-        } else if (sort.equals("avgRatings")) {
-        	 if (order.equals("asc")) { // 오름차순
-        	 	recipePage = recipeRepository.findAllOrderByAverageScoreAsc(pageable);
-        	 } else { // 내림차순
-        	 	recipePage = recipeRepository.findAllOrderByAverageScoreDesc(pageable);        		
-        	 }
-        } else { // 생성일(디폴트)
-        	if (order.equals("asc")) { // 오름차순
-        		recipePage = recipeRepository.findAllByOrderByCreatedAtAsc(pageable);
-        	} else {
-        		recipePage = recipeRepository.findAllByOrderByCreatedAtDesc(pageable);        		
-        	}
-        }
-        
-		// 응답할 데이터 
-        return RecipeListResponse.builder()
-        	.page(page)
-        	.size(size)
-        	.totalPages(recipePage.getTotalPages())
-        	.totalRecipes(recipePage.getTotalElements())
-        	.recipes(
-        		// 아이디, 이름, 이미지, [가격], [평점], [조회수]
-        		recipePage.getContent().stream()
-    				.map(recipe -> {
-    					ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
-    					int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
-    					double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
-    					int reviewCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
-						boolean isFavorite = user != null ? favoriteRepository.existsByUserIdAndRecipeIdAndDeletedAtIsNull(user.getId(), recipe.getId()) : false;
-    					return RecipeResponse.toDTO(recipe, averageScore, reviewCount, totalPrice, isFavorite);
-    				})
-    				.toList())
-        	.build();
+		if (sort.equals("viewCount")) {
+			if (order.equals("asc")) { // 오름차순
+				recipePage = recipeRepository.findAllByOrderByViewCountAsc(pageable);
+			} else { // 내림차순
+				recipePage = recipeRepository.findAllByOrderByViewCountDesc(pageable);
+			}
+		} else if (sort.equals("avgRatings")) {
+			if (order.equals("asc")) { // 오름차순
+				recipePage = recipeRepository.findAllOrderByAverageScoreAsc(pageable);
+			} else { // 내림차순
+				recipePage = recipeRepository.findAllOrderByAverageScoreDesc(pageable);
+			}
+		} else { // 생성일(디폴트)
+			if (order.equals("asc")) { // 오름차순
+				recipePage = recipeRepository.findAllByOrderByCreatedAtAsc(pageable);
+			} else {
+				recipePage = recipeRepository.findAllByOrderByCreatedAtDesc(pageable);
+			}
+		}
+
+		// 응답할 데이터
+		return RecipeListResponse.builder().page(page).size(size).totalPages(recipePage.getTotalPages())
+				.totalRecipes(recipePage.getTotalElements()).recipes(
+						// 아이디, 이름, 이미지, [가격], [평점], [조회수]
+						recipePage.getContent().stream().map(recipe -> {
+							ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
+							int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
+							double averageScore = stats != null && stats.getAverageScore() != null
+									? stats.getAverageScore()
+									: 0.0;
+							int reviewCount = stats != null && stats.getReviewCount() != null
+									? stats.getReviewCount().intValue()
+									: 0;
+							boolean isFavorite = user != null
+									? favoriteRepository.existsByUserIdAndRecipeIdAndDeletedAtIsNull(user.getId(),
+											recipe.getId())
+									: false;
+							return RecipeResponse.toDTO(recipe, averageScore, reviewCount, totalPrice, isFavorite);
+						}).toList())
+				.build();
 	}
 
 	// 전체 레시피 수 조회 : 총 페이지를 미리 입력하여, 무한 로딩 방지
@@ -98,8 +101,7 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	@Transactional
 	public RecipeResponse getRecipeById(Long id, User user) {
-		Recipe recipe = recipeRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("레시피 정보가 없습니다."));
+		Recipe recipe = recipeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("레시피 정보가 없습니다."));
 		// 조회수 증가
 		recipeRepository.updateViewCount(id);
 		// 리뷰 평점 가져오기
@@ -107,8 +109,10 @@ public class RecipeServiceImpl implements RecipeService {
 		double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
 		int commentCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
 
-		boolean isFavorite = user != null ? favoriteRepository.existsByUserIdAndRecipeIdAndDeletedAtIsNull(user.getId(), recipe.getId()) : false;
-		
+		boolean isFavorite = user != null
+				? favoriteRepository.existsByUserIdAndRecipeIdAndDeletedAtIsNull(user.getId(), recipe.getId())
+				: false;
+
 		// 총 금액 가져오기
 		int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
 		// 레시피 테이블에 가격 반영
@@ -146,14 +150,17 @@ public class RecipeServiceImpl implements RecipeService {
 					.recipes(recipePage.getContent().stream().map(recipe -> {
 						ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
 						int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
-						double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
-						int commentCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
-						boolean isFavorite = user != null ? favoriteRepository.existsByUserIdAndRecipeIdAndDeletedAtIsNull(user.getId(), recipe.getId()) : false;
+						double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore()
+								: 0.0;
+						int commentCount = stats != null && stats.getReviewCount() != null
+								? stats.getReviewCount().intValue()
+								: 0;
+						boolean isFavorite = user != null
+								? favoriteRepository.existsByUserIdAndRecipeIdAndDeletedAtIsNull(user.getId(),
+										recipe.getId())
+								: false;
 						return RecipeResponse.toDTO(recipe, averageScore, commentCount, totalPrice, isFavorite);
-					})
-					.toList()
-				)
-				.build();
+					}).toList()).build();
 		} catch (IllegalArgumentException e) {
 			log.error("잘못된 검색어가 입력되었습니다: {}", keyword, e);
 			throw e;
@@ -178,7 +185,8 @@ public class RecipeServiceImpl implements RecipeService {
 					: 0;
 
 			return BudgetRecipesResponse.Recipe.builder().id(recipe.getId()).title(recipe.getTitle())
-					.thumbnailUrl(recipe.getThumbnailUrl()).price(recipe.getPrice() / recipe.getServings()).favoriteCount(favoriteCount) // 계산된
+					.thumbnailUrl(recipe.getThumbnailUrl()).price(recipe.getPrice() / recipe.getServings())
+					.favoriteCount(favoriteCount) // 계산된
 					.avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
 					.build();
 		}).collect(Collectors.toList());
@@ -202,7 +210,7 @@ public class RecipeServiceImpl implements RecipeService {
 
 		recommendedRecipeRepository.saveAll(recipes);
 	}
-	
+
 	// 추천받은 레시피 가져오기
 
 	@Override
@@ -227,28 +235,64 @@ public class RecipeServiceImpl implements RecipeService {
 					.id(recipe.getId()).title(recipe.getTitle()).thumbnailUrl(recipe.getThumbnailUrl())
 					.price(recipe.getPrice()).favoriteCount(favoriteCount) // 북마크 수
 					.avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
-					.servings(recipe.getServings())
-					.build();
+					.servings(recipe.getServings()).isUsed(recommendedRecipe.isUsed()).build();
 		}).collect(Collectors.toList());
 	}
 
+	// used가 true인 레시피만 반환
+	@Override
+	public List<WeeklyRecipesResponse.Recipe> getUsedRecommendedRecipes(int year,
+			int weekNumber, User user) {
+		List<RecommendedRecipe> recommendedRecipes = recommendedRecipeRepository.findByYearAndWeekNumberAndUserId(year,
+				weekNumber, user.getId());
+		
+		return recommendedRecipes.stream()
+		        .filter(RecommendedRecipe::isUsed) // isUsed가 true인 레시피만 필터링
+		        .map((RecommendedRecipe recommendedRecipe) -> {
+		            Recipe recipe = recommendedRecipe.getRecipe(); // 추천 레시피에서 실제 레시피 정보 가져오기
+
+		            // 리뷰 통계 가져오기
+		            ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
+
+		            // 평균 평점 및 북마크 수 계산
+		            double averageScore = (stats != null && stats.getAverageScore() != null) ? stats.getAverageScore() : 0.0;
+		            int favoriteCount = (stats != null && stats.getReviewCount() != null) ? stats.getReviewCount().intValue() : 0;
+
+		            return WeeklyRecipesResponse.Recipe.builder() // WeeklyRecipesResponse.Recipe로 반환
+		                    .id(recipe.getId())
+		                    .title(recipe.getTitle())
+		                    .thumbnailUrl(recipe.getThumbnailUrl())
+		                    .price(recipe.getPrice())
+		                    .favoriteCount(favoriteCount) // 북마크 수
+		                    .avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
+		                    .servings(recipe.getServings())
+		                    .isUsed(recommendedRecipe.isUsed())
+		                    .build();
+		        })
+		        .collect(Collectors.toList());
+	}
+
+	
+	
+	// 추천 레시피 사용여부 수정
+
 	@Override
 	public RecipeUsageResponse modifyUseRecipe(RecipeUsageRequest recipeUsageRequest, User user) {
-		RecommendedRecipe recipe = recommendedRecipeRepository.findByYearAndWeekNumberAndUserIdAndRecipeId(recipeUsageRequest.getYear(), recipeUsageRequest.getWeekNumber(), user.getId(), recipeUsageRequest.getRecipeId());
+		RecommendedRecipe recipe = recommendedRecipeRepository.findByYearAndWeekNumberAndUserIdAndRecipeId(
+				recipeUsageRequest.getYear(), recipeUsageRequest.getWeekNumber(), user.getId(),
+				recipeUsageRequest.getRecipe().getId());
 		if (recipe == null) {
-			
+
 			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
 		}
 		recipe.setUsed(!recipe.isUsed());
 		recommendedRecipeRepository.save(recipe);
 
-		
-		return RecipeUsageResponse.builder()
-	            .message("레시피 사용 여부가 기록되었습니다.")
-	            .recipeId(recipe.getRecipe().getId())
-	            .used(recipe.isUsed())
-	            .build();
+		return RecipeUsageResponse.builder().message("레시피 사용 여부가 기록되었습니다.").recipeId(recipe.getRecipe().getId())
+				.used(recipe.isUsed()).build();
 
 	}
+
+
 
 }

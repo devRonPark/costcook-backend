@@ -9,6 +9,8 @@ import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
 import com.costcook.domain.response.RecipeUsageResponse;
 import com.costcook.domain.response.WeeklyRecipesResponse;
+import com.costcook.domain.response.WeeklyRecipesResponse.Recipe;
+import com.costcook.entity.RecommendedRecipe;
 import com.costcook.entity.User;
 
 
@@ -32,6 +34,8 @@ public interface RecipeService {
 	List<WeeklyRecipesResponse.Recipe> getRecommendedRecipes(int year, int weekNumber, User user);
 
 	RecipeUsageResponse modifyUseRecipe(RecipeUsageRequest recipeUsageRequest, User user);
+
+	List<Recipe> getUsedRecommendedRecipes(int year, int weekNumber, User user);
 
 
 

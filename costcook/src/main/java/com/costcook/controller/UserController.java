@@ -9,12 +9,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.costcook.domain.request.RecommendedRecipeRequest;
 import com.costcook.domain.request.UserUpdateRequest;
-import com.costcook.domain.response.BudgetRecipesResponse;
 import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.domain.response.UserResponse;
 import com.costcook.domain.response.WeeklyRecipesResponse;
@@ -100,7 +101,7 @@ public class UserController {
 			throw e;
 		}
 	}
-	
+
 	// 추천 레시피 가져오기
 
 	@GetMapping("/me/recommended-recipes")
@@ -115,5 +116,19 @@ public class UserController {
 
 		return ResponseEntity.ok(response);
 	}
+	
+	// used가 true인 레시피 가져오기
+    @GetMapping("/me/used-recipes")
+    public ResponseEntity<?> getUsedRecommendedRecipes(@RequestParam(name = "year") int year,
+			@RequestParam(name = "weekNumber") int weekNumber, @AuthenticationPrincipal User user) {
+        List<WeeklyRecipesResponse.Recipe> usedRecipes = recipeService.getUsedRecommendedRecipes(year, weekNumber, user);
+        
+        WeeklyRecipesResponse response = WeeklyRecipesResponse.builder().year(year).weekNumber(weekNumber)
+				.recipes(usedRecipes).build();
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    
 
 }
