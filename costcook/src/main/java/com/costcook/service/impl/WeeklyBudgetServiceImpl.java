@@ -157,6 +157,7 @@ public class WeeklyBudgetServiceImpl implements WeeklyBudgetService {
 
 	    // 응답 객체 생성
 	    return WeeklyUsedBudgetResponse.builder()
+	    		.userId(user.getId())
 	            .weeklyBudget(weeklyBudget) // 이번 주 예산
 	            .usedBudget(weeklyUsedPrice) // 총 사용 가격
 	            .remainingBudget(remainingBudget) // 남은 예산

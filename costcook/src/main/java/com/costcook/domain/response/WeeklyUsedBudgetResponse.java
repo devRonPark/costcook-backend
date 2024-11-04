@@ -2,8 +2,6 @@ package com.costcook.domain.response;
 
 import java.util.List;
 
-import com.costcook.entity.Recipe;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class WeeklyUsedBudgetResponse {
 	
+	private Long userId;
 	private int year;
 	private int weekNumber;
 	private int weeklyBudget; // 이번 주 예산
