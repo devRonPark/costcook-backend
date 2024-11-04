@@ -13,4 +13,6 @@ public interface RecommendedRecipeRepository extends JpaRepository<RecommendedRe
 
 	List<RecommendedRecipe> findByYearAndWeekNumberAndUserId(int year, int weekNumber, Long id);
 
+	RecommendedRecipe findByYearAndWeekNumberAndUserIdAndRecipeId(int year, int weekNumber, Long id, Long recipeId);
+
 }

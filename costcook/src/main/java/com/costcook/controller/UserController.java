@@ -100,6 +100,8 @@ public class UserController {
 			throw e;
 		}
 	}
+	
+	// 추천 레시피 가져오기
 
 	@GetMapping("/me/recommended-recipes")
 	public ResponseEntity<WeeklyRecipesResponse> getAllRecommendRecipes(@RequestParam(name = "year") int year,

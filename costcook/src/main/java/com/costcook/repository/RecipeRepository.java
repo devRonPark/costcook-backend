@@ -12,8 +12,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.costcook.domain.ReviewStatsDTO;
-import com.costcook.domain.response.RecipeResponse;
-import com.costcook.domain.response.BudgetRecipesResponse;
 import com.costcook.entity.Recipe;
 
 @Repository

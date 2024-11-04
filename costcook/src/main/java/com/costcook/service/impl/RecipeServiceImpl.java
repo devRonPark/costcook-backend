@@ -11,14 +11,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.costcook.domain.ReviewStatsDTO;
+import com.costcook.domain.request.RecipeUsageRequest;
 import com.costcook.domain.request.RecommendedRecipeRequest;
 import com.costcook.domain.response.BudgetRecipesResponse;
 import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
+import com.costcook.domain.response.RecipeUsageResponse;
 import com.costcook.domain.response.WeeklyRecipesResponse;
 import com.costcook.entity.Recipe;
 import com.costcook.entity.RecommendedRecipe;
 import com.costcook.entity.User;
+import com.costcook.exceptions.NotFoundException;
 import com.costcook.repository.RecipeIngredientRepository;
 import com.costcook.repository.RecipeRepository;
 import com.costcook.repository.RecommendedRecipeRepository;
@@ -170,9 +173,7 @@ public class RecipeServiceImpl implements RecipeService {
 					: 0;
 
 			return BudgetRecipesResponse.Recipe.builder().id(recipe.getId()).title(recipe.getTitle())
-					.thumbnailUrl(recipe.getThumbnailUrl()).price(recipe.getPrice()).favoriteCount(favoriteCount) // 계산된
-																													// 즐겨찾기
-																													// 개수
+					.thumbnailUrl(recipe.getThumbnailUrl()).price(recipe.getPrice() / recipe.getServings()).favoriteCount(favoriteCount) // 계산된
 					.avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
 					.build();
 		}).collect(Collectors.toList());
@@ -196,6 +197,8 @@ public class RecipeServiceImpl implements RecipeService {
 
 		recommendedRecipeRepository.saveAll(recipes);
 	}
+	
+	// 추천받은 레시피 가져오기
 
 	@Override
 	public List<WeeklyRecipesResponse.Recipe> getRecommendedRecipes(int year, int weekNumber, User user) {
@@ -219,8 +222,28 @@ public class RecipeServiceImpl implements RecipeService {
 					.id(recipe.getId()).title(recipe.getTitle()).thumbnailUrl(recipe.getThumbnailUrl())
 					.price(recipe.getPrice()).favoriteCount(favoriteCount) // 북마크 수
 					.avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
+					.servings(recipe.getServings())
 					.build();
 		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public RecipeUsageResponse modifyUseRecipe(RecipeUsageRequest recipeUsageRequest, User user) {
+		RecommendedRecipe recipe = recommendedRecipeRepository.findByYearAndWeekNumberAndUserIdAndRecipeId(recipeUsageRequest.getYear(), recipeUsageRequest.getWeekNumber(), user.getId(), recipeUsageRequest.getRecipeId());
+		if (recipe == null) {
+			
+			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
+		}
+		recipe.setUsed(!recipe.isUsed());
+		recommendedRecipeRepository.save(recipe);
+
+		
+		return RecipeUsageResponse.builder()
+	            .message("레시피 사용 여부가 기록되었습니다.")
+	            .recipeId(recipe.getRecipe().getId())
+	            .used(recipe.isUsed())
+	            .build();
+
 	}
 
 }
