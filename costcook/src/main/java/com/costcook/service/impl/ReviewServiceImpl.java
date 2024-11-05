@@ -1,11 +1,9 @@
 package com.costcook.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.request.UpdateReviewRequest;
-import com.costcook.domain.response.CreateReviewResponse;
 import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.entity.Recipe;
@@ -48,7 +45,7 @@ public class ReviewServiceImpl implements ReviewService {
 		// 응답할 데이터
 		return ReviewListResponse.builder()
 			.page(page)
-			.size(size)
+			.size(reviewPage.getNumberOfElements())
 			.totalPages(reviewPage.getTotalPages())
 			.totalReviews(reviewPage.getTotalElements())
 			.reviews(
@@ -59,11 +56,7 @@ public class ReviewServiceImpl implements ReviewService {
 	
 	// 리뷰 등록
 	@Override
-//	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
-	
-	// 리뷰 등록 TEST(로그인 상태라 가정)
-	
-	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest) {
+	public ReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
 		Optional<Recipe> optRecipe = recipeRepository.findById(reviewRequest.getRecipeId());
 		if (optRecipe.isEmpty()) {
 			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
@@ -76,7 +69,7 @@ public class ReviewServiceImpl implements ReviewService {
 			.build();
 		
 		Review result = reviewRepository.save(review);
-		return CreateReviewResponse.toDTO(result);
+		return ReviewResponse.toDTO(result);
 	}
 	
 	
@@ -119,6 +112,10 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public ReviewResponse modifyReview(UpdateReviewRequest updateReviewRequest, User user, Long reviewId) {
 		Optional<Review> optReview = reviewRepository.findById(reviewId);
+		
+		log.info("리뷰 작성 유저: {}", optReview.get().getUser().getEmail());
+		log.info("현재 로그인 유저: {}", user.getEmail());
+		
 		if (optReview.isEmpty() || optReview.get().getDeletedAt() != null) {
 			// 해당 리뷰를 찾을 수 없습니다 404 Not Found
 			throw new NotFoundException("해당 리뷰를 찾을 수 없습니다.");
@@ -139,6 +136,7 @@ public class ReviewServiceImpl implements ReviewService {
 		// 변경 사항 반영
 		reviewToUpdate.setScore(updateReviewRequest.getScore());
 		reviewToUpdate.setComment(updateReviewRequest.getComment());
+		reviewToUpdate.setUpdatedAt(LocalDateTime.now()); // 수정 날짜
 		
 		 // 변경 사항 저장
 		Review updatedReview = reviewRepository.save(reviewToUpdate);
