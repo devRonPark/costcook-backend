@@ -22,8 +22,10 @@ import com.costcook.domain.request.AdminIngredientRegisterRequest;
 import com.costcook.domain.request.AdminRecipeRegisterRequest;
 import com.costcook.domain.response.AdminIngredientResponse;
 import com.costcook.domain.response.RecipeIngredientResponse;
+import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.service.AdminIngredientService;
 import com.costcook.service.AdminRecipeService;
+import com.costcook.service.AdminReviewService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,7 @@ public class AdminController {
 
   private final AdminRecipeService adminRecipeService;
   private final AdminIngredientService adminIngredientService;
+  private final AdminReviewService adminReviewService;
 
   @GetMapping("/ingredients")
   public ResponseEntity<List<AdminIngredientResponse>> getAllIngredients() {
@@ -227,6 +230,16 @@ public class AdminController {
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 삭제 중 오류가 발생했습니다.");
     }
+  }
+
+
+  @GetMapping("/reviews")
+  public ResponseEntity<ReviewListResponse> getReviewList(
+    @RequestParam(name = "page", defaultValue = "1") int page,
+		@RequestParam(name = "size", defaultValue = "3") int size
+  ) {
+    ReviewListResponse response = adminReviewService.getReviewList(page - 1, size);
+    return ResponseEntity.ok(response);
   }
 
 }

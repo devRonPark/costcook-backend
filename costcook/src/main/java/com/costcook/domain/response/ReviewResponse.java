@@ -19,6 +19,7 @@ public class ReviewResponse {
 	private Long id;
 	private int score;
 	private String comment;
+  private Boolean status;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime createdAt;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -52,20 +53,21 @@ public class ReviewResponse {
 		return ReviewResponse.builder()
 				.id(review.getId())
 				.score(review.getScore())
-                .comment(review.getComment())
-                .createdAt(review.getCreatedAt())
+        .comment(review.getComment())
+        .status(review.isStatus())
+        .createdAt(review.getCreatedAt())
 				.updatedAt(review.getUpdatedAt())
-                .user(User.builder()
-                	.id(review.getUser().getId())
-                    .nickname(review.getUser().getNickname())
-                    .profileUrl(review.getUser().getProfileUrl())
-                    .build())
-                .recipe(Recipe.builder()
-                    .id(review.getRecipe().getId())
-					.title(review.getRecipe().getTitle())
-                    .thumbnailUrl(review.getRecipe().getThumbnailUrl())
-                    .build())
-                .build();						
+        .user(User.builder()
+                .id(review.getUser().getId())
+                .nickname(review.getUser().getNickname())
+                .profileUrl(review.getUser().getProfileUrl())
+                .build())
+        .recipe(Recipe.builder()
+                .id(review.getRecipe().getId())
+					      .title(review.getRecipe().getTitle())
+                .thumbnailUrl(review.getRecipe().getThumbnailUrl())
+                .build())
+        .build();						
 	}
 	
 }

@@ -76,7 +76,8 @@ public class WebSecurityConfig {
 				
 				// 임시 admin 
 				new AntPathRequestMatcher("/api/admin/ingredients/**"),
-				new AntPathRequestMatcher("/api/admin/recipes/**") 
+				new AntPathRequestMatcher("/api/admin/recipes/**"),
+        new AntPathRequestMatcher("/api/admin/reviews/**")
 			).permitAll()
 			.requestMatchers("/api/users/me/**").authenticated() // 이 API는 인증이 필요함
 			// 그 밖의 다른 요청들은 인증을 통과한(로그인한) 사용자라면 모두 접근할 수 있도록 한다.
