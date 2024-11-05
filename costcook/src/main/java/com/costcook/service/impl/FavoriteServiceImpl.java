@@ -119,13 +119,9 @@ public class FavoriteServiceImpl implements FavoriteService {
 				}
 			}
 		}
-	
 		return new CreateFavoritesResponse(addedFavorites); // 추가된 FavoriteResponse 목록 반환
 	}
 	
-	
-
-
 	@Override
 	public void deleteFavorites(Long userId, List<Long> recipeIds) {
 		for (Long recipeId : recipeIds) {

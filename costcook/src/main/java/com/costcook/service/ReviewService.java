@@ -21,4 +21,6 @@ public interface ReviewService {
 	// 리뷰 목록 가져오기(마이페이지)
 	ReviewListResponse getReviewListByUserWithPagination(User user, int page);
 
+	ReviewResponse getReviewByUserAndRecipe(User user, Long recipeId);
+
 }
