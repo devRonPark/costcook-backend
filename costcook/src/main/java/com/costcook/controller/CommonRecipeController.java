@@ -7,6 +7,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ import com.costcook.domain.response.RecipeDetailResponse;
 import com.costcook.domain.response.RecipeListResponse;
 import com.costcook.domain.response.RecipeResponse;
 import com.costcook.domain.response.ReviewListResponse;
+import com.costcook.entity.User;
 import com.costcook.service.RecipeIngredientService;
 import com.costcook.service.RecipeService;
 import com.costcook.service.ReviewService;
@@ -37,48 +39,49 @@ public class CommonRecipeController {
 	private final ReviewService reviewService;
 	private final RecipeIngredientService recipeIngredientService;
 	
-	@GetMapping("/test")
-	public ResponseEntity<?> testMan(@RequestParam("number") int number) {
-		String url = "https://m.10000recipe.com/recipe/" + number;
-		RestTemplate restTemplate = new RestTemplate();
-		String htmlContent = restTemplate.getForObject(url, String.class);
-		
-		Document doc = Jsoup.parse(htmlContent, "UTF-8");
-		Element specificTag = doc.selectFirst("ul.step_list");
-		
-		return ResponseEntity.ok().header("Content-type", "text/html; charset=UTF-8").body(specificTag != null ? specificTag.html() : "레시피 없음");
-	}
-	
 	// 레시피 전체 목록 조회 
 	@GetMapping(value = {"", "/"})
-	public ResponseEntity<RecipeListResponse> getAllRecipe(
+	public ResponseEntity<?> getAllRecipe(
 		@RequestParam(name = "page", defaultValue = "1") int page, 
 		@RequestParam(name = "size", defaultValue = "9") int size, 
 		@RequestParam(name = "sort", defaultValue = "createdAt") String sort,
-		@RequestParam(name = "order", defaultValue = "desc") String order
+		@RequestParam(name = "order", defaultValue = "desc") String order,
+		@AuthenticationPrincipal User user,
+		@RequestParam(required = false, name = "ids") List<Long> ids // 여러 개의 레시피 id 를 요청으로 받음.
 	) {
+		if (ids != null && !ids.isEmpty()) {
+			// 특정 IDs가 존재하는 경우 해당 레시피 목록만 가져오기
+			List<RecipeResponse> recipes = recipeService.getRecipesByIds(ids, user);
+			return ResponseEntity.ok(recipes);
+		} else {
+			// IDs가 없을 경우 전체 레시피 목록 가져오기
+			RecipeListResponse response = recipeService.getRecipes(page, size, sort, order, user);
+			return ResponseEntity.ok(response);
+		}
 		// 레시피 목록 가져오기
-		RecipeListResponse response = recipeService.getRecipes(page, size, sort, order);
-		return ResponseEntity.ok(response);
+		// RecipeListResponse response = recipeService.getRecipes(page, size, sort, order, user);
+
+		// return ResponseEntity.ok(response);
 	}
 
 	// 레시피 검색
 	@GetMapping("/search")
 	public ResponseEntity<RecipeListResponse> searchRecipes(
 		@RequestParam(value = "keyword", required = false) String keyword,
-		@RequestParam(value = "page", defaultValue = "0") int page
+		@RequestParam(value = "page", defaultValue = "0") int page,
+		@AuthenticationPrincipal User user
 	) {
 		log.info("레시피 검색 API 호출");
-		RecipeListResponse response = recipeService.searchRecipes(keyword, page);
+		RecipeListResponse response = recipeService.searchRecipes(keyword, page, user);
 		return ResponseEntity.ok(response);
 	}
 	
 	
     // 레시피별 상세보기
 	@GetMapping("/{recipeId}")
-	public ResponseEntity<RecipeDetailResponse> getIngredientsByRecipeId(@PathVariable("recipeId") Long id) {
+	public ResponseEntity<RecipeDetailResponse> getIngredientsByRecipeId(@PathVariable("recipeId") Long id, @AuthenticationPrincipal User user) {
 		// 아이디를 통한 레시피 조회 (레시피 아이디, 제목, 조회수, 설명, 평점, 리뷰개수, 북마크개수, 총 가격, 인분, 카테고리, 재료목록(재료아이디, 재료명, 가격, 단위, 수량, 재료카테고리))
-		RecipeResponse recipeResponse = recipeService.getRecipeById(id);
+		RecipeResponse recipeResponse = recipeService.getRecipeById(id, user);
 		List<IngredientResponse> ingredients = recipeIngredientService.getRecipeIngredients(id);
 		RecipeDetailResponse result = RecipeDetailResponse.toDTO(recipeResponse, ingredients);
 		return ResponseEntity.ok(result);
@@ -95,4 +98,23 @@ public class CommonRecipeController {
 		ReviewListResponse response = reviewService.getReviewList(recipeId, page, size);
 		return ResponseEntity.ok(response);		 
 	}
+	
+	
+	// 타 사이트 영역 가져오기
+	@GetMapping("/test")
+	   public ResponseEntity<?> testMan(@RequestParam("number") int number) {
+		System.out.println(number);
+	      String url = "https://m.10000recipe.com/recipe/" + number;
+	      RestTemplate restTemplate = new RestTemplate();
+	      String htmlContent = restTemplate.getForObject(url, String.class);
+	      
+	      Document doc = Jsoup.parse(htmlContent, "UTF-8");
+	      Element specificTag = doc.selectFirst("ul.step_list");
+	      
+	      return ResponseEntity.ok().header("Content-type", "text/html; charset=UTF-8").body(specificTag != null ? specificTag.html() : "레시피 없음");
+	   }
+	
+	
+	
+	
 }

@@ -2,23 +2,14 @@ package com.costcook.service;
 
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.request.UpdateReviewRequest;
-import com.costcook.domain.response.CreateReviewResponse;
 import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.entity.User;
 
 public interface ReviewService {
 
-//	// 리뷰 작성
-//	CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user);
-	
-	////////////
-	// 리뷰 작성 TEST
-	CreateReviewResponse createReview(CreateReviewRequest reviewRequest);
-////////////////
-	
-	
-	// 리뷰 삭제
+	ReviewResponse createReview(CreateReviewRequest reviewRequest, User user);
+
 	boolean deleteReview(User user, Long reviewId);
 
 	// 리뷰 수정

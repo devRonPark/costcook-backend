@@ -1,7 +1,4 @@
-
 package com.costcook.domain.response;
-
-import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,15 +6,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WeeklyRecipesResponse {
-    private int year;                        // 해당 연도
-    private int weekNumber;                  // 해당 주 번호
-    
+public class BudgetRecipesResponse {
+	
+	private int budget;
     private List<Recipe> recipes; // 추천 레시피 목록
 
     @Getter
@@ -32,7 +30,5 @@ public class WeeklyRecipesResponse {
         private int price;                   // 가격
         private int favoriteCount;           // 북마크 수
         private double avgRatings;           // 평균 평점
-        private int servings;
-        private boolean isUsed;
     }
 }

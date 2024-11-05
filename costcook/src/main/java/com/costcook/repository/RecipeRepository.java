@@ -12,8 +12,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.costcook.domain.ReviewStatsDTO;
-import com.costcook.domain.response.RecipeResponse;
-import com.costcook.domain.response.WeeklyRecipesResponse;
 import com.costcook.entity.Recipe;
 
 @Repository
@@ -41,7 +39,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 	ReviewStatsDTO findCountAndAverageScoreByRecipeId(@Param("id") Long id);
 
 	@Query("SELECT SUM(i.price * ri.quantity) FROM Recipe recipe LEFT JOIN RecipeIngredient ri ON ri.recipe.id = recipe.id LEFT JOIN Ingredient i on ri.ingredient.id = i.id WHERE recipe.id = :id")
-	Long getTotalPrice(@Param("id") Long id);
+	int getTotalPrice(@Param("id") Long id);
 
 	// 레시피 검색(검색 대상: 레시피 이름, 레시피 구성 재료명)
 	@Query("SELECT DISTINCT r FROM Recipe r " +
@@ -57,7 +55,10 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 	@Query("SELECT r FROM Recipe r WHERE r.price >= :minPrice AND r.price < :maxPrice")
     List<Recipe> findByPriceRange(@Param("minPrice") int minPrice, @Param("maxPrice") int maxPrice);
 
-  // 이름 중복 검사
-  boolean existsByTitle(String title);
-
+    // 이름 중복 검사
+    boolean existsByTitle(String title);
+    
+    // 사용한 레시피 가격합 (예산 집계에 사용)
+	@Query("SELECT SUM(r.price) FROM Recipe r WHERE r.id IN :recipeId")
+	Long findTotalPriceByRecipeId(@Param("recipeId") List<Long> recipeId);
 }
