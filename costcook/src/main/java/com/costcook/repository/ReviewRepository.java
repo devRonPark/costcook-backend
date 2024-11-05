@@ -2,6 +2,7 @@ package com.costcook.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.costcook.entity.Recipe;
 import com.costcook.entity.Review;
+import com.costcook.entity.User;
 
 public interface ReviewRepository extends JpaRepository<Review, Long>{
     // 특정 recipeId를 가진 모든 리뷰 목록 조회
@@ -29,4 +32,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long>{
 
     @Query("SELECT r FROM Review r WHERE r.user.id = :userId AND r.deletedAt IS NULL AND r.status = false")
     Page<Review> findAllByUserIdAndStatusFalseAndNotDeleted(@Param("userId") Long userId, Pageable pageable);
+
+    Optional<Review> findByUserAndRecipe(User user, Recipe recipe);
 }

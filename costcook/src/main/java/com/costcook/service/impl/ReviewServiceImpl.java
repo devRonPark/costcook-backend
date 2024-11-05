@@ -17,6 +17,7 @@ import com.costcook.domain.response.ReviewResponse;
 import com.costcook.entity.Recipe;
 import com.costcook.entity.Review;
 import com.costcook.entity.User;
+import com.costcook.exceptions.AlreadyExistsException;
 import com.costcook.exceptions.ForbiddenException;
 import com.costcook.exceptions.NotFoundException;
 import com.costcook.repository.RecipeRepository;
@@ -57,12 +58,21 @@ public class ReviewServiceImpl implements ReviewService {
 	// 리뷰 등록
 	@Override
 	public ReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
+		// 레시피 ID로 레시피를 찾기
 		Optional<Recipe> optRecipe = recipeRepository.findById(reviewRequest.getRecipeId());
 		if (optRecipe.isEmpty()) {
 			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
 		}
+		
+		// 이미 해당 레시피에 대해 작성된 리뷰가 있는지 확인
+		Optional<Review> existingReview = reviewRepository.findByUserAndRecipe(user, optRecipe.get());
+		if (existingReview.isPresent()) {
+			throw new AlreadyExistsException("이미 이 레시피에 대한 리뷰가 존재합니다."); // 적절한 예외 처리
+		}
+
+		// 새로운 리뷰 생성 및 저장
 		Review review = Review.builder()
-//			.user(user)
+			.user(user)
 			.recipe(optRecipe.get())
 			.score(reviewRequest.getScore())
 			.comment(reviewRequest.getComment())
@@ -71,6 +81,22 @@ public class ReviewServiceImpl implements ReviewService {
 		Review result = reviewRepository.save(review);
 		return ReviewResponse.toDTO(result);
 	}
+
+    @Override
+    public ReviewResponse getReviewByUserAndRecipe(User user, Long recipeId) {
+		// 레시피 ID로 레시피를 찾기
+		Optional<Recipe> optRecipe = recipeRepository.findById(recipeId);
+		if (optRecipe.isEmpty()) {
+			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
+		}
+
+        // 특정 사용자가 특정 레시피에 대해 작성한 리뷰 조회
+        Review review = reviewRepository.findByUserAndRecipe(user, optRecipe.get())
+            .orElseThrow(() -> new NotFoundException("해당 레시피에 대한 리뷰를 찾을 수 없습니다."));
+
+        // Review 엔티티를 ReviewResponse DTO로 변환하여 반환
+        return ReviewResponse.toDTO(review);
+    }
 	
 	
 	
