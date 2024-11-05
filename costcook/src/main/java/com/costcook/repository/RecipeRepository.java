@@ -55,7 +55,10 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 	@Query("SELECT r FROM Recipe r WHERE r.price >= :minPrice AND r.price < :maxPrice")
     List<Recipe> findByPriceRange(@Param("minPrice") int minPrice, @Param("maxPrice") int maxPrice);
 
-  // 이름 중복 검사
-  boolean existsByTitle(String title);
-
+    // 이름 중복 검사
+    boolean existsByTitle(String title);
+    
+    // 사용한 레시피 가격합 (예산 집계에 사용)
+	@Query("SELECT SUM(r.price) FROM Recipe r WHERE r.id IN :recipeId")
+	Long findTotalPriceByRecipeId(@Param("recipeId") List<Long> recipeId);
 }

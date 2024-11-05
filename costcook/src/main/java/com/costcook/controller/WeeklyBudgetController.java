@@ -15,6 +15,7 @@ import com.costcook.domain.request.WeeklyBudgetQueryRequest;
 import com.costcook.domain.request.WeeklyBudgetRequest;
 import com.costcook.domain.response.WeeklyBudgetResponse;
 import com.costcook.domain.response.WeeklyBudgetUpdateResponse;
+import com.costcook.domain.response.WeeklyUsedBudgetResponse;
 import com.costcook.entity.User;
 import com.costcook.service.WeeklyBudgetService;
 
@@ -52,4 +53,15 @@ public class WeeklyBudgetController {
 		WeeklyBudgetUpdateResponse result = budgetService.modifyWeeklyBudget(budgetRequest,user);
 		return ResponseEntity.status(HttpStatus.OK).body(result.getMessage());
 	}
+	
+	// 이번주 사용 예산, 사용 레시피 정보 조회
+	@GetMapping("/used")
+	public ResponseEntity<WeeklyUsedBudgetResponse> getWeeklyUsedBudget( @RequestParam(name = "year") int year,
+		    @RequestParam(name = "weekNumber") int weekNumber, @AuthenticationPrincipal User user) {
+		WeeklyUsedBudgetResponse usedBudget = budgetService.getWeeklyUsedBudget(new WeeklyBudgetQueryRequest(year, weekNumber), user);
+		
+		return ResponseEntity.status(HttpStatus.OK).body(usedBudget);
+    }
+	
+	
 }

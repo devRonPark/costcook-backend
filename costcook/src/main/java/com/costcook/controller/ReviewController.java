@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.request.UpdateReviewRequest;
-import com.costcook.domain.response.CreateReviewResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.entity.User;
 import com.costcook.service.ReviewService;
@@ -30,11 +29,9 @@ public class ReviewController {
 	
 	// 리뷰 작성
 	@PostMapping("")
-//	public ResponseEntity<CreateReviewResponse> createReview(@RequestBody CreateReviewRequest reviewRequest, @AuthenticationPrincipal User user) {
-	public ResponseEntity<CreateReviewResponse> createReview(@RequestBody CreateReviewRequest reviewRequest) {
-//		CreateReviewResponse result = reviewService.createReview(reviewRequest, user);
-		CreateReviewResponse result = reviewService.createReview(reviewRequest);
-		if (result.getReviewId() == null) 
+	public ResponseEntity<ReviewResponse> createReview(@RequestBody CreateReviewRequest reviewRequest, @AuthenticationPrincipal User user) {
+		ReviewResponse result = reviewService.createReview(reviewRequest, user);
+		if (result.getId() == null) 
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
 		return ResponseEntity.status(HttpStatus.CREATED).body(result);
 	}

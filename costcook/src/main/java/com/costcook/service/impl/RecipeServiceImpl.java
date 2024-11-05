@@ -101,7 +101,10 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	@Transactional
 	public RecipeResponse getRecipeById(Long id, User user) {
+
 		Recipe recipe = recipeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("레시피 정보가 없습니다."));
+		log.info("레시피 상세 조회 : {}", recipe);
+
 		// 조회수 증가
 		recipeRepository.updateViewCount(id);
 		// 리뷰 평점 가져오기
