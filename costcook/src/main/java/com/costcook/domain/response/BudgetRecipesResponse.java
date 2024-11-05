@@ -27,6 +27,7 @@ public class BudgetRecipesResponse {
         private Long id;                     // 레시피 식별자
         private String title;                // 레시피 제목
         private String thumbnailUrl;         // 레시피 썸네일 URL
+        private int servings;
         private int price;                   // 가격
         private int favoriteCount;           // 북마크 수
         private double avgRatings;           // 평균 평점

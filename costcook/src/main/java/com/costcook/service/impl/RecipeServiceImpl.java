@@ -190,6 +190,7 @@ public class RecipeServiceImpl implements RecipeService {
 			return BudgetRecipesResponse.Recipe.builder().id(recipe.getId()).title(recipe.getTitle())
 					.thumbnailUrl(recipe.getThumbnailUrl()).price(recipe.getPrice() / recipe.getServings())
 					.favoriteCount(favoriteCount) // 계산된
+					.servings(recipe.getServings())
 					.avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
 					.build();
 		}).collect(Collectors.toList());
@@ -202,11 +203,11 @@ public class RecipeServiceImpl implements RecipeService {
 
 	@Override
 	public void addRecommendedRecipe(List<RecommendedRecipeRequest> recipesRequest, User user) {
-		List<RecommendedRecipe> recipes = recipesRequest.stream().map((RecommendedRecipeRequest request) -> { // 타입을
-																												// 명시적으로
-																												// 지정
+		List<RecommendedRecipe> recipes = recipesRequest.stream().map((RecommendedRecipeRequest request) -> { 																								
 			Recipe recipe = recipeRepository.findById(request.getRecipeId())
 					.orElseThrow(() -> new RuntimeException("레시피를 찾을 수 없습니다. ID: " + request.getRecipeId()));
+			
+			
 			return RecommendedRecipe.builder().year(request.getYear()).weekNumber(request.getWeekNumber())
 					.isUsed(request.isUsed()).recipe(recipe).user(user).build();
 		}).collect(Collectors.toList());
@@ -294,6 +295,20 @@ public class RecipeServiceImpl implements RecipeService {
 		return RecipeUsageResponse.builder().message("레시피 사용 여부가 기록되었습니다.").recipeId(recipe.getRecipe().getId())
 				.used(recipe.isUsed()).build();
 
+	}
+
+	
+	// 해당 주차 레시피 전체 삭제
+	
+	
+	@Override
+	public void deleteRecommendedRecipe(RecommendedRecipeRequest recipesRequest, User user) {
+		List<RecommendedRecipe> recipeList = recommendedRecipeRepository.findByYearAndWeekNumberAndUserId(recipesRequest.getYear(), recipesRequest.getWeekNumber(), user.getId());
+		if (recipeList == null) {
+			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
+		}
+		
+		recommendedRecipeRepository.deleteAll(recipeList);
 	}
 
 
