@@ -1,9 +1,11 @@
 package com.costcook.service;
 
+import java.util.Map;
+
 import com.costcook.domain.response.ReviewListResponse;
 
 public interface AdminReviewService {
 
-  ReviewListResponse getReviewList(int page, int size, String sortBy, String direction);
+  ReviewListResponse getReviewList(Map<String, String> params);
   
 }

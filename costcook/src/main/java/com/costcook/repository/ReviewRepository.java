@@ -29,4 +29,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long>{
 
     @Query("SELECT r FROM Review r WHERE r.user.id = :userId AND r.deletedAt IS NULL AND r.status = false")
     Page<Review> findAllByUserIdAndStatusFalseAndNotDeleted(@Param("userId") Long userId, Pageable pageable);
+
+    Page<Review> findByRecipeTitleContaining(String title, Pageable pageable);
+    Page<Review> findByUserNicknameContaining(String nickname, Pageable pageable);
+
 }

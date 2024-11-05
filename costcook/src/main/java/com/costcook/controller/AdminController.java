@@ -234,19 +234,13 @@ public class AdminController {
 
 
   @GetMapping("/reviews")
-  public ResponseEntity<ReviewListResponse> getReviewList(
-    @RequestParam(name = "page", defaultValue = "1") int page,
-    @RequestParam(name = "size", defaultValue = "5") int size,
-    @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
-    @RequestParam(name = "direction", defaultValue = "asc") String direction
-  ) {
-    // 전달된 파라미터 값을 로그로 기록
-    log.info("리뷰 리스트 요청 받음 - page: {}, size: {}, sortBy: {}, direction: {}", page, size, sortBy, direction);
-  
-    // 페이지가 1부터 시작하기 때문에 내부적으로 사용할 때는 -1로 조정
-    ReviewListResponse response = adminReviewService.getReviewList(page - 1, size, sortBy, direction);
+  public ResponseEntity<ReviewListResponse> getReviewList(@RequestParam Map<String, String> params) {
     
+    log.info("리뷰 리스트 요청 - 파라미터들: {}", params);
+
+    ReviewListResponse response = adminReviewService.getReviewList(params);
     return ResponseEntity.ok(response);
   }
+
 
 }

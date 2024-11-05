@@ -1,6 +1,7 @@
 package com.costcook.service.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.entity.Review;
-import com.costcook.repository.RecipeRepository;
 import com.costcook.repository.ReviewRepository;
 import com.costcook.service.AdminReviewService;
 
@@ -27,21 +27,30 @@ public class AdminReviewServiceImpl implements AdminReviewService {
 	private final ReviewRepository reviewRepository;
 
   @Override
-  public ReviewListResponse getReviewList(int page, int size, String sortBy, String direction) {
-    // 기본 정렬 설정
-    Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+  public ReviewListResponse getReviewList(Map<String, String> params) {
+    int page = Integer.parseInt(params.getOrDefault("page", "0"));
+    int size = Integer.parseInt(params.getOrDefault("size", "5"));
+    String sortBy = params.getOrDefault("sortBy", "id");
+    String direction = params.getOrDefault("direction", "asc");
+    String category = params.getOrDefault("category", "");
+    String query = params.getOrDefault("query", "");
 
-    // sortBy와 direction이 있을 경우 정렬 기준 변경
-    if (sortBy != null && !sortBy.isEmpty()) {
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
-        sort = Sort.by(sortDirection, sortBy);
-    }
+    // 기본 정렬 설정
+    Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
 
     // 페이지네이션을 위한 Pageable 객체 생성 (페이지 번호는 0부터 시작)
     Pageable pageable = PageRequest.of(page, size, sort);
+    
+    Page<Review> reviewPage;
 
-    // ReviewRepository에서 페이지네이션된 결과를 가져옴
-    Page<Review> reviewPage = reviewRepository.findAll(pageable);
+    // 카테고리 조건에 따라 적절한 쿼리 호출
+    if ("레시피".equals(category) && !query.isEmpty()) {
+      reviewPage = reviewRepository.findByRecipeTitleContaining(query, pageable);
+    } else if ("작성자".equals(category) && !query.isEmpty()) {
+      reviewPage = reviewRepository.findByUserNicknameContaining(query, pageable);
+    } else {
+      reviewPage = reviewRepository.findAll(pageable); // 검색어 없으면 모든 리뷰 반환
+    }
 
     // Page 객체에서 필요한 정보 추출
     List<Review> reviews = reviewPage.getContent();
@@ -49,15 +58,13 @@ public class AdminReviewServiceImpl implements AdminReviewService {
     int totalPages = reviewPage.getTotalPages();
 
     // ReviewListResponse 객체에 데이터를 담아 반환
-    ReviewListResponse response = ReviewListResponse.builder()
+    return ReviewListResponse.builder()
             .reviews(reviews.stream().map(ReviewResponse::toDTO).collect(Collectors.toList()))
             .totalReviews(totalElements)
             .totalPages(totalPages)
             .page(page)
             .size(size)
             .build();
-
-    return response;
   }
 
 }
