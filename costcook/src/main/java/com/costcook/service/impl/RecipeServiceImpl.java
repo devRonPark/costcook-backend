@@ -85,6 +85,23 @@ public class RecipeServiceImpl implements RecipeService {
         	.build();
 	}
 
+	@Override
+	public List<RecipeResponse> getRecipesByIds(List<Long> ids, User user) {
+		List<Recipe> recipes = recipeRepository.findAllById(ids);
+
+		// 각 레시피에 필요한 데이터를 채워서 RecipeResponse로 변환
+		return recipes.stream()
+			.map(recipe -> {
+				ReviewStatsDTO stats = recipeRepository.findCountAndAverageScoreByRecipeId(recipe.getId());
+				int totalPrice = recipeRepository.getTotalPrice(recipe.getId());
+				double averageScore = stats != null && stats.getAverageScore() != null ? stats.getAverageScore() : 0.0;
+				int reviewCount = stats != null && stats.getReviewCount() != null ? stats.getReviewCount().intValue() : 0;
+				boolean isFavorite = user != null ? favoriteRepository.existsByUserIdAndRecipeIdAndDeletedAtIsNull(user.getId(), recipe.getId()) : false;
+				return RecipeResponse.toDTO(recipe, averageScore, reviewCount, totalPrice, isFavorite);
+			})
+			.collect(Collectors.toList());
+	}
+
 	// 전체 레시피 수 조회 : 총 페이지를 미리 입력하여, 무한 로딩 방지
 	@Override
 	public long getTotalRecipes() {
@@ -203,5 +220,7 @@ public class RecipeServiceImpl implements RecipeService {
 
 		recommendedRecipeRepository.saveAll(recipes);
 	}
+
+
 
 }
