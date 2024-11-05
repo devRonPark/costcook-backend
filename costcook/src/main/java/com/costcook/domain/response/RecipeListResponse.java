@@ -18,4 +18,3 @@ public class RecipeListResponse {
     private Long totalRecipes; // 전체 레시피 수
     private List<RecipeResponse> recipes; // 레시피 목록
 }
-

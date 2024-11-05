@@ -41,17 +41,27 @@ public class CommonRecipeController {
 	
 	// 레시피 전체 목록 조회 
 	@GetMapping(value = {"", "/"})
-	public ResponseEntity<RecipeListResponse> getAllRecipe(
+	public ResponseEntity<?> getAllRecipe(
 		@RequestParam(name = "page", defaultValue = "1") int page, 
 		@RequestParam(name = "size", defaultValue = "9") int size, 
 		@RequestParam(name = "sort", defaultValue = "createdAt") String sort,
 		@RequestParam(name = "order", defaultValue = "desc") String order,
-		@AuthenticationPrincipal User user
+		@AuthenticationPrincipal User user,
+		@RequestParam(required = false, name = "ids") List<Long> ids // 여러 개의 레시피 id 를 요청으로 받음.
 	) {
+		if (ids != null && !ids.isEmpty()) {
+			// 특정 IDs가 존재하는 경우 해당 레시피 목록만 가져오기
+			List<RecipeResponse> recipes = recipeService.getRecipesByIds(ids, user);
+			return ResponseEntity.ok(recipes);
+		} else {
+			// IDs가 없을 경우 전체 레시피 목록 가져오기
+			RecipeListResponse response = recipeService.getRecipes(page, size, sort, order, user);
+			return ResponseEntity.ok(response);
+		}
 		// 레시피 목록 가져오기
-		RecipeListResponse response = recipeService.getRecipes(page, size, sort, order, user);
+		// RecipeListResponse response = recipeService.getRecipes(page, size, sort, order, user);
 
-		return ResponseEntity.ok(response);
+		// return ResponseEntity.ok(response);
 	}
 
 	// 레시피 검색
