@@ -32,7 +32,7 @@ public interface RecipeService {
 
 	BudgetRecipesResponse getRecipesByBudget(int minPrice, int maxPrice);
 
-	void addRecommendedRecipe(List<RecommendedRecipeRequest> recipesRequest, User user);
+	void addRecommendedRecipes(List<RecommendedRecipeRequest> recipesRequest, User user);
 
 	List<WeeklyRecipesResponse.Recipe> getRecommendedRecipes(int year, int weekNumber, User user);
 
