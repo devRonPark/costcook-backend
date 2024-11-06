@@ -217,7 +217,8 @@ public class RecipeServiceImpl implements RecipeService {
 		// WeeklyRecipesResponse 반환
 		return BudgetRecipesResponse.builder().budget(maxPrice).recipes(recipeList).build();
 	}
-
+	
+	@Transactional
 	@Override
 	public void addRecommendedRecipe(List<RecommendedRecipeRequest> recipesRequest, User user) {
 		List<RecommendedRecipe> recipes = recipesRequest.stream().map((RecommendedRecipeRequest request) -> { 																								
@@ -297,6 +298,7 @@ public class RecipeServiceImpl implements RecipeService {
 	
 	// 추천 레시피 사용여부 수정
 
+	@Transactional
 	@Override
 	public RecipeUsageResponse modifyUseRecipe(RecipeUsageRequest recipeUsageRequest, User user) {
 		RecommendedRecipe recipe = recommendedRecipeRepository.findByYearAndWeekNumberAndUserIdAndRecipeId(
@@ -317,7 +319,7 @@ public class RecipeServiceImpl implements RecipeService {
 	
 	// 해당 주차 레시피 전체 삭제
 	
-	
+	@Transactional
 	@Override
 	public void deleteRecommendedRecipe(RecommendedRecipeRequest recipesRequest, User user) {
 		List<RecommendedRecipe> recipeList = recommendedRecipeRepository.findByYearAndWeekNumberAndUserId(recipesRequest.getYear(), recipesRequest.getWeekNumber(), user.getId());
