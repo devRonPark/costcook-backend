@@ -76,7 +76,8 @@ public class WebSecurityConfig {
 				
 				// 임시 admin 
 				new AntPathRequestMatcher("/api/admin/ingredients/**"),
-				new AntPathRequestMatcher("/api/admin/recipes/**") 
+				new AntPathRequestMatcher("/api/admin/recipes/**"),
+				new AntPathRequestMatcher("/api/users/nickname/duplicate-check")
 			).permitAll()
 			.requestMatchers(
 				new AntPathRequestMatcher("/api/users/me/**"),
