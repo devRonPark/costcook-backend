@@ -79,7 +79,10 @@ public class WebSecurityConfig {
 				new AntPathRequestMatcher("/api/admin/recipes/**"),
         new AntPathRequestMatcher("/api/admin/reviews/**")
 			).permitAll()
-			.requestMatchers("/api/users/me/**").authenticated() // 이 API는 인증이 필요함
+			.requestMatchers(
+				new AntPathRequestMatcher("/api/users/me/**"),
+				new AntPathRequestMatcher("/api/favorites/**") // 즐겨찾기 관리	
+			).authenticated() // 이 API는 인증이 필요함
 			// 그 밖의 다른 요청들은 인증을 통과한(로그인한) 사용자라면 모두 접근할 수 있도록 한다.
 			.anyRequest().authenticated()
 		);

@@ -53,7 +53,6 @@ public class Favorite {
 	private LocalDateTime createdAt;
 	
 	// 삭제일 : 즐겨찾기 ON, OFF
-	@LastModifiedDate
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 	
@@ -66,11 +65,4 @@ public class Favorite {
 	public void softDelete() {
 		this.deletedAt = LocalDateTime.now();
 	}
-	
-	
-	
-	
-	
-	
-
 }

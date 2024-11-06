@@ -1,11 +1,9 @@
 package com.costcook.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,12 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.costcook.domain.request.CreateReviewRequest;
 import com.costcook.domain.request.UpdateReviewRequest;
-import com.costcook.domain.response.CreateReviewResponse;
 import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.entity.Recipe;
 import com.costcook.entity.Review;
 import com.costcook.entity.User;
+import com.costcook.exceptions.AlreadyExistsException;
 import com.costcook.exceptions.ForbiddenException;
 import com.costcook.exceptions.NotFoundException;
 import com.costcook.repository.RecipeRepository;
@@ -48,7 +46,7 @@ public class ReviewServiceImpl implements ReviewService {
 		// 응답할 데이터
 		return ReviewListResponse.builder()
 			.page(page)
-			.size(size)
+			.size(reviewPage.getNumberOfElements())
 			.totalPages(reviewPage.getTotalPages())
 			.totalReviews(reviewPage.getTotalElements())
 			.reviews(
@@ -59,25 +57,46 @@ public class ReviewServiceImpl implements ReviewService {
 	
 	// 리뷰 등록
 	@Override
-//	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
-	
-	// 리뷰 등록 TEST(로그인 상태라 가정)
-	
-	public CreateReviewResponse createReview(CreateReviewRequest reviewRequest) {
+	public ReviewResponse createReview(CreateReviewRequest reviewRequest, User user) {
+		// 레시피 ID로 레시피를 찾기
 		Optional<Recipe> optRecipe = recipeRepository.findById(reviewRequest.getRecipeId());
 		if (optRecipe.isEmpty()) {
 			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
 		}
+		
+		// 이미 해당 레시피에 대해 작성된 리뷰가 있는지 확인
+		Optional<Review> existingReview = reviewRepository.findByUserAndRecipe(user, optRecipe.get());
+		if (existingReview.isPresent()) {
+			throw new AlreadyExistsException("이미 이 레시피에 대한 리뷰가 존재합니다."); // 적절한 예외 처리
+		}
+
+		// 새로운 리뷰 생성 및 저장
 		Review review = Review.builder()
-//			.user(user)
+			.user(user)
 			.recipe(optRecipe.get())
 			.score(reviewRequest.getScore())
 			.comment(reviewRequest.getComment())
 			.build();
 		
 		Review result = reviewRepository.save(review);
-		return CreateReviewResponse.toDTO(result);
+		return ReviewResponse.toDTO(result);
 	}
+
+    @Override
+    public ReviewResponse getReviewByUserAndRecipe(User user, Long recipeId) {
+		// 레시피 ID로 레시피를 찾기
+		Optional<Recipe> optRecipe = recipeRepository.findById(recipeId);
+		if (optRecipe.isEmpty()) {
+			throw new NotFoundException("해당 레시피를 찾을 수 없습니다.");
+		}
+
+        // 특정 사용자가 특정 레시피에 대해 작성한 리뷰 조회
+        Review review = reviewRepository.findByUserAndRecipe(user, optRecipe.get())
+            .orElseThrow(() -> new NotFoundException("해당 레시피에 대한 리뷰를 찾을 수 없습니다."));
+
+        // Review 엔티티를 ReviewResponse DTO로 변환하여 반환
+        return ReviewResponse.toDTO(review);
+    }
 	
 	
 	
@@ -119,6 +138,10 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public ReviewResponse modifyReview(UpdateReviewRequest updateReviewRequest, User user, Long reviewId) {
 		Optional<Review> optReview = reviewRepository.findById(reviewId);
+		
+		log.info("리뷰 작성 유저: {}", optReview.get().getUser().getEmail());
+		log.info("현재 로그인 유저: {}", user.getEmail());
+		
 		if (optReview.isEmpty() || optReview.get().getDeletedAt() != null) {
 			// 해당 리뷰를 찾을 수 없습니다 404 Not Found
 			throw new NotFoundException("해당 리뷰를 찾을 수 없습니다.");
@@ -139,6 +162,7 @@ public class ReviewServiceImpl implements ReviewService {
 		// 변경 사항 반영
 		reviewToUpdate.setScore(updateReviewRequest.getScore());
 		reviewToUpdate.setComment(updateReviewRequest.getComment());
+		reviewToUpdate.setUpdatedAt(LocalDateTime.now()); // 수정 날짜
 		
 		 // 변경 사항 저장
 		Review updatedReview = reviewRepository.save(reviewToUpdate);
