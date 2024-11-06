@@ -13,24 +13,30 @@ import org.springframework.data.repository.query.Param;
 import com.costcook.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long>{
-    // 특정 recipeId를 가진 모든 리뷰 목록 조회
+  // 특정 recipeId를 가진 모든 리뷰 목록 조회
 	List<Review> findAllByRecipeId(Long recipeId);
 	
-    // soft delete 구현을 위한 메서드 (deletedAt 필드를 업데이트하여 삭제 처리)
-    @Modifying
-    @Query("UPDATE Review r SET r.deletedAt = :deletedAt WHERE r.id = :id")
-    void softDelete(@Param("id") Long id, @Param("deletedAt") LocalDateTime deletedAt);
+  // soft delete 구현을 위한 메서드 (deletedAt 필드를 업데이트하여 삭제 처리)
+  @Modifying
+  @Query("UPDATE Review r SET r.deletedAt = :deletedAt WHERE r.id = :id")
+  void softDelete(@Param("id") Long id, @Param("deletedAt") LocalDateTime deletedAt);
 
 	Page<Review> findByRecipeId(Long recipeId, Pageable pageable);
 
 	// 리뷰 목록 생성일 순으로 정렬
-    @Query("SELECT r FROM Review r WHERE r.recipe.id = :recipeId AND r.deletedAt IS NULL AND r.status = false ORDER BY r.createdAt DESC")
-    Page<Review> findByRecipeIdOrderByCreatedAtDesc(@Param("recipeId") Long recipeId, Pageable pageable);
+  @Query("SELECT r FROM Review r WHERE r.recipe.id = :recipeId AND r.deletedAt IS NULL AND r.status = false ORDER BY r.createdAt DESC")
+  Page<Review> findByRecipeIdOrderByCreatedAtDesc(@Param("recipeId") Long recipeId, Pageable pageable);
 
-    @Query("SELECT r FROM Review r WHERE r.user.id = :userId AND r.deletedAt IS NULL AND r.status = false")
-    Page<Review> findAllByUserIdAndStatusFalseAndNotDeleted(@Param("userId") Long userId, Pageable pageable);
+  @Query("SELECT r FROM Review r WHERE r.user.id = :userId AND r.deletedAt IS NULL AND r.status = false")
+  Page<Review> findAllByUserIdAndStatusFalseAndNotDeleted(@Param("userId") Long userId, Pageable pageable);
 
-    Page<Review> findByRecipeTitleContaining(String title, Pageable pageable);
-    Page<Review> findByUserNicknameContaining(String nickname, Pageable pageable);
+  @Query("SELECT r FROM Review r WHERE r.deletedAt IS NULL AND r.recipe.title LIKE %:title%")
+  Page<Review> findActiveReviewByRecipeTitleContaining(@Param("title") String title, Pageable pageable);
+
+  @Query("SELECT r FROM Review r WHERE r.deletedAt IS NULL AND r.user.nickname LIKE %:nickname%")
+  Page<Review> findActiveReviewByUserNicknameContaining(@Param("nickname") String nickname, Pageable pageable);
+
+  @Query("SELECT r FROM Review r WHERE r.deletedAt IS NULL")
+  Page<Review> findActiveReviews(Pageable pageable);
 
 }

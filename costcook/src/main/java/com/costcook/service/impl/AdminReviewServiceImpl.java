@@ -46,11 +46,11 @@ public class AdminReviewServiceImpl implements AdminReviewService {
 
     // 카테고리 조건에 따라 적절한 쿼리 호출
     if ("레시피".equals(category) && !query.isEmpty()) {
-      reviewPage = reviewRepository.findByRecipeTitleContaining(query, pageable);
+      reviewPage = reviewRepository.findActiveReviewByRecipeTitleContaining(query, pageable);
     } else if ("작성자".equals(category) && !query.isEmpty()) {
-      reviewPage = reviewRepository.findByUserNicknameContaining(query, pageable);
+      reviewPage = reviewRepository.findActiveReviewByUserNicknameContaining(query, pageable);
     } else {
-      reviewPage = reviewRepository.findAll(pageable); // 검색어 없으면 모든 리뷰 반환
+      reviewPage = reviewRepository.findActiveReviews(pageable);
     }
 
     // Page 객체에서 필요한 정보 추출
