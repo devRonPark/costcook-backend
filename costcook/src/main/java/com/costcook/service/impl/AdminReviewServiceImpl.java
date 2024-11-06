@@ -56,6 +56,7 @@ public class AdminReviewServiceImpl implements AdminReviewService {
     List<Review> reviews = reviewPage.getContent();
     long totalElements = reviewPage.getTotalElements();
     int totalPages = reviewPage.getTotalPages();
+    int currentSize = reviewPage.getNumberOfElements();
 
     // ReviewListResponse 객체에 데이터를 담아 반환
     return ReviewListResponse.builder()
@@ -63,7 +64,7 @@ public class AdminReviewServiceImpl implements AdminReviewService {
             .totalReviews(totalElements)
             .totalPages(totalPages)
             .page(page)
-            .size(size)
+            .size(currentSize)
             .build();
   }
 
