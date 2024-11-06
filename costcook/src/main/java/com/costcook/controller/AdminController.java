@@ -22,8 +22,10 @@ import com.costcook.domain.request.AdminIngredientRegisterRequest;
 import com.costcook.domain.request.AdminRecipeRegisterRequest;
 import com.costcook.domain.response.AdminIngredientResponse;
 import com.costcook.domain.response.RecipeIngredientResponse;
+import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.service.AdminIngredientService;
 import com.costcook.service.AdminRecipeService;
+import com.costcook.service.AdminReviewService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,7 @@ public class AdminController {
 
   private final AdminRecipeService adminRecipeService;
   private final AdminIngredientService adminIngredientService;
+  private final AdminReviewService adminReviewService;
 
   @GetMapping("/ingredients")
   public ResponseEntity<List<AdminIngredientResponse>> getAllIngredients() {
@@ -157,6 +160,7 @@ public class AdminController {
     return ResponseEntity.ok(response);
   }
 
+
   @PostMapping("/recipes")
   public ResponseEntity<String> saveRecipe(
     @ModelAttribute AdminRecipeRegisterRequest recipe,
@@ -228,5 +232,37 @@ public class AdminController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("레시피 삭제 중 오류가 발생했습니다.");
     }
   }
+
+
+  @GetMapping("/reviews")
+  public ResponseEntity<ReviewListResponse> getReviewList(@RequestParam Map<String, String> params) {
+    
+    log.info("리뷰 리스트 요청 - 파라미터들: {}", params);
+
+    ReviewListResponse response = adminReviewService.getReviewList(params);
+    return ResponseEntity.ok(response);
+  }
+
+
+  @PatchMapping("/reviews/{reviewId}/status")
+  public ResponseEntity<String> updateReviewStatus(@PathVariable("reviewId") Long reviewId) {
+
+    // [로그] 리뷰 ID 확인
+    log.info("리뷰 상태 변경 요청 - 리뷰 ID: {}", reviewId);
+    
+    // 리뷰의 상태 변경 로직을 호출
+    boolean result = adminReviewService.updateReviewStatus(reviewId);
+
+    if(!result) {
+      throw new IllegalStateException("리뷰 상태 변경에 실패했습니다.");
+    }
+
+    // [로그] 상태 변경 완료
+    log.info("리뷰 상태 변경 완료 - 리뷰 ID: {}", reviewId);
+
+    // OK 응답 반환
+    return ResponseEntity.ok("리뷰 상태가 성공적으로 변경되었습니다.");
+  }
+
 
 }
