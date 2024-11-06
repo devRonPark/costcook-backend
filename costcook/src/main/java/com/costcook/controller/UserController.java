@@ -9,6 +9,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.costcook.domain.request.RecommendedRecipeRequest;
 import com.costcook.domain.request.UserUpdateRequest;
+import com.costcook.domain.response.NicknameCheckResponse;
 import com.costcook.domain.response.ReviewListResponse;
 import com.costcook.domain.response.ReviewResponse;
 import com.costcook.domain.response.UserResponse;
@@ -108,7 +111,6 @@ public class UserController {
 	}
 
 	// 추천 레시피 가져오기
-
 	@GetMapping("/me/recommended-recipes")
 	public ResponseEntity<WeeklyRecipesResponse> getAllRecommendRecipes(@RequestParam(name = "year") int year,
 			@RequestParam(name = "weekNumber") int weekNumber, @AuthenticationPrincipal User user) {
@@ -134,6 +136,10 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
     
-    
-
+	// 닉네임 중복여부 확인
+    @GetMapping("/nickname/duplicate-check")
+	public ResponseEntity<NicknameCheckResponse> checkNicknameDuplicate(@RequestParam(name = "nickname") String nickname) {
+		boolean isDuplicated = userService.checkNicknameDuplicate(nickname);
+		return ResponseEntity.ok(new NicknameCheckResponse(isDuplicated));
+	}
 }
