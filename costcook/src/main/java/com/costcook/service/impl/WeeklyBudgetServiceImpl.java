@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.costcook.domain.ReviewStatsDTO;
 import com.costcook.domain.request.WeeklyBudgetQueryRequest;
 import com.costcook.domain.request.WeeklyBudgetRequest;
 import com.costcook.domain.response.RecipeResponse;
@@ -15,10 +14,8 @@ import com.costcook.domain.response.WeeklyBudgetResponse;
 import com.costcook.domain.response.WeeklyBudgetUpdateResponse;
 import com.costcook.domain.response.WeeklyUsedBudgetResponse;
 import com.costcook.entity.Budget;
-import com.costcook.entity.Recipe;
 import com.costcook.entity.User;
 import com.costcook.exceptions.NotFoundException;
-import com.costcook.repository.FavoriteRepository;
 import com.costcook.repository.RecipeRepository;
 import com.costcook.repository.RecommendedRecipeRepository;
 import com.costcook.repository.UserRepository;

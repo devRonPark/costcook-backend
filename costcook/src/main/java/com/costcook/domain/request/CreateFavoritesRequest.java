@@ -2,11 +2,13 @@ package com.costcook.domain.request;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class CreateFavoritesRequest {
     private List<Long> recipeIds;
 }
