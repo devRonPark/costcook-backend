@@ -17,4 +17,6 @@ public interface UserService {
 	public void updateUserTaste(User user, UserUpdateRequest requestDTO);
 	// 사용자 선호 재료 및 기피 재료 목록 조회
 	public Map<String, List<Long>> getPreferredAndDislikedCategoryIds(User user);
+	// 닉네임 중복 확인
+	boolean checkNicknameDuplicate(String nickname);
 }

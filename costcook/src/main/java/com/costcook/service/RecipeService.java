@@ -40,6 +40,8 @@ public interface RecipeService {
 
 	List<Recipe> getUsedRecommendedRecipes(int year, int weekNumber, User user);
 
+	void deleteRecommendedRecipe(RecommendedRecipeRequest recipesRequest, User user);
+
 
 
 }

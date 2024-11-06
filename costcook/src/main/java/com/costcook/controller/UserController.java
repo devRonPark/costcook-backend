@@ -9,6 +9,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,7 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.costcook.domain.request.RecommendedRecipeRequest;
 import com.costcook.domain.request.UserUpdateRequest;
+import com.costcook.domain.response.NicknameCheckResponse;
 import com.costcook.domain.response.ReviewListResponse;
+import com.costcook.domain.response.ReviewResponse;
 import com.costcook.domain.response.UserResponse;
 import com.costcook.domain.response.WeeklyRecipesResponse;
 import com.costcook.entity.User;
@@ -75,9 +79,13 @@ public class UserController {
 	// 내 리뷰 목록 조회
 	// 단, 액세스 토큰이 없거나 만료된 액세스 토큰과 함께 요청시 403 Forbidden 에러 발생.
 	@GetMapping("/me/reviews")
-	public ResponseEntity<?> getMyReviews(@RequestParam(name = "page", defaultValue = "1") int page,
-			@AuthenticationPrincipal User userDetails // 사용자 정보 가져오기
+	public ResponseEntity<?> getMyReviews(@RequestParam(name = "page", defaultValue = "1") int page, @RequestParam(name = "recipeId", required = false) Long recipeId,
+		@AuthenticationPrincipal User userDetails // 사용자 정보 가져오기
 	) {
+		if (recipeId != null) {
+			ReviewResponse userReview = reviewService.getReviewByUserAndRecipe(userDetails, recipeId);
+			return ResponseEntity.ok(userReview); // 특정 레시피 리뷰 반환
+		}
 		ReviewListResponse response = reviewService.getReviewListByUserWithPagination(userDetails, page);
 		return ResponseEntity.ok(response);
 	}
@@ -103,7 +111,6 @@ public class UserController {
 	}
 
 	// 추천 레시피 가져오기
-
 	@GetMapping("/me/recommended-recipes")
 	public ResponseEntity<WeeklyRecipesResponse> getAllRecommendRecipes(@RequestParam(name = "year") int year,
 			@RequestParam(name = "weekNumber") int weekNumber, @AuthenticationPrincipal User user) {
@@ -129,6 +136,10 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
     
-    
-
+	// 닉네임 중복여부 확인
+    @GetMapping("/nickname/duplicate-check")
+	public ResponseEntity<NicknameCheckResponse> checkNicknameDuplicate(@RequestParam(name = "nickname") String nickname) {
+		boolean isDuplicated = userService.checkNicknameDuplicate(nickname);
+		return ResponseEntity.ok(new NicknameCheckResponse(isDuplicated));
+	}
 }

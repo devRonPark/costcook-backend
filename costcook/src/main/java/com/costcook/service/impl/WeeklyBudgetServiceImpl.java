@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.costcook.domain.ReviewStatsDTO;
 import com.costcook.domain.request.WeeklyBudgetQueryRequest;
@@ -40,6 +41,7 @@ public class WeeklyBudgetServiceImpl implements WeeklyBudgetService {
 
 	
 	// 예산 설정
+	@Transactional
 	@Override
 	public WeeklyBudgetResponse settingWeeklyBudget(WeeklyBudgetRequest budgetRequest, User user) {
 		Optional<User> optUser = userRepository.findById(user.getId());
@@ -69,6 +71,7 @@ public class WeeklyBudgetServiceImpl implements WeeklyBudgetService {
 	}
 
 	// 예산 수정
+	@Transactional
 	@Override
 	public WeeklyBudgetUpdateResponse modifyWeeklyBudget(WeeklyBudgetRequest budgetRequest, User user) {
 		Optional<User> optUser = userRepository.findById(user.getId());

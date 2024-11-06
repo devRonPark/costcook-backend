@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,6 +57,18 @@ public class RecommendController {
 		
 		return ResponseEntity.ok(result);
 
+	}
+	
+	
+	// 추천받은 레시피 삭제
+	@DeleteMapping("/selected-recipes")
+	public ResponseEntity<Void> deleteWeeklyRecipes(@RequestBody RecommendedRecipeRequest recipesRequest,
+			@AuthenticationPrincipal User user) {
+		
+		recipeService.deleteRecommendedRecipe(recipesRequest, user);
+		return ResponseEntity.ok().build();
+		
+		
 	}
 
 }
