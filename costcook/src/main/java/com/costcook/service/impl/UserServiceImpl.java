@@ -417,4 +417,11 @@ public class UserServiceImpl implements UserService {
 
         return userTaste;
 	}
+
+	@Override
+	// 닉네임 중복 확인 메서드
+	public boolean checkNicknameDuplicate(String nickname) {
+		log.info(nickname);
+		return userRepository.existsByNickname(nickname);  // true면 중복, false면 중복되지 않음
+	}
 }
