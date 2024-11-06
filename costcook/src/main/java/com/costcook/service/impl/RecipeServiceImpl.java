@@ -205,7 +205,7 @@ public class RecipeServiceImpl implements RecipeService {
 					: 0;
 
 			return BudgetRecipesResponse.Recipe.builder().id(recipe.getId()).title(recipe.getTitle())
-					.thumbnailUrl(recipe.getThumbnailUrl()).price(recipe.getPrice() / recipe.getServings())
+					.thumbnailUrl(recipe.getThumbnailUrl()).price(recipe.getPrice())
 					.favoriteCount(favoriteCount) // 계산된
 					.servings(recipe.getServings())
 					.avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
