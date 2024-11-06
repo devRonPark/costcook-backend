@@ -16,6 +16,7 @@ import com.costcook.entity.Review;
 import com.costcook.repository.ReviewRepository;
 import com.costcook.service.AdminReviewService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,5 +68,23 @@ public class AdminReviewServiceImpl implements AdminReviewService {
             .size(currentSize)
             .build();
   }
+
+  @Override
+  public boolean updateReviewStatus(Long reviewId) {
+    // 리뷰 조회 (존재하지 않으면 예외 발생)
+    Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new EntityNotFoundException("리뷰를 찾을 수 없습니다."));
+
+    // 상태 변경
+    review.setStatus(!review.isStatus());
+
+    // 변경된 리뷰 저장
+    reviewRepository.save(review);
+
+    log.info("리뷰 상태 변경 완료 - 리뷰 ID: {}, 새로운 상태: {}", reviewId, review.isStatus());
+
+    return true;
+  }
+
 
 }

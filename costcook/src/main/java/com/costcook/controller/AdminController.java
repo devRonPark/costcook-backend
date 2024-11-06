@@ -160,6 +160,7 @@ public class AdminController {
     return ResponseEntity.ok(response);
   }
 
+
   @PostMapping("/recipes")
   public ResponseEntity<String> saveRecipe(
     @ModelAttribute AdminRecipeRegisterRequest recipe,
@@ -240,6 +241,27 @@ public class AdminController {
 
     ReviewListResponse response = adminReviewService.getReviewList(params);
     return ResponseEntity.ok(response);
+  }
+
+
+  @PatchMapping("/reviews/{reviewId}/status")
+  public ResponseEntity<String> updateReviewStatus(@PathVariable("reviewId") Long reviewId) {
+
+    // [로그] 리뷰 ID 확인
+    log.info("리뷰 상태 변경 요청 - 리뷰 ID: {}", reviewId);
+    
+    // 리뷰의 상태 변경 로직을 호출
+    boolean result = adminReviewService.updateReviewStatus(reviewId);
+
+    if(!result) {
+      throw new IllegalStateException("리뷰 상태 변경에 실패했습니다.");
+    }
+
+    // [로그] 상태 변경 완료
+    log.info("리뷰 상태 변경 완료 - 리뷰 ID: {}", reviewId);
+
+    // OK 응답 반환
+    return ResponseEntity.ok("리뷰 상태가 성공적으로 변경되었습니다.");
   }
 
 
