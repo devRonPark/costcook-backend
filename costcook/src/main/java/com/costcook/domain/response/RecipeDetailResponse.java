@@ -15,12 +15,11 @@ public class RecipeDetailResponse {
     private String thumbnailUrl;
     private int rcpSno;
     private int servings;
-    private int viewCount;
-    private int favoriteCount;
     private int reviewCount;
     private int price;
     private double avgRatings;
     private List<IngredientResponse> ingredients;
+	private boolean isFavorite;
 	
     public static RecipeDetailResponse toDTO(RecipeResponse recipeResponse, List<IngredientResponse> ingredients) {
     	return RecipeDetailResponse.builder()
@@ -30,12 +29,11 @@ public class RecipeDetailResponse {
     		.thumbnailUrl(recipeResponse.getThumbnailUrl())
     		.rcpSno(recipeResponse.getRcpSno())
     		.servings(recipeResponse.getServings())
-    		.viewCount(recipeResponse.getViewCount())
     		.price(recipeResponse.getPrice())
-    		// .favoriteCount(recipeResponse.getFavoriteCount())
     		.reviewCount(recipeResponse.getReviewCount())
     		.avgRatings(recipeResponse.getAvgRatings())
     		.ingredients(ingredients)
+			.isFavorite(recipeResponse.isFavorite())
     		.build();
 	}
 }
