@@ -79,8 +79,8 @@ public class WebSecurityConfig {
 				new AntPathRequestMatcher("/api/admin/ingredients/**"),
 				new AntPathRequestMatcher("/api/admin/recipes/**"),
         new AntPathRequestMatcher("/api/admin/reviews/**"),
-        new AntPathRequestMatcher("/api/admin/login/**"),
-        new AntPathRequestMatcher("/api/admin/signup")
+        new AntPathRequestMatcher("/api/admin/login"),
+        new AntPathRequestMatcher("/api/admin/signup/**")
         
 			).permitAll()
 			.requestMatchers(

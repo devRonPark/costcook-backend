@@ -70,4 +70,7 @@ public class TokenUtils {
     public void removeRefreshTokenCookie(HttpServletResponse response) {
         setCookie(response, "refreshToken", "", 0); // 유효기간을 0으로 설정하여 쿠키 제거
     }
+    public void removeAccessTokenCookie(HttpServletResponse response) {
+      setCookie(response, "accessToken", "", 0); // 유효기간을 0으로 설정하여 쿠키 제거
+  }
 }

@@ -223,6 +223,7 @@ public class AuthServiceImpl implements AuthService {
 
         // 리프레시 토큰 쿠키 제거
         tokenUtils.removeRefreshTokenCookie(response);
+        tokenUtils.removeAccessTokenCookie(response);
 
         return "로그아웃이 성공적으로 처리되었습니다.";
     }
