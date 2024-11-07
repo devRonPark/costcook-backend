@@ -106,16 +106,6 @@ public class AuthServiceImpl implements AuthService {
                 // FavoriteServiceImpl의 createFavorites 메소드 호출
                 favoriteService.createFavorites(user, favoriteRequest);
             }
-
-            // 3-2. 비회원이 저장한 예산 추가 로직
-            if (request.getBudget() != null) {
-                weeklyBudgetService.settingWeeklyBudget(request.getBudget(), user);
-            }
-
-            // 3-3. 비회원이 저장한 추천 레시피 추가 로직
-            if (request.getRecommendedRecipes() != null && !request.getRecommendedRecipes().isEmpty()) {
-                recipeService.addRecommendedRecipes(request.getRecommendedRecipes(), user);
-            }
     
             // 4. 액세스 토큰, 리프레시 토큰 발급
             Map<String, String> tokenMap = tokenUtils.generateToken(user);
