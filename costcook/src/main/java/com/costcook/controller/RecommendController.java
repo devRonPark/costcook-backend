@@ -34,8 +34,11 @@ public class RecommendController {
 
 	// 추천받는 레시피 중 예산에 맞는 레시피 들고오기
 	@GetMapping("/recipes")
-	public ResponseEntity<?> getRecipesByBudget( @RequestParam(value = "minBudget") int minBudget,
-	        @RequestParam(value = "maxBudget") int maxBudget) {
+	public ResponseEntity<?> getRecipesByBudget( 
+		@RequestParam(value = "minBudget") int minBudget,
+	    @RequestParam(value = "maxBudget") int maxBudget
+	) {
+		log.info("추천받는 레시피 중 예산에 맞는 레시피 들고오기");
 		BudgetRecipesResponse response = recipeService.getRecipesByBudget(minBudget, maxBudget);
 		return ResponseEntity.ok(response);
 	}
@@ -44,7 +47,7 @@ public class RecommendController {
 	@PostMapping("/selected-recipes")
 	public ResponseEntity<Void> addWeeklyRecipes(@RequestBody List<RecommendedRecipeRequest> recipesRequest,
 			@AuthenticationPrincipal User user) {
-		recipeService.addRecommendedRecipe(recipesRequest, user);
+		recipeService.addRecommendedRecipes(recipesRequest, user);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 	

@@ -18,6 +18,7 @@ import com.costcook.domain.PlatformTypeEnum;
 import com.costcook.domain.RoleEnum;
 import com.costcook.domain.request.AdminLoginRequest;
 import com.costcook.domain.request.AdminSignupRequest;
+import com.costcook.domain.request.CreateFavoritesRequest;
 import com.costcook.domain.request.SignUpOrLoginRequest;
 import com.costcook.domain.response.SignUpOrLoginResponse;
 import com.costcook.entity.DislikedIngredient;
@@ -34,6 +35,9 @@ import com.costcook.repository.SocialAccountRepository;
 import com.costcook.repository.UserRepository;
 import com.costcook.security.JwtProvider;
 import com.costcook.service.AuthService;
+import com.costcook.service.FavoriteService;
+import com.costcook.service.RecipeService;
+import com.costcook.service.WeeklyBudgetService;
 import com.costcook.util.TokenUtils;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,6 +51,9 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthServiceImpl implements AuthService {
     private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
+    private final FavoriteService favoriteService;
+    private final WeeklyBudgetService weeklyBudgetService;
+    private final RecipeService recipeService;
     private final SocialAccountRepository socialAccountRepository;
     private final PreferredIngredientRepository preferredIngredientRepository;
     private final DislikedIngredientRepository dislikedIngredientRepository;
@@ -104,20 +111,27 @@ public class AuthServiceImpl implements AuthService {
                 registerSocialAccount(user, request.getProvider(), request.getSocialKey());
                 log.info("소셜 계정 정보가 등록되었습니다: {} - {}", request.getProvider(), request.getSocialKey());
             }
+
+            // 3. 비회원이 저장한 즐겨찾기 목록 추가 로직 (FavoriteServiceImpl의 createFavorites 메소드 재활용)
+            if (request.getFavoriteRecipeIds() != null && !request.getFavoriteRecipeIds().isEmpty()) {
+                // CreateFavoritesRequest로 변환
+                CreateFavoritesRequest favoriteRequest = new CreateFavoritesRequest(request.getFavoriteRecipeIds());
+                // FavoriteServiceImpl의 createFavorites 메소드 호출
+                favoriteService.createFavorites(user, favoriteRequest);
+            }
     
-    
-            // 3. 액세스 토큰, 리프레시 토큰 발급
+            // 4. 액세스 토큰, 리프레시 토큰 발급
             Map<String, String> tokenMap = tokenUtils.generateToken(user);
             String accessToken = tokenMap.get("accessToken");
             String refreshToken = tokenMap.get("refreshToken");
             log.info("새로 발급된 액세스 토큰: {}", accessToken);
             log.info("새로 발급된 리프레시 토큰: {}", refreshToken);
             
-            // 4. 발급된 리프레시 토큰 사용자 테이블에 저장
+            // 5. 발급된 리프레시 토큰 사용자 테이블에 저장
             user.setRefreshToken(refreshToken);
             userRepository.save(user);
             
-            // 5. 쿠키에 생성된 리프레시 토큰과 액세스 토큰을 담아 응답
+            // 6. 쿠키에 생성된 리프레시 토큰과 액세스 토큰을 담아 응답
             tokenUtils.setRefreshTokenCookie(response, refreshToken);
             tokenUtils.setAccessTokenCookie(response, accessToken);
             
@@ -131,7 +145,6 @@ public class AuthServiceImpl implements AuthService {
                     .build();
             
             return signUpOrLoginResponse;
-
         } catch (Exception e) {
             e.printStackTrace();
             log.error("{}",e.getMessage());
@@ -182,11 +195,11 @@ public class AuthServiceImpl implements AuthService {
     	log.info("{}", PlatformTypeEnum.fromString(provider));
     	log.info("--------");
         SocialAccount newSocialAccount = SocialAccount
-                    .builder()
-                    .provider(PlatformTypeEnum.fromString(provider))
-                    .socialKey(socialKey)
-                    .user(user)
-                    .build();
+            .builder()
+            .provider(PlatformTypeEnum.fromString(provider))
+            .socialKey(socialKey)
+            .user(user)
+            .build();
         socialAccountRepository.save(newSocialAccount);
     }
 

@@ -9,7 +9,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.costcook.domain.ReviewStatsDTO;
 import com.costcook.domain.request.RecipeUsageRequest;
@@ -205,7 +204,7 @@ public class RecipeServiceImpl implements RecipeService {
 					: 0;
 
 			return BudgetRecipesResponse.Recipe.builder().id(recipe.getId()).title(recipe.getTitle())
-					.thumbnailUrl(recipe.getThumbnailUrl()).price(recipe.getPrice() / recipe.getServings())
+					.thumbnailUrl(recipe.getThumbnailUrl()).price(recipe.getPrice())
 					.favoriteCount(favoriteCount) // 계산된
 					.servings(recipe.getServings())
 					.avgRatings(Math.round(averageScore * 10) / 10.0) // 평점을 소수점 첫째자리까지 반올림
@@ -220,12 +219,11 @@ public class RecipeServiceImpl implements RecipeService {
 	
 	@Transactional
 	@Override
-	public void addRecommendedRecipe(List<RecommendedRecipeRequest> recipesRequest, User user) {
+	public void addRecommendedRecipes(List<RecommendedRecipeRequest> recipesRequest, User user) {
 		List<RecommendedRecipe> recipes = recipesRequest.stream().map((RecommendedRecipeRequest request) -> { 																								
 			Recipe recipe = recipeRepository.findById(request.getRecipeId())
-					.orElseThrow(() -> new RuntimeException("레시피를 찾을 수 없습니다. ID: " + request.getRecipeId()));
-			
-			
+				.orElseThrow(() -> new RuntimeException("레시피를 찾을 수 없습니다. ID: " + request.getRecipeId()));
+
 			return RecommendedRecipe.builder().year(request.getYear()).weekNumber(request.getWeekNumber())
 					.isUsed(request.isUsed()).recipe(recipe).user(user).build();
 		}).collect(Collectors.toList());
