@@ -22,11 +22,5 @@ public class SignUpOrLoginRequest {
 
     // (비회원) 즐겨찾기 추가된 레시피 ID 목록
     private List<Long> favoriteRecipeIds;
-
-    // (비회원) 설정한 예산 정보
-    private WeeklyBudgetRequest budget;
-
-    // (비회원) 추가한 레시피 목록
-    private List<RecommendedRecipeRequest> recommendedRecipes;
 }
 
