@@ -3,6 +3,8 @@ package com.costcook.service;
 import java.util.Optional;
 
 import com.costcook.domain.PlatformTypeEnum;
+import com.costcook.domain.request.AdminLoginRequest;
+import com.costcook.domain.request.AdminSignupRequest;
 import com.costcook.domain.request.SignUpOrLoginRequest;
 import com.costcook.domain.response.SignUpOrLoginResponse;
 import com.costcook.entity.User;
@@ -14,4 +16,6 @@ public interface AuthService {
 	public SignUpOrLoginResponse signUpOrLogin(SignUpOrLoginRequest request, HttpServletResponse response);
 	public String refreshAccessToken(String refreshToken);
 	public String logout(User user, String refreshToken, HttpServletResponse response);
+  public String adminLogin(AdminLoginRequest request, HttpServletResponse response);
+  public void adminSignup(AdminSignupRequest request);
 }
