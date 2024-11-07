@@ -5,16 +5,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.costcook.domain.PlatformTypeEnum;
+import com.costcook.domain.RoleEnum;
+import com.costcook.domain.request.AdminLoginRequest;
+import com.costcook.domain.request.AdminSignupRequest;
 import com.costcook.domain.request.SignUpOrLoginRequest;
 import com.costcook.domain.response.SignUpOrLoginResponse;
 import com.costcook.entity.DislikedIngredient;
 import com.costcook.entity.PreferredIngredient;
 import com.costcook.entity.SocialAccount;
 import com.costcook.entity.User;
+import com.costcook.exceptions.AlreadyExistsException;
+import com.costcook.exceptions.ForbiddenException;
 import com.costcook.exceptions.InvalidProviderException;
 import com.costcook.exceptions.MissingFieldException;
 import com.costcook.repository.DislikedIngredientRepository;
@@ -41,6 +52,8 @@ public class AuthServiceImpl implements AuthService {
     private final DislikedIngredientRepository dislikedIngredientRepository;
     private final TokenUtils tokenUtils;
     private final JwtProvider jwtProvider;
+    private final AuthenticationManager authenticationManager;
+    private final BCryptPasswordEncoder passwordEncoder;
     
     /**
      * 주어진 소셜 키와 공급자를 사용하여 해당 사용자의 이메일을 조회합니다.
@@ -213,4 +226,62 @@ public class AuthServiceImpl implements AuthService {
 
         return "로그아웃이 성공적으로 처리되었습니다.";
     }
+
+    @Override
+    public String adminLogin(AdminLoginRequest request, HttpServletResponse response) {
+     // 이메일 및 비밀번호를 통한 인증
+      Authentication authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(
+          request.getUsername(),
+          request.getPassword()
+        )
+      );
+
+      // Authentication 객체에서 User 객체를 추출
+      User user = (User) authentication.getPrincipal();
+
+      // ROLE_ADMIN 권한 확인
+      if (user.getRole() != RoleEnum.ROLE_ADMIN) {
+        throw new ForbiddenException("Access Denied: 관리자가 아닙니다.");
+      }
+
+      // 3. 액세스 토큰, 리프레시 토큰 발급
+      Map<String, String> tokenMap = tokenUtils.generateToken(user);
+      String accessToken = tokenMap.get("accessToken");
+      String refreshToken = tokenMap.get("refreshToken");
+      log.info("새로 발급된 액세스 토큰: {}", accessToken);
+      log.info("새로 발급된 리프레시 토큰: {}", refreshToken);
+
+      // 발급된 리프레시 토큰 사용자 테이블에 저장
+      user.setRefreshToken(refreshToken);
+      userRepository.save(user);
+      
+      // 쿠키에 생성된 리프레시 토큰과 액세스 토큰을 담아 응답
+      tokenUtils.setRefreshTokenCookie(response, refreshToken);
+      tokenUtils.setAccessTokenCookie(response, accessToken);
+
+      return "관리자 로그인 성공";
+    }
+
+    @Transactional
+    @Override
+    public void adminSignup(AdminSignupRequest request) {
+      // 이메일이 이미 존재하는지 확인
+      if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        throw new AlreadyExistsException("이미 존재하는 이메일입니다.");
+      }
+    
+      // 비밀번호 암호화
+      String encodedPassword = passwordEncoder.encode(request.getPassword());
+    
+      // User 엔티티 생성 (ROLE_ADMIN 권한 부여)
+      User admin = User.builder()
+        .email(request.getEmail())
+        .password(encodedPassword)
+        .role(RoleEnum.ROLE_ADMIN)  // 관리자 역할 부여
+        .build();
+    
+      // 사용자 정보 저장
+      userRepository.save(admin);
+    };
 }

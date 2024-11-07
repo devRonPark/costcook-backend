@@ -41,6 +41,9 @@ public class User implements UserDetails {
     @Column(length = 255, nullable = true)  // 선택 입력 정보
     private String profileUrl;
 
+    @Column(nullable = true)  // null이 아니면 관리자
+    private String password;   
+
     @Column(name = "service_agreement")
     private Boolean serviceAgreement = false;
 
@@ -97,7 +100,7 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        throw null;
+      return this.password;
     }
 
     @Override
