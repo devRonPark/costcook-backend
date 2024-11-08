@@ -67,20 +67,20 @@ public class WebSecurityConfig {
 		http.authorizeHttpRequests(auth ->
 			// 특정 URL 경로에 대해서는 인증 없이 접근 가능
 			auth.requestMatchers(
-				new AntPathRequestMatcher("/img/**"), // 이미지
+				new AntPathRequestMatcher("/api/img/**"), // 이미지
 				new AntPathRequestMatcher("/api/oauth/**"),
 				new AntPathRequestMatcher("/api/auth/**"),
 				new AntPathRequestMatcher("/api/auth/token/refresh"),
 				new AntPathRequestMatcher("/api/recipes/**"),// 사용자 레시피 조회
 				new AntPathRequestMatcher("/api/recommendations/**"),// 추천부분
-        new AntPathRequestMatcher("/api/users/nickname/duplicate-check"),
+                new AntPathRequestMatcher("/api/users/nickname/duplicate-check"),
 				
 				// 임시 admin 
 				new AntPathRequestMatcher("/api/admin/ingredients/**"),
 				new AntPathRequestMatcher("/api/admin/recipes/**"),
-        new AntPathRequestMatcher("/api/admin/reviews/**"),
-        new AntPathRequestMatcher("/api/admin/login"),
-        new AntPathRequestMatcher("/api/admin/signup/**")
+                new AntPathRequestMatcher("/api/admin/reviews/**"),
+                new AntPathRequestMatcher("/api/admin/login"),
+                new AntPathRequestMatcher("/api/admin/signup/**")
         
 			).permitAll()
 			.requestMatchers(
