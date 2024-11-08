@@ -72,6 +72,9 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
         }
       }
 
+      // 총 가격 계산
+      int totalPrice = calculateTotalPrice(recipe.getIngredients());
+
       // 레시피 저장
       Recipe recipeItem = Recipe.builder()
           .title(recipe.getTitle())
@@ -79,7 +82,7 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
           .description(recipe.getDescription())
           .category(category)
           .servings(recipe.getServings() != null ? recipe.getServings() : 1)
-         // .price(recipe.getPrice())
+          .price(totalPrice)
           .thumbnailUrl(thumbnailUrl)
           .build();
 
@@ -94,13 +97,12 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
 
         Ingredient ingredient = ingredientRepository.findById(ingredientDTO.getIngredientId())
           .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 재료 ID입니다: " + ingredientDTO.getIngredientId()));
-
+        
         // RecipeIngredient 객체 생성 및 저장
         RecipeIngredient recipeIngredient = RecipeIngredient.builder()
             .recipe(savedRecipe)
             .ingredient(ingredient)
             .quantity(ingredientDTO.getQuantity())
-            // .price((int) (ingredientDTO.getQuantity() * ingredient.getPrice()))
             .build();
 
         recipeIngredientRepository.save(recipeIngredient);
@@ -177,6 +179,10 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
 
     // [4] 재료 업데이트
     updateIngredients(id, recipeRequest.getIngredients(), recipe);
+
+    // [5] 총 가격 업데이트
+    int totalPrice = calculateTotalPrice(recipeRequest.getIngredients());
+    recipe.setPrice(totalPrice);
 
     log.info("레시피 및 재료 수정 완료 - 레시피 ID: {}", recipe.getId());
     return true;
@@ -311,6 +317,16 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
   public boolean isRecipeDuplicate(String title) {
     return recipeRepository.existsByTitle(title);
   }
+
+  private int calculateTotalPrice(List<IngredientDTO> ingredients) {
+    return ingredients.stream()
+        .mapToInt(dto -> {
+          Ingredient ingredient = ingredientRepository.findById(dto.getIngredientId())
+                  .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 재료 ID입니다: " + dto.getIngredientId()));
+          return (int) (dto.getQuantity() * ingredient.getPrice());
+        })
+        .sum();
+  } 
 
   
 }
