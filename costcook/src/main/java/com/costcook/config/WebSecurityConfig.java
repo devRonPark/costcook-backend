@@ -73,16 +73,13 @@ public class WebSecurityConfig {
 				new AntPathRequestMatcher("/api/auth/token/refresh"),
 				new AntPathRequestMatcher("/api/recipes/**"),// 사용자 레시피 조회
 				new AntPathRequestMatcher("/api/recommendations/**"),// 추천부분
-                new AntPathRequestMatcher("/api/users/nickname/duplicate-check"),
-				
-				// 임시 admin 
-				new AntPathRequestMatcher("/api/admin/ingredients/**"),
-				new AntPathRequestMatcher("/api/admin/recipes/**"),
-                new AntPathRequestMatcher("/api/admin/reviews/**"),
-                new AntPathRequestMatcher("/api/admin/login"),
-                new AntPathRequestMatcher("/api/admin/signup/**")
-        
+        new AntPathRequestMatcher("/api/users/nickname/duplicate-check"),
+        new AntPathRequestMatcher("/api/admin/login")
+        // new AntPathRequestMatcher("/api/admin/signup/**")
 			).permitAll()
+      .requestMatchers(
+				new AntPathRequestMatcher("/api/admin/**") // 관리자는 반드시 인증 및 권한 필요
+			).hasRole("ADMIN")
 			.requestMatchers(
 				new AntPathRequestMatcher("/api/users/me/**"),
 				new AntPathRequestMatcher("/api/favorites/**") // 즐겨찾기 관리	
