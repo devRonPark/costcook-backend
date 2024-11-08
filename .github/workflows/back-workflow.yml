@@ -1,0 +1,30 @@
+name: BACK-WORKFLOW
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  back-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            # 오류 발생 시 스크립트 중단
+            set -e
+            
+            # SSH 접속 후 작업 디렉토리로 이동
+            echo "SSH 접속"
+            cd costcook-backend/costcook
+            
+            # GIT 최신 코드 가져오기
+            echo "GIT PULL 작업"
+            git_output=$(sudo git pull origin main 2>&1)
+            echo "$git_output"
+
+            # Docker 빌드
+            echo "Docker build"
+            docker compose up -d --build --no-deps springboot-container

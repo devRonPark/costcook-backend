@@ -110,7 +110,7 @@ public class WebSecurityConfig {
 			CorsConfiguration config = new CorsConfiguration();
 			config.setAllowedHeaders(Collections.singletonList("*"));
 			config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-			config.setAllowedOrigins(List.of("http://localhost:3000"));
+			config.setAllowedOrigins(List.of("http://localhost:3000", "https://costcook.shop"));
 			config.setAllowCredentials(true);
 			return config;
 		};
