@@ -308,6 +308,8 @@ public class UserServiceImpl implements UserService {
 				String savedFileName = fileUploadService.uploadUserFile(requestDTO.getProfileImage());
 				String profileImageUrl = USER_PROFILE_ACCESS_PATH + savedFileName;
 				user.setProfileUrl(profileImageUrl);
+			} else {
+				user.setProfileUrl("/img/user/default_user_profile.png");
 			}
 		
 			// 2. 닉네임 검증 및 업데이트
