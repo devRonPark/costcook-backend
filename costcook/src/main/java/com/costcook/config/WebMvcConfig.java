@@ -35,7 +35,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 레시피 이미지 경로 설정
         registry
             .addResourceHandler("/api/img/recipe/**")
-            .addResourceLocations("file:" + recipeUploadLocation + "/");
+            .addResourceLocations("file:" + recipeUploadLocation + "/")
+            .setCachePeriod(2592000); // 30일 동안 캐시 처리
 
         // 사용자 프로필 이미지 경로 설정
         registry
