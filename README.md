@@ -6,6 +6,9 @@
 
 이 저장소는 **코스트쿡의 백엔드 API 저장소**로, 프론트엔드 애플리케이션과 통신하여 서비스의 주요 기능을 제공합니다.
 
+
+📄 **발표 자료(PPT)**: [코스트쿡 프로젝트 발표 자료](https://github.com/user-attachments/files/18744666/costcook_ppt.pdf)
+
 ## 🚀 주요 기능
 - **사용자 인증**: OAuth 2.0을 활용한 카카오 및 구글 소셜 로그인 지원  
 - **예산 맞춤 레시피 추천**: 사용자의 주간 예산을 기반으로 최적의 레시피 목록 제공  
@@ -16,21 +19,65 @@
 ## 🛠️ 기술 스택
 ### **Backend**
 - **Framework**: Spring Boot  
-- **Security**: Spring Security, OAuth 2.0, JWT  
+- **Security & Auth**: Spring Security, OAuth 2.0, JWT  
 - **Database**: MySQL, Spring Data JPA  
-- **Libraries**:
-  - **Authentication**: Spring Security, JWT (io.jsonwebtoken)  
-  - **Web & API**: Spring Web  
+- **Utility Libraries**:
   - **Email**: Spring Boot Mail  
   - **Crawling**: Jsoup  
-  - **Utility**: Lombok  
+  - **Code Simplification**: Lombok  
 
 ### **Infrastructure**
 - **Containerization**: Docker  
 - **CI/CD**: GitHub Actions  
-- **Hosting**: AWS (EC2) 
+- **Hosting**: AWS (EC2), Nginx 
 
-## 📂 프로젝트 구조
+---
+
+## 📂 프로젝트 구조  
+```plaintext
+📦 costcook-backend
+ ┣ 📂 src
+ ┃ ┣ 📂 main
+ ┃ ┃ ┣ 📂 java/com/costcook
+ ┃ ┃ ┃ ┣ 📂 config        # 애플리케이션 전반적인 설정(Spring Security, CORS)
+ ┃ ┃ ┃ ┣ 📂 controller    # 클라이언트 요청을 처리하는 API 컨트롤러
+ ┃ ┃ ┃ ┣ 📂 domain        # 핵심 도메인 로직 및 서비스 계층에서 사용하는 DTO 정의
+ ┃ ┃ ┃ ┣ 📂 entity        # JPA 엔티티 정의 (데이터베이스 테이블 매핑)
+ ┃ ┃ ┃ ┣ 📂 exceptions    # 커스텀 예외 클래스 및 전역 예외 처리 핸들러
+ ┃ ┃ ┃ ┣ 📂 repository    # JPA를 활용한 데이터 액세스 계층 (Spring Data JPA 인터페이스)
+ ┃ ┃ ┃ ┣ 📂 security      # 인증 및 인가 관련 로직 (JWT, OAuth2 인증 등)
+ ┃ ┃ ┃ ┣ 📂 service       # 비즈니스 로직을 처리하는 서비스 계층
+ ┃ ┃ ┃ ┗ 📂 util          # 공통적으로 사용되는 유틸리티 클래스 (파일 처리, 데이터 변환 등)
+ ┗ 📂 test                  # 단위 테스트 및 통합 테스트 코드
+```
+
+## 🗂 ERD 및 백엔드 아키텍처  
+
+### 👤 사용자 관련 ERD  
+사용자 정보 및 인증과 관련된 ERD입니다.  
+
+![사용자 관련 ERD](https://github.com/user-attachments/assets/6152a9d0-594c-4cb3-a8e5-7c0821c01fb0)
+
+### 🍽 레시피 관련 ERD  
+레시피 및 재료 관리와 관련된 ERD입니다.  
+
+![레시피 관련 ERD](https://github.com/user-attachments/assets/af3374e1-654d-404d-90fe-4501ba3a6e8d)
+
+### 🏗 백엔드 아키텍처  
+서비스 전반의 백엔드 아키텍처 구성도입니다.
+
+![백엔드 아키텍처](https://github.com/user-attachments/assets/628821d4-411e-462a-833a-8ff7560da5ba)
+
+
+## 👥 팀원 소개
+
+| 이름 | 역할 | 주요 담당 업무 |
+|------|------|----------------------------------------------------------------|
+| **박병찬** | 팀장, 백엔드 | 프로젝트 관리, ERD 설계, API 설계 및 명세서 문서화, 소셜 로그인 API 개발, 이메일 인증 및 인증번호 처리 API 개발, 사용자 정보 조회 및 수정 API 개발, 소셜 로그인 페이지, 이메일 인증 페이지, 마이 페이지 개발 |
+| **권지훈** | 백엔드 | 관리자 회원가입 및 로그인 API 개발, 관리자 레시피 등록/수정/삭제 API 개발, 관리자 재료 등록/수정/삭제 API 개발, 관리자 리뷰 비공개 처리 API 개발, 관리자 대시보드 페이지 개발 |
+| **유현준** | 백엔드, 프론트엔드 | 레시피 목록 조회, 검색, 상세 정보 조회 API 개발, 레시피 목록 및 상세정보 페이지 개발, 예산관리 페이지 개발, 주간 예산 사용 내역 상세 페이지 개발 |
+| **한민혁** | 프론트엔드 | 프론트엔드 디자인, 레시피 데이터 가공, 사용자 리뷰 등록/수정/삭제 API 개발, 사용자 예산 설정/수정 API 개발, 레시피 추천 페이지 개발 |
+
 
 ## 🔥 주요 이슈 및 해결  
 
@@ -76,4 +123,11 @@
 ✔ 로그인한 사용자의 **기존 즐겨찾기 데이터와 병합**하여 충돌 없이 유지.  
 
 🔗 **자세한 해결 방법:** [Notion 링크](https://www.notion.so/1106-1364b7e536fc8077a674e0037ce28a7e?pvs=4)  
+
+---
+
+## 📌 프로젝트 회고  
+
+프로젝트를 진행하며 겪은 시행착오와 배운 점을 정리했습니다.  
+[➡ 코스트쿡 프로젝트 회고 보기](https://www.notion.so/13a4b7e536fc80d4978af88c49827175?pvs=4)
 
